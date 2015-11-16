@@ -7,9 +7,9 @@ app = Flask(__name__)
 def hello():
     return "Hello World!"
 
-@app.route("/sparql")
+@app.route("/sparql", methods = ["POST"])
 def sparql():
-    return request.args["q"]
+    return request.form["payload"]
 
 
 if __name__ == "__main__":
