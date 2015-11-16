@@ -9,6 +9,7 @@ def hello():
 
 @app.route("/sparql", methods = ["POST"])
 def sparql():
+    print request.form["payload"]
     return request.form["payload"]
 
 
