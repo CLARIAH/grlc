@@ -1,17 +1,104 @@
 #!/usr/bin/env python
 
-from flask import Flask, request
+from flask import Flask, request, jsonify, render_template
+import urllib2
+import json
+from api.one import baz
+from SPARQLWrapper import SPARQLWrapper, JSON, TURTLE
+
 app = Flask(__name__)
+app.register_blueprint(baz)
 
-@app.route("/")
+def add_query(repo, rqfile):
+    # TODO
+    return ''
+
+@app.route('/')
 def hello():
-    return "Hello World!"
+    return 'This is apicrap, it creates crappy apis out of your github stored SPARQL queries for the lulz'
 
-@app.route("/sparql", methods = ["POST"])
+
+@app.route('/<user>/<repo>/<query>')
+def query(user, repo, query):
+    print user, repo, query
+    raw_repo_uri = 'https://raw.githubusercontent.com/' + user + '/' + repo + '/master/'
+    raw_query_uri = raw_repo_uri + query + '.rq'
+    stream = urllib2.urlopen(raw_query_uri)
+    query = stream.read()
+
+    sparql = SPARQLWrapper('http://virtuoso.clariah-sdh.eculture.labs.vu.nl/sparql')
+    sparql.setQuery(query)
+    sparql.setReturnFormat(JSON)
+    results = sparql.query().convert()
+
+    # for result in results['results']['bindings']:
+    #     print(result)
+
+    return jsonify(results)
+
+@app.route('/<user>/<repo>/api-docs')
+def api_docs(user, repo):
+    return render_template('api-docs.html', user=user, repo=repo)
+
+@app.route('/<user>/<repo>/spec')
+def swagger_spec(user, repo):
+    print user, repo
+    api_repo_uri = 'https://api.github.com/repos/' + user + '/' + repo
+    print api_repo_uri
+    stream = urllib2.urlopen(api_repo_uri)
+    resp = json.load(stream)
+    swag = {}
+    swag['swagger'] = '2.0'
+    swag['info'] = {'version': '1.0', 'title': resp['name'], 'contact': {'name': resp['owner']['login'], 'url': resp['owner']['url']}, 'license': {'name' : 'licensename', 'url': 'licenseurl'}}
+    swag['host'] = 'apicrap.amp.ops.few.vu.nl'
+    swag['basePath'] = '/' + user + '/' + repo + '/'
+    swag['schemes'] = ['http']
+    swag['paths'] = {}
+    
+    api_repo_content_uri = api_repo_uri + '/contents'
+    stream = urllib2.urlopen(api_repo_content_uri)
+    resp = json.load(stream)
+    # Fetch all .rq files
+    for c in resp:
+        if ".rq" in c['name']:
+            call_name = c['name'].split('.')[0]
+            swag['paths'][call_name] = {}
+            swag['paths'][call_name]["get"] = {"tags" : ["foo", "bar"],
+                                               "summary" : "summary",
+                                               "responses": {
+                                                   "200" : {
+                                                       "description" : "pet response",
+                                                       "schema" : {
+                                                           "type" : "object",
+                                                           }
+                                                       },
+                                                   "default" : {
+                                                       "description" : "Unexpected error",
+                                                       "schema" : {
+                                                           "$ref" : "#/definitions/Message"
+                                                       }
+                                                   }
+                                               }
+                                               }
+            
+
+    return jsonify(swag)
+
+@app.route('/sparql', methods = ['POST'])
 def sparql():
-    print request.form["payload"]
-    return request.form["payload"]
+    push = json.loads(request.data)
+    # One push may contain many commits
+    for c in push['commits']:
+        # We only look for .rq files
+        for a in c['added']:
+            if '.rq' in a:
+                # New query added
+                add_query(push['repository']['full_name'], a)
+        print c['added']
+        print c['removed']
+        print c['modified']
+    
+        return 'foo'
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(port=8088, debug=True)
