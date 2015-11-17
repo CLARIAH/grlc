@@ -3,31 +3,55 @@
 from flask import Flask, request, jsonify, render_template
 import urllib2
 import json
-from SPARQLWrapper import SPARQLWrapper, JSON, TURTLE
+from SPARQLWrapper import SPARQLWrapper, JSON
+import StringIO
+import logging
+import sys
 
 app = Flask(__name__)
+# stream_handler = logging.StreamHandler(sys.stdout)
+# stream_handler.setLevel(logging.DEBUG)
+# app.logger.addHandler(stream_handler)
+
+def guess_endpoint_uri(rq):
+    '''
+    Guesses the endpoint URI from (in this order):
+    - An #+Endpoint decorator
+    - A endpoint.txt file in the repo
+    Otherwise assigns a default one
+    '''
+    endpoint = 'http://dbpedia.org/sparql'
+
+    try:
+        buf = StringIO.StringIO(rq)
+        endpoint_line = buf.readline()
+        endpoint = endpoint_line.split("#+endpoint: ")[1]
+        app.logger.debug("Decorator guessed endpoint: " + endpoint)
+    except ValueError as e:
+        app.logger.error("Couldn't guess endpoint from the query file")
+        pass
+
+    return endpoint
 
 @app.route('/')
 def hello():
     return 'This is apicrap, it creates crappy apis out of your github stored SPARQL queries for the lulz'
 
-
 @app.route('/<user>/<repo>/<query>')
 def query(user, repo, query):
-    print user, repo, query
-    print request.headers["Accept"]
+    app.logger.debug("Got request at /" + user + "/" + repo + "/" + query)
+    app.logger.debug("Request accept header: " +request.headers["Accept"])
     raw_repo_uri = 'https://raw.githubusercontent.com/' + user + '/' + repo + '/master/'
     raw_query_uri = raw_repo_uri + query + '.rq'
     stream = urllib2.urlopen(raw_query_uri)
-    query = stream.read()
-
-    sparql = SPARQLWrapper('http://virtuoso.clariah-sdh.eculture.labs.vu.nl/sparql')
-    sparql.setQuery(query)
+    raw_query = stream.read()
+    
+    endpoint = guess_endpoint_uri(raw_query)
+    app.logger.debug("Guessed endpoint for this query: " + endpoint)
+    sparql = SPARQLWrapper(endpoint)
+    sparql.setQuery(raw_query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
-
-    # for result in results['results']['bindings']:
-    #     print(result)
 
     return jsonify(results)
 
@@ -37,9 +61,8 @@ def api_docs(user, repo):
 
 @app.route('/<user>/<repo>/spec')
 def swagger_spec(user, repo):
-    print user, repo
+    app.logger.debug("Generating swagger spec for /" + user + "/" + repo)
     api_repo_uri = 'https://api.github.com/repos/' + user + '/' + repo
-    print api_repo_uri
     stream = urllib2.urlopen(api_repo_uri)
     resp = json.load(stream)
     swag = {}
@@ -60,6 +83,7 @@ def swagger_spec(user, repo):
             swag['paths'][call_name] = {}
             swag['paths'][call_name]["get"] = {"tags" : ["foo", "bar"],
                                                "summary" : "summary",
+                                               "produces" : ["application/json", "text/csv"],
                                                "responses": {
                                                    "200" : {
                                                        "description" : "pet response",
@@ -75,13 +99,11 @@ def swagger_spec(user, repo):
                                                    }
                                                }
                                                }
-            
-
+    
     return jsonify(swag)
 
 # DEPRECATED
 # Do something on github pushes?
-
 @app.route('/sparql', methods = ['POST'])
 def sparql():
     push = json.loads(request.data)
