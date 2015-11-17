@@ -3,15 +3,9 @@
 from flask import Flask, request, jsonify, render_template
 import urllib2
 import json
-from api.one import baz
 from SPARQLWrapper import SPARQLWrapper, JSON, TURTLE
 
 app = Flask(__name__)
-app.register_blueprint(baz)
-
-def add_query(repo, rqfile):
-    # TODO
-    return ''
 
 @app.route('/')
 def hello():
@@ -21,6 +15,7 @@ def hello():
 @app.route('/<user>/<repo>/<query>')
 def query(user, repo, query):
     print user, repo, query
+    print request.headers["Accept"]
     raw_repo_uri = 'https://raw.githubusercontent.com/' + user + '/' + repo + '/master/'
     raw_query_uri = raw_repo_uri + query + '.rq'
     stream = urllib2.urlopen(raw_query_uri)
@@ -83,6 +78,9 @@ def swagger_spec(user, repo):
             
 
     return jsonify(swag)
+
+# DEPRECATED
+# Do something on github pushes?
 
 @app.route('/sparql', methods = ['POST'])
 def sparql():
