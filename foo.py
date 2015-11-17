@@ -6,7 +6,7 @@ import json
 from SPARQLWrapper import SPARQLWrapper, JSON
 import StringIO
 import logging
-import sys
+import re
 
 app = Flask(__name__)
 
@@ -21,9 +21,7 @@ def guess_endpoint_uri(rq, ru):
 
     # Decorator
     try:
-        buf = StringIO.StringIO(rq)
-        endpoint_line = buf.readline()
-        endpoint = endpoint_line.split("#+endpoint: ")[1].strip()
+        endpoint = get_metadata(rq, exp='endpoint')
         app.logger.info("Decorator guessed endpoint: " + endpoint)
         return endpoint
     except IndexError:
@@ -43,6 +41,17 @@ def guess_endpoint_uri(rq, ru):
 
     app.logger.warning("Using default endpoint " + endpoint)
     return endpoint
+
+def get_metadata(rq, exp):
+    '''
+    Returns the metadata 'exp' parsed from the raw query file 'rq'
+    'exp' is one of: 'endpoint', 'tags', 'summary'
+    '''
+    groups = ['endpoint', 'tags', 'summary']
+    match = re.search("#\+(" + exp + ")\:\s?(?P<content>.*)\n", rq)
+    if exp == 'tags':
+        return [tag.strip() for tag in match.group('content').split(',')]
+    return match.group('content')
 
 @app.route('/')
 def hello():
@@ -92,9 +101,18 @@ def swagger_spec(user, repo):
     for c in resp:
         if ".rq" in c['name']:
             call_name = c['name'].split('.')[0]
+            # Retrieve extra metadata from the query decorators
+            raw_repo_uri = 'https://raw.githubusercontent.com/' + user + '/' + repo + '/master/'
+            raw_query_uri = raw_repo_uri + c['name']
+            stream = urllib2.urlopen(raw_query_uri)
+            resp = stream.read()
+            tags = get_metadata(resp, exp='tags')
+            app.logger.debug("Read query tags: " + ', '.join(tags))
+            summary = get_metadata(resp, exp='summary')
+            app.logger.debug("Read query summary: " + summary)
             swag['paths'][call_name] = {}
-            swag['paths'][call_name]["get"] = {"tags" : ["foo", "bar"],
-                                               "summary" : "summary",
+            swag['paths'][call_name]["get"] = {"tags" : tags,
+                                               "summary" : summary,
                                                "produces" : ["application/json", "text/csv"],
                                                "responses": {
                                                    "200" : {
@@ -116,21 +134,21 @@ def swagger_spec(user, repo):
 
 # DEPRECATED
 # Do something on github pushes?
-@app.route('/sparql', methods = ['POST'])
-def sparql():
-    push = json.loads(request.data)
-    # One push may contain many commits
-    for c in push['commits']:
-        # We only look for .rq files
-        for a in c['added']:
-            if '.rq' in a:
-                # New query added
-                add_query(push['repository']['full_name'], a)
-        print c['added']
-        print c['removed']
-        print c['modified']
+# @app.route('/sparql', methods = ['POST'])
+# def sparql():
+#     push = json.loads(request.data)
+#     # One push may contain many commits
+#     for c in push['commits']:
+#         # We only look for .rq files
+#         for a in c['added']:
+#             if '.rq' in a:
+#                 # New query added
+#                 add_query(push['repository']['full_name'], a)
+#         print c['added']
+#         print c['removed']
+#         print c['modified']
     
-        return 'foo'
+#         return 'foo'
 
 if __name__ == '__main__':
     app.run(port=8088, debug=True)
