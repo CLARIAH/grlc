@@ -9,11 +9,8 @@ import logging
 import sys
 
 app = Flask(__name__)
-# stream_handler = logging.StreamHandler(sys.stdout)
-# stream_handler.setLevel(logging.DEBUG)
-# app.logger.addHandler(stream_handler)
 
-def guess_endpoint_uri(rq):
+def guess_endpoint_uri(rq, ru):
     '''
     Guesses the endpoint URI from (in this order):
     - An #+Endpoint decorator
@@ -22,15 +19,29 @@ def guess_endpoint_uri(rq):
     '''
     endpoint = 'http://dbpedia.org/sparql'
 
+    # Decorator
     try:
         buf = StringIO.StringIO(rq)
         endpoint_line = buf.readline()
-        endpoint = endpoint_line.split("#+endpoint: ")[1]
-        app.logger.debug("Decorator guessed endpoint: " + endpoint)
-    except ValueError as e:
-        app.logger.error("Couldn't guess endpoint from the query file")
+        endpoint = endpoint_line.split("#+endpoint: ")[1].strip()
+        app.logger.info("Decorator guessed endpoint: " + endpoint)
+        return endpoint
+    except IndexError:
+        app.logger.warning("Couldn't guess endpoint from the query file")
         pass
 
+    # Endpoint file in repo
+    try:
+        endpoint_file_uri = ru + "endpoint.txt"
+        stream = urllib2.urlopen(endpoint_file_uri)
+        endpoint = stream.read().split("#+endpoint: ")[1].strip()
+        app.logger.info("File guessed endpoint: " + endpoint)
+        return endpoint
+    except IndexError:
+        app.logger.warning("Couldn't guess endpoint from endpoint file")
+        pass    
+
+    app.logger.warning("Using default endpoint " + endpoint)
     return endpoint
 
 @app.route('/')
@@ -46,9 +57,10 @@ def query(user, repo, query):
     stream = urllib2.urlopen(raw_query_uri)
     raw_query = stream.read()
     
-    endpoint = guess_endpoint_uri(raw_query)
-    app.logger.debug("Guessed endpoint for this query: " + endpoint)
+    endpoint = guess_endpoint_uri(raw_query, raw_repo_uri)
+    app.logger.debug("Sending query to endpoint: " + endpoint)
     sparql = SPARQLWrapper(endpoint)
+    app.logger.debug("Sending query: " + raw_query)
     sparql.setQuery(raw_query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
