@@ -20,19 +20,18 @@ def guess_endpoint_uri(rq, ru):
     endpoint = 'http://dbpedia.org/sparql'
 
     # Decorator
-    try:
-        endpoint = get_metadata(rq, exp='endpoint')
+    endpoint = get_metadata(rq, exp='endpoint')
+    if len(endpoint):
         app.logger.info("Decorator guessed endpoint: " + endpoint)
         return endpoint
-    except IndexError:
+    else:
         app.logger.warning("Couldn't guess endpoint from the query file")
-        pass
 
     # Endpoint file in repo
     try:
         endpoint_file_uri = ru + "endpoint.txt"
         stream = urllib2.urlopen(endpoint_file_uri)
-        endpoint = stream.read().split("#+endpoint: ")[1].strip()
+        endpoint = stream.read().strip()
         app.logger.info("File guessed endpoint: " + endpoint)
         return endpoint
     except IndexError:
@@ -49,6 +48,9 @@ def get_metadata(rq, exp):
     '''
     groups = ['endpoint', 'tags', 'summary']
     match = re.search("#\+(" + exp + ")\:\s?(?P<content>.*)\n", rq)
+    if not match:
+        app.logger.warning("Couldn't get " + exp + " metadata")
+        return '' 
     if exp == 'tags':
         return [tag.strip() for tag in match.group('content').split(',')]
     return match.group('content')
