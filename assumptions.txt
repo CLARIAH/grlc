@@ -1,3 +1,2 @@
 - GitHub
-- one nesting level of query files
 - master branch

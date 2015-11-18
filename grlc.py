@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 
 from flask import Flask, request, jsonify, render_template
@@ -62,7 +63,7 @@ def get_metadata(rq):
 
 @app.route('/')
 def hello():
-    return 'This is apicrap, it creates crappy apis out of your github stored SPARQL queries for the lulz'
+    return 'This is grlc, it creates crappy apis out of your github stored SPARQL queries for the lulz'
 
 @app.route('/<user>/<repo>/<query>')
 def query(user, repo, query):
@@ -96,7 +97,7 @@ def swagger_spec(user, repo):
     swag = {}
     swag['swagger'] = '2.0'
     swag['info'] = {'version': '1.0', 'title': resp['name'], 'contact': {'name': resp['owner']['login'], 'url': resp['owner']['url']}, 'license': {'name' : 'licensename', 'url': 'licenseurl'}}
-    swag['host'] = 'apicrap.amp.ops.few.vu.nl'
+    swag['host'] = 'grlc.amp.ops.few.vu.nl'
     swag['basePath'] = '/' + user + '/' + repo + '/'
     swag['schemes'] = ['http']
     swag['paths'] = {}
