@@ -8,9 +8,12 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 import StringIO
 import logging
 import re
-import pyyaml
+import yaml
 from rdflib.plugins.sparql.parser import Query
 from rdflib.plugins.sparql.processor import translateQuery
+
+XSD_DATATYPES = ["decimal", "float", "double", "integer", "positiveInteger", "negativeInteger", "nonPositiveInteger", "nonNegativeInteger", "long", "int", "short", "byte", "unsignedLong", "unsignedInt", "unsignedShort", "unsignedByte", "dateTime", "date", "gYearMonth", "gYear", "duration", "gMonthDay", "gDay", "gMonth", "string", "normalizedString", "token", "language", "NMTOKEN", "NMTOKENS", "Name", "NCName", "ID", "IDREFS", "ENTITY", "ENTITIES", "QName", "boolean", "hexBinary", "base64Binary", "anyURI", "notation"]
+
 
 app = Flask(__name__)
 
@@ -40,20 +43,79 @@ def guess_endpoint_uri(rq, ru):
         return endpoint
     except IndexError:
         app.logger.warning("Couldn't guess endpoint from endpoint file")
-        pass    
+        pass
 
     app.logger.warning("Using default endpoint " + endpoint)
     return endpoint
+
+
+def get_parameters(rq):
+    """
+        ?_name The variable specifies the API mandatory parameter name. The value is incorporated in the query as plain literal.
+        ?__name The parameter name is optional.
+        ?_name_iri The variable is substituted with the parameter value as a IRI.
+        ?_name_en The parameter value is considered as literal with the language 'en' (e.g., en,it,es, etc.).
+        ?_name_integer The parameter value is considered as literal and the XSD datatype 'integer' is added during substitution.
+        ?_name_prefix_datatype The parameter value is considered as literal and the datatype 'prefix:datatype' is added during substitution. The prefix must be specified according to the SPARQL syntax.
+    """
+
+    variables = translateQuery(Query.parseString(rq, parseAll=True)).algebra['_vars']
+
+    ## Aggregates
+    internal_matcher = re.compile("__agg_\d+__")
+    ## Basil-style variables
+    variable_matcher = re.compile("(?P<required>[_]{1,2})(?P<name>[^_]+)_?(?P<type>[a-zA-Z0-9]+)?_?(?P<userdefined>[a-zA-Z0-9]+)?.*$")
+
+    parameters = {}
+    for v in variables:
+        if internal_matcher.match(v):
+            continue
+
+        match = variable_matcher.match(v)
+        if match :
+            vname = match.group('name')
+            vrequired = True if match.group('required') == '_' else False
+            vtype = 'iri'
+            vlang = None
+            vdatatype = None
+
+            mtype = match.group('type')
+            muserdefined = match.group('userdefined')
+
+            if mtype in ['iri','number','literal']:
+                vtype = mtype
+            elif mtype:
+                vtype = 'literal'
+
+                if mtype:
+                    if mtype in XSD_DATATYPES:
+                        vdatatype = mtype
+                    elif len(mtype) == 2 :
+                        vlang = mtype
+                    elif muserdefined :
+                        vdatatype = '{}:{}'.format(mtype, muserdefined)
+
+            parameters[v] = {
+                'original': '?{}'.format(v),
+                'required': vrequired,
+                'name': vname,
+                'type': vtype,
+                'datatype': vdatatype,
+                'lang': vlang
+            }
+
+    return parameters
+
 
 def get_metadata(rq):
     '''
     Returns the metadata 'exp' parsed from the raw query file 'rq'
     'exp' is one of: 'endpoint', 'tags', 'summary'
     '''
-    yaml_string = "\n".join([row.lstrip('#+') for row in q.split('\n') if row.startswith('#+')])
+    yaml_string = "\n".join([row.lstrip('#+') for row in rq.split('\n') if row.startswith('#+')])
     query_metadata = yaml.load(yaml_string)
 
-    parsed_query = translateQuery(Query.parseString(q, parseAll=True))
+    parsed_query = translateQuery(Query.parseString(rq, parseAll=True))
     query_metadata['type'] = parsed_query.algebra.name
 
     if query_metadata['type'] == 'SelectQuery':
@@ -73,7 +135,7 @@ def query(user, repo, query):
     raw_query_uri = raw_repo_uri + query + '.rq'
     stream = urllib2.urlopen(raw_query_uri)
     raw_query = stream.read()
-    
+
     endpoint = guess_endpoint_uri(raw_query, raw_repo_uri)
     app.logger.debug("Sending query to endpoint: " + endpoint)
     sparql = SPARQLWrapper(endpoint)
@@ -101,7 +163,7 @@ def swagger_spec(user, repo):
     swag['basePath'] = '/' + user + '/' + repo + '/'
     swag['schemes'] = ['http']
     swag['paths'] = {}
-    
+
     api_repo_content_uri = api_repo_uri + '/contents'
     stream = urllib2.urlopen(api_repo_content_uri)
     resp = json.load(stream)
@@ -116,40 +178,54 @@ def swagger_spec(user, repo):
             resp = stream.read()
 
             try :
-
-
                 query_metadata = get_metadata(resp)
+            except Exception as e:
+                print resp
 
-                tags = query_metadata['tags'] if 'tags' in query_metadata else []
-                app.logger.debug("Read query tags: " + ', '.join(tags))
+                app.logger.error("Could not parse query")
+                continue
 
-                summary = query_metadata['summary'] if 'summary' in query_metadata else ""
-                app.logger.debug("Read query summary: " + summary)
 
-                endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
-                app.logger.debug("Read query endpoint: " + endpoint)
 
-                swag['paths'][call_name] = {}
-                swag['paths'][call_name]["get"] = {"tags" : tags,
-                                                   "summary" : summary,
-                                                   "produces" : ["application/json", "text/csv"],
-                                                   "responses": {
-                                                       "200" : {
-                                                           "description" : "pet response",
-                                                           "schema" : {
-                                                               "type" : "object",
-                                                               }
-                                                           },
-                                                       "default" : {
-                                                           "description" : "Unexpected error",
-                                                           "schema" : {
-                                                               "$ref" : "#/definitions/Message"
+            tags = query_metadata['tags'] if 'tags' in query_metadata else []
+            app.logger.debug("Read query tags: " + ', '.join(tags))
+
+            summary = query_metadata['summary'] if 'summary' in query_metadata else ""
+            app.logger.debug("Read query summary: " + summary)
+
+            endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
+            app.logger.debug("Read query endpoint: " + endpoint)
+
+            try :
+                parameters = get_parameters(resp)
+            except Exception as e:
+                print e
+                app.logger.error("Could not parse parameters")
+                continue
+
+            app.logger.debug("Read parameters")
+            app.logger.debug(parameters)
+            # TODO: do something intelligent with the parameters!
+
+            swag['paths'][call_name] = {}
+            swag['paths'][call_name]["get"] = {"tags" : tags,
+                                               "summary" : summary,
+                                               "produces" : ["application/json", "text/csv"],
+                                               "responses": {
+                                                   "200" : {
+                                                       "description" : "pet response",
+                                                       "schema" : {
+                                                           "type" : "object",
                                                            }
+                                                       },
+                                                   "default" : {
+                                                       "description" : "Unexpected error",
+                                                       "schema" : {
+                                                           "$ref" : "#/definitions/Message"
                                                        }
                                                    }
-                                                   }
-            except Exception as e:
-                app.logger.error("Could not parse query")
+                                               }
+                                               }
     return jsonify(swag)
 
 # DEPRECATED
@@ -167,7 +243,7 @@ def swagger_spec(user, repo):
 #         print c['added']
 #         print c['removed']
 #         print c['modified']
-    
+
 #         return 'foo'
 
 if __name__ == '__main__':
