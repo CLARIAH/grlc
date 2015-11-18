@@ -6,6 +6,7 @@ Jinja2==2.8
 keepalive==0.4.1
 MarkupSafe==0.23
 pyparsing==2.0.6
+PyYAML==3.11
 rdflib==4.2.1
 six==1.10.0
 SPARQLWrapper==1.7.4
