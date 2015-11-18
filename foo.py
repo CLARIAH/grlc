@@ -7,6 +7,9 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 import StringIO
 import logging
 import re
+import pyyaml
+from rdflib.plugins.sparql.parser import Query
+from rdflib.plugins.sparql.processor import translateQuery
 
 app = Flask(__name__)
 
@@ -41,19 +44,21 @@ def guess_endpoint_uri(rq, ru):
     app.logger.warning("Using default endpoint " + endpoint)
     return endpoint
 
-def get_metadata(rq, exp):
+def get_metadata(rq):
     '''
     Returns the metadata 'exp' parsed from the raw query file 'rq'
     'exp' is one of: 'endpoint', 'tags', 'summary'
     '''
-    groups = ['endpoint', 'tags', 'summary']
-    match = re.search("#\+(" + exp + ")\:\s?(?P<content>.*)\n", rq)
-    if not match:
-        app.logger.warning("Couldn't get " + exp + " metadata")
-        return '' 
-    if exp == 'tags':
-        return [tag.strip() for tag in match.group('content').split(',')]
-    return match.group('content')
+    yaml_string = "\n".join([row.lstrip('#+') for row in q.split('\n') if row.startswith('#+')])
+    query_metadata = yaml.load(yaml_string)
+
+    parsed_query = translateQuery(Query.parseString(q, parseAll=True))
+    query_metadata['type'] = parsed_query.algebra.name
+
+    if query_metadata['type'] == 'SelectQuery':
+        query_metadata['variables'] = parsed_query.algebra['PV']
+
+    return query_metadata
 
 @app.route('/')
 def hello():
@@ -108,30 +113,42 @@ def swagger_spec(user, repo):
             raw_query_uri = raw_repo_uri + c['name']
             stream = urllib2.urlopen(raw_query_uri)
             resp = stream.read()
-            tags = get_metadata(resp, exp='tags')
-            app.logger.debug("Read query tags: " + ', '.join(tags))
-            summary = get_metadata(resp, exp='summary')
-            app.logger.debug("Read query summary: " + summary)
-            swag['paths'][call_name] = {}
-            swag['paths'][call_name]["get"] = {"tags" : tags,
-                                               "summary" : summary,
-                                               "produces" : ["application/json", "text/csv"],
-                                               "responses": {
-                                                   "200" : {
-                                                       "description" : "pet response",
-                                                       "schema" : {
-                                                           "type" : "object",
+
+            try :
+
+
+                query_metadata = get_metadata(resp)
+
+                tags = query_metadata['tags'] if 'tags' in query_metadata else []
+                app.logger.debug("Read query tags: " + ', '.join(tags))
+
+                summary = query_metadata['summary'] if 'summary' in query_metadata else ""
+                app.logger.debug("Read query summary: " + summary)
+
+                endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
+                app.logger.debug("Read query endpoint: " + endpoint)
+
+                swag['paths'][call_name] = {}
+                swag['paths'][call_name]["get"] = {"tags" : tags,
+                                                   "summary" : summary,
+                                                   "produces" : ["application/json", "text/csv"],
+                                                   "responses": {
+                                                       "200" : {
+                                                           "description" : "pet response",
+                                                           "schema" : {
+                                                               "type" : "object",
+                                                               }
+                                                           },
+                                                       "default" : {
+                                                           "description" : "Unexpected error",
+                                                           "schema" : {
+                                                               "$ref" : "#/definitions/Message"
                                                            }
-                                                       },
-                                                   "default" : {
-                                                       "description" : "Unexpected error",
-                                                       "schema" : {
-                                                           "$ref" : "#/definitions/Message"
                                                        }
                                                    }
-                                               }
-                                               }
-    
+                                                   }
+            except Exception as e:
+                app.logger.error("Could not parse query")
     return jsonify(swag)
 
 # DEPRECATED
