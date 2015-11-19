@@ -91,13 +91,13 @@ def get_parameters(rq):
 
                 if mtype:
                     if mtype in XSD_DATATYPES:
-                        vdatatype = mtype
+                        vdatatype = 'xsd:{}'.format(mtype)
                     elif len(mtype) == 2 :
                         vlang = mtype
                     elif muserdefined :
                         vdatatype = '{}:{}'.format(mtype, muserdefined)
 
-            parameters[v] = {
+            parameters[vname] = {
                 'original': '?{}'.format(v),
                 'required': vrequired,
                 'name': vname,
@@ -115,7 +115,10 @@ def get_metadata(rq):
     'exp' is one of: 'endpoint', 'tags', 'summary'
     '''
     yaml_string = "\n".join([row.lstrip('#+') for row in rq.split('\n') if row.startswith('#+')])
+    query_string = "\n".join([row for row in rq.split('\n') if not row.startswith('#+')])
+
     query_metadata = yaml.load(yaml_string)
+    query_metadata['query'] = query_string
 
     parsed_query = translateQuery(Query.parseString(rq, parseAll=True))
     query_metadata['type'] = parsed_query.algebra.name
@@ -182,7 +185,7 @@ def swagger_spec(user, repo):
             try :
                 query_metadata = get_metadata(resp)
             except Exception as e:
-                print resp
+                print traceback.print_exc()
 
                 app.logger.error("Could not parse query")
                 continue
@@ -199,9 +202,10 @@ def swagger_spec(user, repo):
             app.logger.debug("Read query endpoint: " + endpoint)
 
             try :
-                parameters = get_parameters(resp)
+                parameters = get_parameters(query_metadata['query'])
             except Exception as e:
-                print e
+                print traceback.print_exc()
+
                 app.logger.error("Could not parse parameters")
                 continue
 
@@ -209,15 +213,57 @@ def swagger_spec(user, repo):
             app.logger.debug(parameters)
             # TODO: do something intelligent with the parameters!
 
+            params = []
+            for v, p in parameters.items():
+                param = {}
+                param['name'] = p['name']
+                param['type'] = "string"
+                param['required'] = p['required']
+                param['in'] = "query"
+                param['description'] = "A value of type {} that will substitute {} in the original query".format(p['type'], p['original'])
+
+                params.append(param)
+
+            item_properties = {}
+            for pv in query_metadata['variables']:
+                i = {
+                    "name": pv,
+                    "type": "object",
+                    "required": ["type", "value"],
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "value": {
+                            "type": "string"
+                        },
+                        "xml:lang": {
+                            "type": "string"
+                        },
+                        "datatype": {
+                            "type": "string"
+                        }
+                    }
+                }
+
+
+                item_properties[pv] = i
+
             swag['paths'][call_name] = {}
             swag['paths'][call_name]["get"] = {"tags" : tags,
                                                "summary" : summary,
+                                               "description" : "<pre>\n{}\n</pre>".format(cgi.escape(query_metadata['query'])),
                                                "produces" : ["application/json", "text/csv"],
+                                               "parameters": params,
                                                "responses": {
                                                    "200" : {
-                                                       "description" : "pet response",
+                                                       "description" : "SPARQL query response",
                                                        "schema" : {
-                                                           "type" : "object",
+                                                           "type" : "array",
+                                                           "items": {
+                                                                "type": "object",
+                                                                "properties": item_properties
+                                                            },
                                                            }
                                                        },
                                                    "default" : {
