@@ -128,11 +128,37 @@ def get_metadata(rq):
 
     return query_metadata
 
+def rewrite_query(query, get_args):
+    parameters = get_parameters(query)
+
+    for pname, p in parameters.items():
+        # Get the parameter value from the GET request
+        v = get_args.get(pname, None)
+        # If the parameter has a value
+        if v:
+            # IRI
+            if p['type'] == 'iri':
+                query = query.replace(p['original'], "<{}>".format(v))
+            # A number (without a datatype)
+            elif p['type'] == 'number':
+                query = query.replace(p['original'], v)
+            # Literals
+            elif p['type'] == 'literal':
+                # If there is a language tag
+                if p['lang']:
+                    query = query.replace(p['original'], "\"{}\"@{}".format(v, p['lang']))
+                elif p['datatype']:
+                    query = query.replace(p['original'], "\"{}\"^^{}".format(v, p['datatype']))
+                else:
+                    query = query.replace(p['original'], "\"{}\"".format(v))
+
+    return query
+
 @app.route('/')
 def hello():
     return 'This is grlc, it creates crappy apis out of your github stored SPARQL queries for the lulz'
 
-@app.route('/<user>/<repo>/<query>')
+@app.route('/<user>/<repo>/<query>', methods=['GET'])
 def query(user, repo, query):
     app.logger.debug("Got request at /" + user + "/" + repo + "/" + query)
     app.logger.debug("Request accept header: " +request.headers["Accept"])
@@ -143,9 +169,13 @@ def query(user, repo, query):
 
     endpoint = guess_endpoint_uri(raw_query, raw_repo_uri)
     app.logger.debug("Sending query to endpoint: " + endpoint)
+
+    query = rewrite_query(raw_query, request.args)
+
+
     sparql = SPARQLWrapper(endpoint)
-    app.logger.debug("Sending query: " + raw_query)
-    sparql.setQuery(raw_query)
+    app.logger.debug("Sending query:\n" + query)
+    sparql.setQuery(query)
     sparql.setReturnFormat(JSON)
     results = sparql.query().convert()
 
@@ -164,7 +194,7 @@ def swagger_spec(user, repo):
     swag = {}
     swag['swagger'] = '2.0'
     swag['info'] = {'version': '1.0', 'title': resp['name'], 'contact': {'name': resp['owner']['login'], 'url': resp['owner']['url']}, 'license': {'name' : 'licensename', 'url': 'licenseurl'}}
-    swag['host'] = 'grlc.amp.ops.few.vu.nl'
+    swag['host'] = app.config['SERVER_NAME']
     swag['basePath'] = '/' + user + '/' + repo + '/'
     swag['schemes'] = ['http']
     swag['paths'] = {}
