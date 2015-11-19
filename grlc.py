@@ -55,7 +55,7 @@ def get_parameters(rq):
     """
         ?_name The variable specifies the API mandatory parameter name. The value is incorporated in the query as plain literal.
         ?__name The parameter name is optional.
-        ?_name_iri The variable is substituted with the parameter value as a IRI.
+        ?_name_iri The variable is substituted with the parameter value as a IRI (also: number or literal).
         ?_name_en The parameter value is considered as literal with the language 'en' (e.g., en,it,es, etc.).
         ?_name_integer The parameter value is considered as literal and the XSD datatype 'integer' is added during substitution.
         ?_name_prefix_datatype The parameter value is considered as literal and the datatype 'prefix:datatype' is added during substitution. The prefix must be specified according to the SPARQL syntax.
