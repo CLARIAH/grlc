@@ -118,6 +118,9 @@ def get_metadata(rq):
     query_string = "\n".join([row for row in rq.split('\n') if not row.startswith('#+')])
 
     query_metadata = yaml.load(yaml_string)
+    # If there is no YAML string
+    if query_metadata == None:
+        query_metadata = {}
     query_metadata['query'] = query_string
 
     parsed_query = translateQuery(Query.parseString(rq, parseAll=True))
