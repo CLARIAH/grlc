@@ -29,7 +29,11 @@ def guess_endpoint_uri(rq, ru):
     endpoint = 'http://dbpedia.org/sparql'
 
     # Decorator
-    endpoint = get_metadata(rq)['endpoint']
+    try:
+        endpoint = get_metadata(rq)['endpoint']
+    except :
+        app.logger.warning("No endpoint specified, using default ({})".format(endpoint))
+
     if len(endpoint):
         app.logger.info("Decorator guessed endpoint: " + endpoint)
         return endpoint
