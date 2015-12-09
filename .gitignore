@@ -1,2 +1,8 @@
 .*!.gitignore
 *~
+*.swp
+bin/
+include/
+lib/
+local/
+pip-selfcheck.json
