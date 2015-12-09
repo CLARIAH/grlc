@@ -31,27 +31,18 @@ def guess_endpoint_uri(rq, ru):
     # Decorator
     try:
         endpoint = get_metadata(rq)['endpoint']
-    except :
-        app.logger.warning("No endpoint specified, using default ({})".format(endpoint))
+	app.logger.info("Decorator guessed endpoint: " + endpoint)
+    except:
+	# File
+	try:
+	    endpoint_file_uri = ru + "endpoint.txt"
+	    stream = urllib2.urlopen(endpoint_file_uri)
+	    endpoint = stream.read().strip()
+ 	    app.logger.info("File guessed endpoint: " + endpoint)	
+	except:
+	    # Default
+            app.logger.warning("No endpoint specified, using default ({})".format(endpoint))
 
-    if len(endpoint):
-        app.logger.info("Decorator guessed endpoint: " + endpoint)
-        return endpoint
-    else:
-        app.logger.warning("Couldn't guess endpoint from the query file")
-
-    # Endpoint file in repo
-    try:
-        endpoint_file_uri = ru + "endpoint.txt"
-        stream = urllib2.urlopen(endpoint_file_uri)
-        endpoint = stream.read().strip()
-        app.logger.info("File guessed endpoint: " + endpoint)
-        return endpoint
-    except IndexError:
-        app.logger.warning("Couldn't guess endpoint from endpoint file")
-        pass
-
-    app.logger.warning("Using default endpoint " + endpoint)
     return endpoint
 
 
