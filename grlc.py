@@ -285,7 +285,7 @@ def swagger_spec(user, repo):
             swag['paths'][call_name]["get"] = {"tags" : tags,
                                                "summary" : summary,
                                                "description" : "<pre>\n{}\n</pre>".format(cgi.escape(query_metadata['query'])),
-                                               "produces" : ["application/json", "text/csv"],
+                                               "produces" : ["text/csv", "application/json", "text/html"],
                                                "parameters": params,
                                                "responses": {
                                                    "200" : {
