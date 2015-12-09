@@ -118,7 +118,10 @@ def get_metadata(rq):
         query_metadata = {}
     query_metadata['query'] = query_string
 
-    parsed_query = translateQuery(Query.parseString(rq, parseAll=True))
+    try:
+        parsed_query = translateQuery(Query.parseString(rq, parseAll=True))
+    except ParseException:
+        app.logger.error("Could not parse query" + query_string)
     query_metadata['type'] = parsed_query.algebra.name
 
     if query_metadata['type'] == 'SelectQuery':
@@ -150,6 +153,7 @@ def rewrite_query(query, get_args):
                 else:
                     query = query.replace(p['original'], "\"{}\"".format(v))
 
+    app.logger.debug("Query rewritten as: " + query)
     return query
 
 @app.route('/')
@@ -179,6 +183,7 @@ def query(user, repo, query):
     }
     data_encoded = urllib.urlencode(data)
     req = urllib2.Request(endpoint, data_encoded, headers)
+    app.logger.debug("Sending request: " + req.get_full_url() + "?" + req.get_data())
     response = urllib2.urlopen(req)
 
     return response.read()
