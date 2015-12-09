@@ -2,9 +2,9 @@
 #!/usr/bin/env python
 
 from flask import Flask, request, jsonify, render_template
+import urllib
 import urllib2
 import json
-from SPARQLWrapper import SPARQLWrapper, JSON
 import StringIO
 import logging
 import re
@@ -170,14 +170,18 @@ def query(user, repo, query):
 
     query = rewrite_query(raw_query, request.args)
 
+    # Preapre HTTP request
+    headers = {
+        'Accept' : request.headers['Accept']
+    }
+    data = {
+	'query' : query
+    }
+    data_encoded = urllib.urlencode(data)
+    req = urllib2.Request(endpoint, data_encoded, headers)
+    response = urllib2.urlopen(req)
 
-    sparql = SPARQLWrapper(endpoint)
-    app.logger.debug("Sending query:\n" + query)
-    sparql.setQuery(query)
-    sparql.setReturnFormat(JSON)
-    results = sparql.query().convert()
-
-    return jsonify(results)
+    return response.read()
 
 @app.route('/<user>/<repo>/api-docs')
 def api_docs(user, repo):
