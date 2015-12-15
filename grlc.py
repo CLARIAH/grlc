@@ -11,6 +11,7 @@ import re
 import yaml
 from rdflib.plugins.sparql.parser import Query
 from rdflib.plugins.sparql.processor import translateQuery
+from pyparsing import ParseException
 import traceback
 import cgi
 
@@ -225,6 +226,7 @@ def swagger_spec(user, repo):
                 print traceback.print_exc()
 
                 app.logger.error("Could not parse query")
+		app.logger.error(raw_query_uri)
                 continue
 
 
