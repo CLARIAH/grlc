@@ -122,7 +122,9 @@ def get_metadata(rq):
     try:
         parsed_query = translateQuery(Query.parseString(rq, parseAll=True))
     except ParseException:
-        app.logger.error("Could not parse query" + query_string)
+        app.logger.error("Could not parse query")
+	app.logger.error(query_string)
+        print traceback.print_exc()
     query_metadata['type'] = parsed_query.algebra.name
 
     if query_metadata['type'] == 'SelectQuery':
@@ -219,17 +221,13 @@ def swagger_spec(user, repo):
             raw_query_uri = raw_repo_uri + c['name']
             stream = urllib2.urlopen(raw_query_uri)
             resp = stream.read()
-
-            try :
-                query_metadata = get_metadata(resp)
-            except Exception as e:
-                print traceback.print_exc()
-
-                app.logger.error("Could not parse query")
-		app.logger.error(raw_query_uri)
-                continue
-
-
+		
+	    try:
+	        query_metadata = get_metadata(resp)
+	    except Exception as e:
+		app.logger.error("Could not parse query " + raw_query_uri)
+		app.logger.error(e)
+		continue
 
             tags = query_metadata['tags'] if 'tags' in query_metadata else []
             app.logger.debug("Read query tags: " + ', '.join(tags))
