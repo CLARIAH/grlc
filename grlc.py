@@ -2,15 +2,16 @@
 #!/usr/bin/env python
 
 from flask import Flask, request, jsonify, render_template
+import urllib
 import urllib2
 import json
-from SPARQLWrapper import SPARQLWrapper, JSON
 import StringIO
 import logging
 import re
 import yaml
 from rdflib.plugins.sparql.parser import Query
 from rdflib.plugins.sparql.processor import translateQuery
+from pyparsing import ParseException
 import traceback
 import cgi
 
@@ -29,25 +30,20 @@ def guess_endpoint_uri(rq, ru):
     endpoint = 'http://dbpedia.org/sparql'
 
     # Decorator
-    endpoint = get_metadata(rq)['endpoint']
-    if len(endpoint):
-        app.logger.info("Decorator guessed endpoint: " + endpoint)
-        return endpoint
-    else:
-        app.logger.warning("Couldn't guess endpoint from the query file")
-
-    # Endpoint file in repo
     try:
-        endpoint_file_uri = ru + "endpoint.txt"
-        stream = urllib2.urlopen(endpoint_file_uri)
-        endpoint = stream.read().strip()
-        app.logger.info("File guessed endpoint: " + endpoint)
-        return endpoint
-    except IndexError:
-        app.logger.warning("Couldn't guess endpoint from endpoint file")
-        pass
+        endpoint = get_metadata(rq)['endpoint']
+	app.logger.info("Decorator guessed endpoint: " + endpoint)
+    except:
+	# File
+	try:
+	    endpoint_file_uri = ru + "endpoint.txt"
+	    stream = urllib2.urlopen(endpoint_file_uri)
+	    endpoint = stream.read().strip()
+ 	    app.logger.info("File guessed endpoint: " + endpoint)	
+	except:
+	    # Default
+            app.logger.warning("No endpoint specified, using default ({})".format(endpoint))
 
-    app.logger.warning("Using default endpoint " + endpoint)
     return endpoint
 
 
@@ -123,7 +119,12 @@ def get_metadata(rq):
         query_metadata = {}
     query_metadata['query'] = query_string
 
-    parsed_query = translateQuery(Query.parseString(rq, parseAll=True))
+    try:
+        parsed_query = translateQuery(Query.parseString(rq, parseAll=True))
+    except ParseException:
+        app.logger.error("Could not parse query")
+	app.logger.error(query_string)
+        print traceback.print_exc()
     query_metadata['type'] = parsed_query.algebra.name
 
     if query_metadata['type'] == 'SelectQuery':
@@ -155,6 +156,7 @@ def rewrite_query(query, get_args):
                 else:
                     query = query.replace(p['original'], "\"{}\"".format(v))
 
+    app.logger.debug("Query rewritten as: " + query)
     return query
 
 @app.route('/')
@@ -175,14 +177,19 @@ def query(user, repo, query):
 
     query = rewrite_query(raw_query, request.args)
 
+    # Preapre HTTP request
+    headers = {
+        'Accept' : request.headers['Accept']
+    }
+    data = {
+	'query' : query
+    }
+    data_encoded = urllib.urlencode(data)
+    req = urllib2.Request(endpoint, data_encoded, headers)
+    app.logger.debug("Sending request: " + req.get_full_url() + "?" + req.get_data())
+    response = urllib2.urlopen(req)
 
-    sparql = SPARQLWrapper(endpoint)
-    app.logger.debug("Sending query:\n" + query)
-    sparql.setQuery(query)
-    sparql.setReturnFormat(JSON)
-    results = sparql.query().convert()
-
-    return jsonify(results)
+    return response.read()
 
 @app.route('/<user>/<repo>/api-docs')
 def api_docs(user, repo):
@@ -214,16 +221,13 @@ def swagger_spec(user, repo):
             raw_query_uri = raw_repo_uri + c['name']
             stream = urllib2.urlopen(raw_query_uri)
             resp = stream.read()
-
-            try :
-                query_metadata = get_metadata(resp)
-            except Exception as e:
-                print traceback.print_exc()
-
-                app.logger.error("Could not parse query")
-                continue
-
-
+		
+	    try:
+	        query_metadata = get_metadata(resp)
+	    except Exception as e:
+		app.logger.error("Could not parse query " + raw_query_uri)
+		app.logger.error(e)
+		continue
 
             tags = query_metadata['tags'] if 'tags' in query_metadata else []
             app.logger.debug("Read query tags: " + ', '.join(tags))
@@ -286,7 +290,7 @@ def swagger_spec(user, repo):
             swag['paths'][call_name]["get"] = {"tags" : tags,
                                                "summary" : summary,
                                                "description" : "<pre>\n{}\n</pre>".format(cgi.escape(query_metadata['query'])),
-                                               "produces" : ["application/json", "text/csv"],
+                                               "produces" : ["text/csv", "application/json", "text/html"],
                                                "parameters": params,
                                                "responses": {
                                                    "200" : {
