@@ -159,7 +159,7 @@ def rewrite_query(query, get_args):
 
 @app.route('/')
 def hello():
-    return 'This is grlc, it creates crappy apis out of your github stored SPARQL queries for the lulz'
+    return render_template('index.html')
 
 @app.route('/<user>/<repo>/<query>', methods=['GET'])
 def query(user, repo, query):

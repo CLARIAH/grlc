@@ -1,3 +1,6 @@
 [submodule "static/swagger-ui"]
 	path = static/swagger-ui
 	url = https://github.com/swagger-api/swagger-ui
+[submodule "static/bootstrap"]
+	path = static/bootstrap
+	url = https://github.com/twbs/bootstrap
