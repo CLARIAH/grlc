@@ -17,7 +17,7 @@ pip install -r requirements.txt
 python grlc.py
 </pre>
 
-Direct your browser to http://localhost:8088.
+Direct your browser to [http://localhost:8088](http://localhost:8088).
 
 ### Usage
 
@@ -25,8 +25,8 @@ grlc assumes a GitHub repository (support for general git repos is on the way) w
 
 If you're seeing this, your grlc instance is up and running, and ready to build APIs. Assuming you got it running at <code>http://localhost:8088/</code> and your queries are at <code>https://github.com/CEDAR-project/Queries</code>, just point your browser to the following locations:
 
-- To request the swagger spec of your API, <code>http://localhost:8088/username/repo/spec</code>, e.g. http://localhost:8088/CEDAR-project/Queries/spec
-- To request the api-docs of your API swagger-ui style, <code>http://localhost:8088/username/repo/api-docs</code>, e.g. http://localhost:8088/CEDAR-project/Queries/api-docs
+- To request the swagger spec of your API, <code>http://localhost:8088/username/repo/spec</code>, e.g. [http://localhost:8088/CEDAR-project/Queries/spec](http://localhost:8088/CEDAR-project/Queries/spec)
+- To request the api-docs of your API swagger-ui style, <code>http://localhost:8088/username/repo/api-docs</code>, e.g. [http://localhost:8088/CEDAR-project/Queries/api-docs](http://localhost:8088/CEDAR-project/Queries/api-docs)
 
 That's it!
 
@@ -39,7 +39,7 @@ A couple of SPARQL comment embedded decorators are available to make your swagge
   &#35;+   - firstTag
   &#35;+   - secondTag</pre>
 
-See examples at <a href="https://github.com/CEDAR-project/Queries">https://github.com/CEDAR-project/Queries</a>.
+See examples at [https://github.com/CEDAR-project/Queries](https://github.com/CEDAR-project/Queries).
 
 ### Request parameter mappings into SPARQL
 
