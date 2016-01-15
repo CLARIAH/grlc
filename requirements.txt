@@ -1,0 +1,15 @@
+Flask==0.10.1
+html5lib==0.9999999
+isodate==0.5.4
+itsdangerous==0.24
+Jinja2==2.8
+keepalive==0.5
+MarkupSafe==0.23
+pyaml==15.8.2
+pyparsing==2.0.7
+PyYAML==3.11
+rdflib==4.2.1
+six==1.10.0
+SPARQLWrapper==1.7.6
+Werkzeug==0.11.3
+wheel==0.24.0
