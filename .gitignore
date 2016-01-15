@@ -1,4 +1,6 @@
 .*!.gitignore
+*/.DS_Store
+.Python
 *~
 *.swp
 bin/
