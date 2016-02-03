@@ -21,7 +21,7 @@ Direct your browser to [http://localhost:8088](http://localhost:8088).
 
 ### Usage
 
-grlc assumes a GitHub repository (support for general git repos is on the way) where you store your SPARQL queries as .rq files. grlc will create an API operation per such a SPARQL query/.rq file.
+grlc assumes a GitHub repository (support for general git repos is on the way) where you store your SPARQL queries as .rq files (like in [this one](https://github.com/CEDAR-project/Queries)). grlc will create an API operation per such a SPARQL query/.rq file.
 
 If you're seeing this, your grlc instance is up and running, and ready to build APIs. Assuming you got it running at <code>http://localhost:8088/</code> and your queries are at <code>https://github.com/CEDAR-project/Queries</code>, just point your browser to the following locations:
 
