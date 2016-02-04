@@ -39,7 +39,7 @@ def guess_endpoint_uri(rq, ru):
 	    endpoint_file_uri = ru + "endpoint.txt"
 	    stream = urllib2.urlopen(endpoint_file_uri)
 	    endpoint = stream.read().strip()
- 	    app.logger.info("File guessed endpoint: " + endpoint)	
+ 	    app.logger.info("File guessed endpoint: " + endpoint)
 	except:
 	    # Default
             app.logger.warning("No endpoint specified, using default ({})".format(endpoint))
@@ -135,6 +135,8 @@ def get_metadata(rq):
 def rewrite_query(query, get_args):
     parameters = get_parameters(query)
 
+    app.logger.debug("Query parameters")
+    app.logger.debug(parameters)
     for pname, p in parameters.items():
         # Get the parameter value from the GET request
         v = get_args.get(pname, None)
@@ -142,7 +144,7 @@ def rewrite_query(query, get_args):
         if v:
             # IRI
             if p['type'] == 'iri':
-                query = query.replace(p['original'], "<{}>".format(v))
+                query = query.replace(p['original'], "{}".format(v))
             # A number (without a datatype)
             elif p['type'] == 'number':
                 query = query.replace(p['original'], v)
@@ -221,7 +223,7 @@ def swagger_spec(user, repo):
             raw_query_uri = raw_repo_uri + c['name']
             stream = urllib2.urlopen(raw_query_uri)
             resp = stream.read()
-		
+
 	    try:
 	        query_metadata = get_metadata(resp)
 	    except Exception as e:
