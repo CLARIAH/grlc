@@ -205,7 +205,7 @@ def swagger_spec(user, repo):
     resp = json.load(stream)
     swag = {}
     swag['swagger'] = '2.0'
-    swag['info'] = {'version': '1.0', 'title': resp['name'], 'contact': {'name': resp['owner']['login'], 'url': resp['owner']['url']}, 'license': {'name' : 'licensename', 'url': 'licenseurl'}}
+    swag['info'] = {'version': '1.0', 'title': resp['name'], 'contact': {'name': resp['owner']['login'], 'url': resp['owner']['html_url']}, 'license': {'name' : 'License', 'url': 'https://raw.githubusercontent.com/' + user + '/' + repo + '/master/LICENSE'}}
     swag['host'] = app.config['SERVER_NAME']
     swag['basePath'] = '/' + user + '/' + repo + '/'
     swag['schemes'] = ['http']
