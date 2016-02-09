@@ -3,6 +3,7 @@
 .Python
 *~
 *.swp
+*.log
 bin/
 include/
 lib/
