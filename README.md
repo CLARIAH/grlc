@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/CLARIAH/grlc/master/static/img/grlc_logo_01.png" width="250px">
+<center><img src="https://raw.githubusercontent.com/CLARIAH/grlc/master/static/img/grlc_logo_01.png" width="250px"></center>
 
 grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor, automatically builds Web APIs using SPARQL queries stored in git repositories.
 
