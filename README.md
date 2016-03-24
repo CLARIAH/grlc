@@ -19,6 +19,8 @@ python grlc.py
 
 Direct your browser to [http://localhost:8088](http://localhost:8088).
 
+Alternatively, you can use the provided Gunicorn configuration to run it as a daemon on your server.
+
 ### Usage
 
 grlc assumes a GitHub repository (support for general git repos is on the way) where you store your SPARQL queries as .rq files (like in [this one](https://github.com/CEDAR-project/Queries)). grlc will create an API operation per such a SPARQL query/.rq file.
