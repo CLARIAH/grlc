@@ -224,12 +224,12 @@ def swagger_spec(user, repo):
             stream = urllib2.urlopen(raw_query_uri)
             resp = stream.read()
 
-	    try:
-	        query_metadata = get_metadata(resp)
-	    except Exception as e:
-		app.logger.error("Could not parse query " + raw_query_uri)
-		app.logger.error(e)
-		continue
+            try:
+                query_metadata = get_metadata(resp)
+            except Exception as e:
+                app.logger.error("Could not parse query " + raw_query_uri)
+                app.logger.error(e)
+                continue
 
             tags = query_metadata['tags'] if 'tags' in query_metadata else []
             app.logger.debug("Read query tags: " + ', '.join(tags))
@@ -237,10 +237,13 @@ def swagger_spec(user, repo):
             summary = query_metadata['summary'] if 'summary' in query_metadata else ""
             app.logger.debug("Read query summary: " + summary)
 
+            description = query_metadata['description'] if 'description' in query_metadata else ""
+            app.logger.debug("Read query description: " + description)
+
             endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
             app.logger.debug("Read query endpoint: " + endpoint)
 
-            try :
+            try:
                 parameters = get_parameters(query_metadata['query'])
             except Exception as e:
                 print traceback.print_exc()
@@ -264,34 +267,41 @@ def swagger_spec(user, repo):
                 params.append(param)
 
             item_properties = {}
-            for pv in query_metadata['variables']:
-                i = {
-                    "name": pv,
-                    "type": "object",
-                    "required": ["type", "value"],
-                    "properties": {
-                        "type": {
-                            "type": "string"
-                        },
-                        "value": {
-                            "type": "string"
-                        },
-                        "xml:lang": {
-                            "type": "string"
-                        },
-                        "datatype": {
-                            "type": "string"
+            if query_metadata['type'] != 'SelectQuery':
+                # TODO: Turn this into a nicer thingamajim
+                app.logger.warning("This is not a SelectQuery, don't really know what to do!")
+                summary += "WARNING: CONSTRUCT queries are not really treated properly yet"
+                # just continue with empty item_properties
+            else:
+                # We now know it is a SELECT query
+                for pv in query_metadata['variables']:
+                    i = {
+                        "name": pv,
+                        "type": "object",
+                        "required": ["type", "value"],
+                        "properties": {
+                            "type": {
+                                "type": "string"
+                            },
+                            "value": {
+                                "type": "string"
+                            },
+                            "xml:lang": {
+                                "type": "string"
+                            },
+                            "datatype": {
+                                "type": "string"
+                            }
                         }
                     }
-                }
 
 
-                item_properties[pv] = i
+                    item_properties[pv] = i
 
             swag['paths'][call_name] = {}
             swag['paths'][call_name]["get"] = {"tags" : tags,
                                                "summary" : summary,
-                                               "description" : "<pre>\n{}\n</pre>".format(cgi.escape(query_metadata['query'])),
+                                               "description" : description + "\n<pre>\n{}\n</pre>".format(cgi.escape(query_metadata['query'])),
                                                "produces" : ["text/csv", "application/json", "text/html"],
                                                "parameters": params,
                                                "responses": {
