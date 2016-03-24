@@ -28,11 +28,18 @@ If you're seeing this, your grlc instance is up and running, and ready to build 
 - To request the swagger spec of your API, <code>http://localhost:8088/username/repo/spec</code>, e.g. [http://localhost:8088/CEDAR-project/Queries/spec](http://localhost:8088/CEDAR-project/Queries/spec)
 - To request the api-docs of your API swagger-ui style, <code>http://localhost:8088/username/repo/api-docs</code>, e.g. [http://localhost:8088/CEDAR-project/Queries/api-docs](http://localhost:8088/CEDAR-project/Queries/api-docs)
 
+By default grlc will direct your queries to the DBPedia SPARQL endpoint. To change this either:
+
+* Add a `endpoint:` decorator in the first comment block of the query text (preferred, see below)
+* Add the URL of the endpoint on a single line in an `endpoint.txt` file within the GitHub repository that contains the queries.
+* Or you can directly modify the grlc source code (but it's nicer if the queries are self-contained)
+
 That's it!
 
 ### Decorator syntax
 A couple of SPARQL comment embedded decorators are available to make your swagger-ui look nicer (note all comments start with <code>#+ </code>):
 
+- To specify a query-specific endpoint, <code>#+ endpoint: http://example.com/sparql</code>.
 - To create a summary of your query/operation, <code>#+ summary: This is the summary of my query/operation</code>
 - To assign tags to your query/operation,
     <pre>&#35;+ tags:
