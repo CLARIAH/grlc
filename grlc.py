@@ -270,7 +270,7 @@ def swagger_spec(user, repo):
             if query_metadata['type'] != 'SelectQuery':
                 # TODO: Turn this into a nicer thingamajim
                 app.logger.warning("This is not a SelectQuery, don't really know what to do!")
-                summary += "WARNING: CONSTRUCT queries are not really treated properly yet"
+                summary += "WARNING: non-SELECT queries are not really treated properly yet"
                 # just continue with empty item_properties
             else:
                 # We now know it is a SELECT query
