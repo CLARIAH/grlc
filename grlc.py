@@ -23,7 +23,7 @@ app = Flask(__name__)
 def guess_endpoint_uri(rq, ru):
     '''
     Guesses the endpoint URI from (in this order):
-    - An #+Endpoint decorator
+    - An #+endpoint decorator
     - A endpoint.txt file in the repo
     Otherwise assigns a default one
     '''
