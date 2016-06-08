@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 
 from flask import Flask, request, jsonify, render_template
@@ -73,7 +72,7 @@ def get_parameters(rq):
         if match :
             vname = match.group('name')
             vrequired = True if match.group('required') == '_' else False
-            vtype = 'iri'
+            vtype = 'literal'
             vlang = None
             vdatatype = None
 
