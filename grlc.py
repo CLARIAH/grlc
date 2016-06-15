@@ -172,7 +172,7 @@ def rewrite_query(query, get_args, endpoint):
         if v:
             # IRI
             if p['type'] == 'iri':
-                query = query.replace(p['original'], "{}".format(v))
+                query = query.replace(p['original'], "{}{}{}".format('<',v,'>'))
             # A number (without a datatype)
             elif p['type'] == 'number':
                 query = query.replace(p['original'], v)
