@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, json, render_template
 import urllib
 import urllib2
 import json
@@ -46,7 +46,7 @@ def guess_endpoint_uri(rq, ru):
     return endpoint
 
 
-def get_parameters(rq):
+def get_parameters(rq, endpoint):
     """
         ?_name The variable specifies the API mandatory parameter name. The value is incorporated in the query as plain literal.
         ?__name The parameter name is optional.
@@ -65,11 +65,39 @@ def get_parameters(rq):
 
     parameters = {}
     for v in variables:
+        app.logger.debug("Current variable")
+        app.logger.debug(v)
         if internal_matcher.match(v):
             continue
 
         match = variable_matcher.match(v)
+        tpattern_matcher = re.compile(".*FROM\s+(?P<gnames>.*)\s+WHERE.*\.[\n\t\s]*(?P<tpattern>.*\s+\?" + re.escape(v) + ").*", flags=re.DOTALL)
+        tp_match = tpattern_matcher.match(rq)
         if match :
+            if tp_match:
+                vtpattern = tp_match.group('tpattern')
+                gnames = tp_match.group('gnames')
+                app.logger.debug("Matched triple pattern with parameter")
+                # app.logger.debug(vtpattern)
+                # app.logger.debug(gnames)
+                codes_subquery = re.sub("SELECT.*\{.*\}", "SELECT DISTINCT ?" + v + " FROM " + gnames + " WHERE { " + vtpattern + " . }", rq, flags=re.DOTALL)
+                headers = {
+                    'Accept' : 'application/json'
+                }
+                data = {
+                    'query' : codes_subquery
+                }
+                data_encoded = urllib.urlencode(data)
+                req = urllib2.Request(endpoint, data_encoded, headers)
+                app.logger.debug("Sending code subquery request: " + req.get_full_url() + "?" + req.get_data())
+                response = urllib2.urlopen(req)
+                codes_json = json.loads(response.read())
+                # app.logger.debug(codes_json)
+                vcodes = []
+                for code in codes_json['results']['bindings']:
+                    vcodes.append(code.values()[0]["value"])
+                # app.logger.debug(vcodes)
+                
             vname = match.group('name')
             vrequired = True if match.group('required') == '_' else False
             vtype = 'literal'
@@ -96,6 +124,7 @@ def get_parameters(rq):
                 'original': '?{}'.format(v),
                 'required': vrequired,
                 'name': vname,
+                'enum': vcodes,
                 'type': vtype,
                 'datatype': vdatatype,
                 'lang': vlang
@@ -131,8 +160,8 @@ def get_metadata(rq):
 
     return query_metadata
 
-def rewrite_query(query, get_args):
-    parameters = get_parameters(query)
+def rewrite_query(query, get_args, endpoint):
+    parameters = get_parameters(query, endpoint)
 
     app.logger.debug("Query parameters")
     app.logger.debug(parameters)
@@ -176,7 +205,7 @@ def query(user, repo, query):
     endpoint = guess_endpoint_uri(raw_query, raw_repo_uri)
     app.logger.debug("Sending query to endpoint: " + endpoint)
 
-    query = rewrite_query(raw_query, request.args)
+    query = rewrite_query(raw_query, request.args, endpoint)
 
     # Preapre HTTP request
     headers = {
@@ -239,11 +268,12 @@ def swagger_spec(user, repo):
             description = query_metadata['description'] if 'description' in query_metadata else ""
             app.logger.debug("Read query description: " + description)
 
-            endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
+            # endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
+            endpoint = guess_endpoint_uri("", raw_repo_uri)
             app.logger.debug("Read query endpoint: " + endpoint)
 
             try:
-                parameters = get_parameters(query_metadata['query'])
+                parameters = get_parameters(query_metadata['query'], endpoint)
             except Exception as e:
                 print traceback.print_exc()
 
@@ -253,6 +283,7 @@ def swagger_spec(user, repo):
             app.logger.debug("Read parameters")
             app.logger.debug(parameters)
             # TODO: do something intelligent with the parameters!
+            # As per #3, prefetching IRIs via SPARQL and filling enum
 
             params = []
             for v, p in parameters.items():
@@ -261,6 +292,7 @@ def swagger_spec(user, repo):
                 param['type'] = "string"
                 param['required'] = p['required']
                 param['in'] = "query"
+                param['enum'] = p['enum']
                 param['description'] = "A value of type {} that will substitute {} in the original query".format(p['type'], p['original'])
 
                 params.append(param)
