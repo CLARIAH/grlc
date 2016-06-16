@@ -124,7 +124,7 @@ def get_parameters(rq, endpoint):
                 'original': '?{}'.format(v),
                 'required': vrequired,
                 'name': vname,
-                'enum': vcodes,
+                'enum': sorted(vcodes),
                 'type': vtype,
                 'datatype': vdatatype,
                 'lang': vlang
