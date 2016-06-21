@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from flask import Flask, request, jsonify, json, render_template
+from flask import Flask, request, jsonify, json, render_template, make_response
 import urllib
 import urllib2
 import json
@@ -16,6 +16,11 @@ import cgi
 
 XSD_DATATYPES = ["decimal", "float", "double", "integer", "positiveInteger", "negativeInteger", "nonPositiveInteger", "nonNegativeInteger", "long", "int", "short", "byte", "unsignedLong", "unsignedInt", "unsignedShort", "unsignedByte", "dateTime", "date", "gYearMonth", "gYear", "duration", "gMonthDay", "gDay", "gMonth", "string", "normalizedString", "token", "language", "NMTOKEN", "NMTOKENS", "Name", "NCName", "ID", "IDREFS", "ENTITY", "ENTITIES", "QName", "boolean", "hexBinary", "base64Binary", "anyURI", "notation"]
 
+mimetypes = {
+    'csv' : 'text/csv; q=1.0, */*; q=0.1',
+    'json' : 'application/json; q=1.0, application/sparql-results+json; q=0.8, */*; q=0.1',
+    'html' : 'text/html; q=1.0, */*; q=0.1'
+}
 
 app = Flask(__name__)
 
@@ -194,7 +199,8 @@ def hello():
     return render_template('index.html')
 
 @app.route('/<user>/<repo>/<query>', methods=['GET'])
-def query(user, repo, query):
+@app.route('/<user>/<repo>/<query>.<content>', methods=['GET'])
+def query(user, repo, query, content=None):
     app.logger.debug("Got request at /" + user + "/" + repo + "/" + query)
     app.logger.debug("Request accept header: " +request.headers["Accept"])
     raw_repo_uri = 'https://raw.githubusercontent.com/' + user + '/' + repo + '/master/'
@@ -208,18 +214,21 @@ def query(user, repo, query):
     query = rewrite_query(raw_query, request.args, endpoint)
 
     # Preapre HTTP request
-    headers = {
-        'Accept' : request.headers['Accept']
-    }
-    data = {
-	'query' : query
-    }
+    headers = { 'Accept' : request.headers['Accept'] }
+    if content:
+        headers = { 'Accept' : mimetypes[content] }
+    data = { 'query' : query }
+
     data_encoded = urllib.urlencode(data)
     req = urllib2.Request(endpoint, data_encoded, headers)
     app.logger.debug("Sending request: " + req.get_full_url() + "?" + req.get_data())
     response = urllib2.urlopen(req)
+    app.logger.debug('Response header from endpoint: ' + response.info().getheader('Content-Type'))
 
-    return response.read()
+    resp = make_response(response.read())
+    resp.headers['Content-Type'] = response.info().getheader('Content-Type')
+
+    return resp
 
 @app.route('/<user>/<repo>/api-docs')
 def api_docs(user, repo):
