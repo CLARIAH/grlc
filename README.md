@@ -50,7 +50,8 @@ A couple of SPARQL comment embedded decorators are available to make your swagge
 
 See examples at [https://github.com/CEDAR-project/Queries](https://github.com/CEDAR-project/Queries).
 
-### Other features
+### Features
 
 - Request parameter mappings into SPARQL: grlc is compliant with [BASIL's convention](https://github.com/the-open-university/basil/wiki/SPARQL-variable-name-convention-for-WEB-API-parameters-mapping) on how to map GET/POST request parameters into SPARQL
+- Automatic population of parameter values in swagger-ui's dropdown menus via SPARQL triple pattern querying
 - URL-based content negotiation: you can request for specific content types by attaching them to the operation request URL, e.g. [http://localhost:8088/CEDAR-project/Queries/residenceStatus_all.csv](http://localhost:8088/CEDAR-project/Queries/residenceStatus_all.csv) will request for results in CSV
