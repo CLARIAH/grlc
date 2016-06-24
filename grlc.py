@@ -76,7 +76,8 @@ def get_parameters(rq, endpoint):
             continue
 
         match = variable_matcher.match(v)
-        tpattern_matcher = re.compile(".*FROM\s+(?P<gnames>.*)\s+WHERE.*\.[\n\t\s]*(?P<tpattern>.*\s+\?" + re.escape(v) + ").*", flags=re.DOTALL)
+	# TODO: currently only one parameter per triple pattern is supported
+        tpattern_matcher = re.compile(".*FROM\s+(?P<gnames>.*)\s+WHERE.*[\.\{][\n\t\s]*(?P<tpattern>.*\?" + re.escape(v) + ".*)\..*", flags=re.DOTALL)
         tp_match = tpattern_matcher.match(rq)
         if match :
             if tp_match:
