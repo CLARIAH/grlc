@@ -13,6 +13,9 @@ from rdflib.plugins.sparql.processor import translateQuery
 from pyparsing import ParseException
 import traceback
 import cgi
+import datetime
+
+CACHE_NAME = "db.json"
 
 XSD_DATATYPES = ["decimal", "float", "double", "integer", "positiveInteger", "negativeInteger", "nonPositiveInteger", "nonNegativeInteger", "long", "int", "short", "byte", "unsignedLong", "unsignedInt", "unsignedShort", "unsignedByte", "dateTime", "date", "gYearMonth", "gYear", "duration", "gMonthDay", "gDay", "gMonth", "string", "normalizedString", "token", "language", "NMTOKEN", "NMTOKENS", "Name", "NCName", "ID", "IDREFS", "ENTITY", "ENTITIES", "QName", "boolean", "hexBinary", "base64Binary", "anyURI", "notation"]
 
@@ -23,6 +26,20 @@ mimetypes = {
 }
 
 app = Flask(__name__)
+
+# Initialize cache
+cache = json.loads("{}")
+try:
+    with open(CACHE_NAME, 'r') as cache_file:
+        try:
+            cache = json.load(cache_file)
+        except ValueError:
+            print "The cache file seems to be empty, starting with flushed cache"
+except IOError:
+    print "The cache file seems to be empty, starting with flushed cache"
+
+print "Loaded JSON cache"
+print cache
 
 def guess_endpoint_uri(rq, ru):
     '''
@@ -195,6 +212,22 @@ def rewrite_query(query, get_args, endpoint):
     app.logger.debug("Query rewritten as: " + query)
     return query
 
+def is_cache_updated(repo_uri):
+    if repo_uri not in cache:
+        return False
+    cache_date = cache[repo_uri]['date']
+    stream = urllib2.urlopen(repo_uri)
+    resp = json.load(stream)
+    github_date = resp['pushed_at']
+    return cache_date > github_date
+
+date_handler = lambda obj: (
+    obj.isoformat()
+    if isinstance(obj, datetime.datetime)
+    or isinstance(obj, datetime.date)
+    else None
+)
+
 @app.route('/')
 def hello():
     return render_template('index.html')
@@ -235,10 +268,15 @@ def query(user, repo, query, content=None):
 def api_docs(user, repo):
     return render_template('api-docs.html', user=user, repo=repo)
 
+
 @app.route('/<user>/<repo>/spec')
 def swagger_spec(user, repo):
     app.logger.debug("Generating swagger spec for /" + user + "/" + repo)
     api_repo_uri = 'https://api.github.com/repos/' + user + '/' + repo
+    # Check if we have an updated cached spec for this repo
+    if is_cache_updated(api_repo_uri):
+        app.logger.info("Reusing updated cache for this spec")
+        return jsonify(cache[api_repo_uri]['spec'])
     stream = urllib2.urlopen(api_repo_uri)
     resp = json.load(stream)
     swag = {}
@@ -364,6 +402,13 @@ def swagger_spec(user, repo):
                                                    }
                                                }
                                                }
+    # Store the generated spec in the cache
+    cache[api_repo_uri] = {'date' : json.dumps(datetime.datetime.now(), default=date_handler).split('\"')[1], 'spec' : swag}
+    with open(CACHE_NAME, 'w') as cache_file:
+        json.dump(cache, cache_file)
+    app.logger.debug("Updated the local cache, dumpping contents")
+    app.logger.debug(cache)
+
     return jsonify(swag)
 
 # DEPRECATED

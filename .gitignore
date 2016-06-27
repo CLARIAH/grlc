@@ -9,3 +9,4 @@ include/
 lib/
 local/
 pip-selfcheck.json
+db.json
