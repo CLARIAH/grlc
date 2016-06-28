@@ -1,6 +1,6 @@
 <p algin="center"><img src="https://raw.githubusercontent.com/CLARIAH/grlc/master/static/img/grlc_logo_01.png" width="250px"></p>
 
-grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor, automatically builds Web APIs using SPARQL queries stored in git repositories.
+grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor, automatically builds Web APIs using SPARQL queries stored in git repositories. http://grlc.io/
 
 **Author:**	Albert Meroño  
 **Copyright:**	Albert Meroño, VU University Amsterdam  
@@ -42,6 +42,7 @@ That's it!
 A couple of SPARQL comment embedded decorators are available to make your swagger-ui look nicer (note all comments start with <code>#+ </code>):
 
 - To specify a query-specific endpoint, <code>#+ endpoint: http://example.com/sparql</code>.
+- To indicate the HTTP request method, <code>#+ method: GET</code>.
 - To create a summary of your query/operation, <code>#+ summary: This is the summary of my query/operation</code>
 - To assign tags to your query/operation,
     <pre>&#35;+ tags:
