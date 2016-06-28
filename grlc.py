@@ -159,7 +159,7 @@ def get_parameters(rq, endpoint):
 def get_metadata(rq):
     '''
     Returns the metadata 'exp' parsed from the raw query file 'rq'
-    'exp' is one of: 'endpoint', 'tags', 'summary'
+    'exp' is one of: 'endpoint', 'tags', 'summary', 'request'
     '''
     yaml_string = "\n".join([row.lstrip('#+') for row in rq.split('\n') if row.startswith('#+')])
     query_string = "\n".join([row for row in rq.split('\n') if not row.startswith('#+')])
@@ -316,6 +316,10 @@ def swagger_spec(user, repo):
             description = query_metadata['description'] if 'description' in query_metadata else ""
             app.logger.debug("Read query description: " + description)
 
+            request_type = query_metadata['request'].lower() if 'request' in query_metadata else "get"
+            if request_type not in ['get', 'post', 'head', 'put', 'delete', 'options', 'connect']:
+                request_type = "get"
+
             # endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
             endpoint = guess_endpoint_uri("", raw_repo_uri)
             app.logger.debug("Read query endpoint: " + endpoint)
@@ -378,7 +382,7 @@ def swagger_spec(user, repo):
                     item_properties[pv] = i
 
             swag['paths'][call_name] = {}
-            swag['paths'][call_name]["get"] = {"tags" : tags,
+            swag['paths'][call_name][request_type.lower()] = {"tags" : tags,
                                                "summary" : summary,
                                                "description" : description + "\n<pre>\n{}\n</pre>".format(cgi.escape(query_metadata['query'])),
                                                "produces" : ["text/csv", "application/json", "text/html"],
