@@ -27,6 +27,10 @@ mimetypes = {
 
 app = Flask(__name__)
 
+# Logging format
+FORMAT = '%(asctime)-15s [%(levelname)s] %(message)s'
+app.debug_log_format = FORMAT
+
 # Initialize cache
 cache = json.loads("{}")
 try:
@@ -39,7 +43,6 @@ except IOError:
     print "The cache file seems to be empty, starting with flushed cache"
 
 print "Loaded JSON cache"
-print cache
 
 def guess_endpoint_uri(rq, ru):
     '''
@@ -60,7 +63,7 @@ def guess_endpoint_uri(rq, ru):
 	    endpoint_file_uri = ru + "endpoint.txt"
 	    stream = urllib2.urlopen(endpoint_file_uri)
 	    endpoint = stream.read().strip()
- 	    app.logger.info("File guessed endpoint: " + endpoint)
+ 	    app.logger.debug("File guessed endpoint: " + endpoint)
 	except:
 	    # Default
             app.logger.warning("No endpoint specified, using default ({})".format(endpoint))
@@ -87,8 +90,6 @@ def get_parameters(rq, endpoint):
 
     parameters = {}
     for v in variables:
-        app.logger.debug("Current variable")
-        app.logger.debug(v)
         if internal_matcher.match(v):
             continue
 
@@ -271,7 +272,7 @@ def api_docs(user, repo):
 
 @app.route('/<user>/<repo>/spec')
 def swagger_spec(user, repo):
-    app.logger.debug("Generating swagger spec for /" + user + "/" + repo)
+    app.logger.info("Generating swagger spec for /" + user + "/" + repo)
     api_repo_uri = 'https://api.github.com/repos/' + user + '/' + repo
     # Check if we have an updated cached spec for this repo
     if is_cache_updated(api_repo_uri):
@@ -300,10 +301,12 @@ def swagger_spec(user, repo):
             stream = urllib2.urlopen(raw_query_uri)
             resp = stream.read()
 
+            app.logger.info("Processing query " + raw_query_uri)
+
             try:
                 query_metadata = get_metadata(resp)
             except Exception as e:
-                app.logger.error("Could not parse query " + raw_query_uri)
+                app.logger.error("Could not parse query")
                 app.logger.error(e)
                 continue
 
@@ -332,7 +335,7 @@ def swagger_spec(user, repo):
                 app.logger.error("Could not parse parameters")
                 continue
 
-            app.logger.debug("Read parameters")
+            app.logger.debug("Read request parameters")
             app.logger.debug(parameters)
             # TODO: do something intelligent with the parameters!
             # As per #3, prefetching IRIs via SPARQL and filling enum
@@ -410,8 +413,7 @@ def swagger_spec(user, repo):
     cache[api_repo_uri] = {'date' : json.dumps(datetime.datetime.now(), default=date_handler).split('\"')[1], 'spec' : swag}
     with open(CACHE_NAME, 'w') as cache_file:
         json.dump(cache, cache_file)
-    app.logger.debug("Updated the local cache, dumpping contents")
-    app.logger.debug(cache)
+    app.logger.debug("Local cache updated")
 
     return jsonify(swag)
 
