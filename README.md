@@ -43,6 +43,7 @@ A couple of SPARQL comment embedded decorators are available to make your swagge
 
 - To specify a query-specific endpoint, <code>#+ endpoint: http://example.com/sparql</code>.
 - To indicate the HTTP request method, <code>#+ method: GET</code>.
+- To paginate the results in e.g. groups of 100, <code>#+ pagination: 100</code>.
 - To create a summary of your query/operation, <code>#+ summary: This is the summary of my query/operation</code>
 - To assign tags to your query/operation,
     <pre>&#35;+ tags:
@@ -56,3 +57,4 @@ See examples at [https://github.com/CEDAR-project/Queries](https://github.com/CE
 - Request parameter mappings into SPARQL: grlc is compliant with [BASIL's convention](https://github.com/the-open-university/basil/wiki/SPARQL-variable-name-convention-for-WEB-API-parameters-mapping) on how to map GET/POST request parameters into SPARQL
 - Automatic population of parameter values in swagger-ui's dropdown menus via SPARQL triple pattern querying
 - URL-based content negotiation: you can request for specific content types by attaching them to the operation request URL, e.g. [http://localhost:8088/CEDAR-project/Queries/residenceStatus_all.csv](http://localhost:8088/CEDAR-project/Queries/residenceStatus_all.csv) will request for results in CSV
+- Pagination of API results, as per the `pagination` decorator and [GitHub's API Pagination Traversal](https://developer.github.com/guides/traversing-with-pagination/)

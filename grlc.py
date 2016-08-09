@@ -28,7 +28,7 @@ mimetypes = {
 app = Flask(__name__)
 
 # Logging format
-FORMAT = '%(asctime)-15s [%(levelname)s] %(message)s'
+FORMAT = '%(asctime)-15s [%(levelname)s] (%(funcName)s) %(message)s'
 app.debug_log_format = FORMAT
 
 # Initialize cache
@@ -57,7 +57,7 @@ def guess_endpoint_uri(rq, ru):
     try:
         endpoint = get_metadata(rq)['endpoint']
 	app.logger.info("Decorator guessed endpoint: " + endpoint)
-    except:
+    except (TypeError, KeyError, ParseException):
 	# File
 	try:
 	    endpoint_file_uri = ru + "endpoint.txt"
@@ -160,8 +160,11 @@ def get_parameters(rq, endpoint):
 def get_metadata(rq):
     '''
     Returns the metadata 'exp' parsed from the raw query file 'rq'
-    'exp' is one of: 'endpoint', 'tags', 'summary', 'request'
+    'exp' is one of: 'endpoint', 'tags', 'summary', 'request', 'pagination'
     '''
+    if not rq:
+        return None
+
     yaml_string = "\n".join([row.lstrip('#+') for row in rq.split('\n') if row.startswith('#+')])
     query_string = "\n".join([row for row in rq.split('\n') if not row.startswith('#+')])
 
@@ -173,16 +176,63 @@ def get_metadata(rq):
 
     try:
         parsed_query = translateQuery(Query.parseString(rq, parseAll=True))
+        query_metadata['type'] = parsed_query.algebra.name
+        if query_metadata['type'] == 'SelectQuery':
+            query_metadata['variables'] = parsed_query.algebra['PV']
     except ParseException:
         app.logger.error("Could not parse query")
 	app.logger.error(query_string)
         print traceback.print_exc()
-    query_metadata['type'] = parsed_query.algebra.name
-
-    if query_metadata['type'] == 'SelectQuery':
-        query_metadata['variables'] = parsed_query.algebra['PV']
 
     return query_metadata
+
+def count_query_results(query, endpoint):
+    '''
+    Returns the total number of results that query 'query' will generate
+    '''
+    number_results_query, repl = re.subn("SELECT.*FROM", "SELECT COUNT (*) FROM", query)
+    if not repl:
+        number_results_query = re.sub("SELECT.*{", "SELECT COUNT(*) {", query)
+    number_results_query = re.sub("GROUP\s+BY\s+[\?\_\(\)a-zA-Z0-9]+", "", number_results_query)
+    number_results_query = re.sub("ORDER\s+BY\s+[\?\_\(\)a-zA-Z0-9]+", "", number_results_query)
+    number_results_query = re.sub("LIMIT\s+[0-9]+", "", number_results_query)
+    number_results_query = re.sub("OFFSET\s+[0-9]+", "", number_results_query)
+
+    app.logger.debug("Query for result count: " + number_results_query)
+
+    # Preapre HTTP request
+    headers = { 'Accept' : 'application/json' }
+    data = { 'query' : number_results_query }
+
+    data_encoded = urllib.urlencode(data)
+    req = urllib2.Request(endpoint, data_encoded, headers)
+    response = urllib2.urlopen(req)
+    count_json = json.loads(response.read())
+    count = int(count_json['results']['bindings'][0]['callret-0']['value'])
+    app.logger.info("Paginated query has {} results in total".format(count))
+
+    return count
+
+def paginate_query(query, get_args):
+    query_metadata = get_metadata(query)
+    if 'pagination' not in query_metadata:
+        return query
+    
+    results_per_page = query_metadata['pagination']    
+    page = get_args.get('page', 1)
+
+    app.logger.info("Paginating query for page {}, {} results per page".format(page, results_per_page))
+
+    # If contains LIMIT or OFFSET, remove them
+    app.logger.debug("Original query: " + query)
+    no_limit_query = re.sub("((LIMIT|OFFSET)\s+[0-9]+)*", "", query)
+    app.logger.debug("No limit query: " + no_limit_query)
+
+    # Append LIMIT results_per_page OFFSET (page-1)*results_per_page
+    paginated_query = no_limit_query + " LIMIT {} OFFSET {}".format(results_per_page, (int(page) - 1) * results_per_page)
+    app.logger.debug("Paginated query: " + paginated_query)
+
+    return paginated_query
 
 def rewrite_query(query, get_args, endpoint):
     parameters = get_parameters(query, endpoint)
@@ -246,13 +296,20 @@ def query(user, repo, query, content=None):
     endpoint = guess_endpoint_uri(raw_query, raw_repo_uri)
     app.logger.debug("Sending query to endpoint: " + endpoint)
 
+    query_metadata = get_metadata(raw_query)
+    pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
+
+    # Rewrite query using parameter values
     query = rewrite_query(raw_query, request.args, endpoint)
+
+    # Rewrite query using pagination
+    paginated_query = paginate_query(query, request.args)
 
     # Preapre HTTP request
     headers = { 'Accept' : request.headers['Accept'] }
     if content:
         headers = { 'Accept' : mimetypes[content] }
-    data = { 'query' : query }
+    data = { 'query' : paginated_query }
 
     data_encoded = urllib.urlencode(data)
     req = urllib2.Request(endpoint, data_encoded, headers)
@@ -262,6 +319,28 @@ def query(user, repo, query, content=None):
 
     resp = make_response(response.read())
     resp.headers['Content-Type'] = response.info().getheader('Content-Type')
+    # If the query is paginated, set link HTTP headers
+    if pagination:
+        # Get number of total results
+        count = count_query_results(query, endpoint)
+        page = 1
+        if 'page' in request.args:
+            page = int(request.args['page'])
+            next_url = re.sub("page=[0-9]+", "page={}".format(page + 1), request.url)
+            prev_url = re.sub("page=[0-9]+", "page={}".format(page - 1), request.url)
+            first_url = re.sub("page=[0-9]+", "page=1", request.url)
+            last_url = re.sub("page=[0-9]+", "page={}".format(count / pagination), request.url)
+        else:
+            next_url = request.url + "?page={}".format(page + 1)
+            prev_url = request.url + "?page={}".format(page - 1)
+            first_url = request.url + "?page={}".format(page)
+            last_url = request.url + "?page={}".format(count / pagination)
+        if page == 1:
+            resp.headers['Link'] = "<{}>; rel=next, <{}>; rel=last".format(next_url, last_url)
+        elif page == count / pagination:
+            resp.headers['Link'] = "<{}>; rel=prev, <{}>; rel=first".format(prev_url, first_url)
+        else:
+            resp.headers['Link'] = "<{}>; rel=next, <{}>; rel=prev, <{}>; rel=first, <{}>; rel=last".format(next_url, prev_url, first_url, last_url)
 
     return resp
 
@@ -323,6 +402,9 @@ def swagger_spec(user, repo):
             if method not in ['get', 'post', 'head', 'put', 'delete', 'options', 'connect']:
                 method = "get"
 
+            pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
+            app.logger.debug("Read query pagination: " + str(pagination))
+
             # endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
             endpoint = guess_endpoint_uri("", raw_repo_uri)
             app.logger.debug("Read query endpoint: " + endpoint)
@@ -352,6 +434,16 @@ def swagger_spec(user, repo):
 
                 params.append(param)
 
+            # If this query allows pagination, add page number as parameter
+            if pagination:
+                pagination_param = {}
+                pagination_param['name'] = "page"
+                pagination_param['type'] = "int"
+                pagination_param['in'] = "query"
+                pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
+
+                params.append(pagination_param)
+                
             item_properties = {}
             if query_metadata['type'] != 'SelectQuery':
                 # TODO: Turn this into a nicer thingamajim
