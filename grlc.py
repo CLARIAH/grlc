@@ -317,7 +317,9 @@ def query(user, repo, query, content=None):
     response = urllib2.urlopen(req)
     app.logger.debug('Response header from endpoint: ' + response.info().getheader('Content-Type'))
 
+    # Response headers
     resp = make_response(response.read())
+    resp.headers['Server'] = 'grlc/1.0.0'
     resp.headers['Content-Type'] = response.info().getheader('Content-Type')
     # If the query is paginated, set link HTTP headers
     if pagination:
