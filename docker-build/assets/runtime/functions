@@ -1,0 +1,62 @@
+#!/bin/bash
+set -e
+source ${GRLC_RUNTIME_DIR}/env-defaults
+
+SYSCONF_TEMPLATES_DIR="${GITLAB_RUNTIME_DIR}/config"
+
+GITLAB_NGINX_CONFIG="/etc/nginx/sites-enabled/gitlab"
+
+## Copies configuration template to the destination as the specified USER
+### Looks up for overrides in ${USERCONF_TEMPLATES_DIR} before using the defaults from ${SYSCONF_TEMPLATES_DIR}
+# $1: copy-as user
+# $2: source file
+# $3: destination location
+# $4: mode of destination
+install_template() {
+  local OWNERSHIP=${1}
+  local SRC=${2}
+  local DEST=${3}
+  local MODE=${4:-0644}
+  if [[ -f ${USERCONF_TEMPLATES_DIR}/${SRC} ]]; then
+    cp ${USERCONF_TEMPLATES_DIR}/${SRC} ${DEST}
+  elif [[ -f ${SYSCONF_TEMPLATES_DIR}/${SRC} ]]; then
+    cp ${SYSCONF_TEMPLATES_DIR}/${SRC} ${DEST}
+  fi
+  chmod ${MODE} ${DEST}
+  chown ${OWNERSHIP} ${DEST}
+}
+
+## Replace placeholders with values
+# $1: file with placeholders to replace
+# $x: placeholders to replace
+update_template() {
+  local FILE=${1?missing argument}
+  shift
+
+  [[ ! -f ${FILE} ]] && return 1
+
+  local VARIABLES=($@)
+  local USR=$(stat -c %U ${FILE})
+  local tmp_file=$(mktemp)
+  cp -a "${FILE}" ${tmp_file}
+
+  local variable
+  for variable in ${VARIABLES[@]}; do
+    # Keep the compatibilty: {{VAR}} => ${VAR}
+    sed -ri "s/[{]{2}$variable[}]{2}/\${$variable}/g" ${tmp_file}
+  done
+
+  # Replace placeholders
+  (
+    export ${VARIABLES[@]}
+    local IFS=":"; sudo -HEu ${USR} envsubst "${VARIABLES[*]/#/$}" < ${tmp_file} > ${FILE}
+  )
+  rm -f ${tmp_file}
+}
+
+setup_nginx() {
+  install_template root: nginx/grlc ${GRLC_NGINX_CONFIG}
+  rm /etc/nginx/sites-enabled/default
+  mkdir -p ${GRLC_LOG_DIR}/nginx
+  service nginx restart
+}
