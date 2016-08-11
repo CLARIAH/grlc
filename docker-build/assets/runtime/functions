@@ -2,7 +2,7 @@
 set -e
 source ${GRLC_RUNTIME_DIR}/env-defaults
 
-SYSCONF_TEMPLATES_DIR="${GITLAB_RUNTIME_DIR}/config"
+SYSCONF_TEMPLATES_DIR="${GITLAB_RUNTIME_DIR}/configs"
 
 GITLAB_NGINX_CONFIG="/etc/nginx/sites-enabled/gitlab"
 
@@ -17,8 +17,8 @@ install_template() {
   local SRC=${2}
   local DEST=${3}
   local MODE=${4:-0644}
-  if [[ -f ${USERCONF_TEMPLATES_DIR}/${SRC} ]]; then
-    cp ${USERCONF_TEMPLATES_DIR}/${SRC} ${DEST}
+  if [[ -f ${SYSCONF_TEMPLATES_DIR}/${SRC} ]]; then
+    cp ${SYSCONF_TEMPLATES_DIR}/${SRC} ${DEST}
   elif [[ -f ${SYSCONF_TEMPLATES_DIR}/${SRC} ]]; then
     cp ${SYSCONF_TEMPLATES_DIR}/${SRC} ${DEST}
   fi
@@ -55,7 +55,7 @@ update_template() {
 }
 
 setup_nginx() {
-  install_template root: nginx/grlc ${GRLC_NGINX_CONFIG}
+  install_template root: nginx/grlc /etc/nginx/sites-enabled/grlc
   rm /etc/nginx/sites-enabled/default
   mkdir -p ${GRLC_LOG_DIR}/nginx
   service nginx restart
