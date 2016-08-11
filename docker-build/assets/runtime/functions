@@ -2,7 +2,7 @@
 set -e
 source ${GRLC_RUNTIME_DIR}/env-defaults
 
-SYSCONF_TEMPLATES_DIR="${GITLAB_RUNTIME_DIR}/configs"
+SYSCONF_TEMPLATES_DIR="${GRLC_RUNTIME_DIR}/configs"
 
 GITLAB_NGINX_CONFIG="/etc/nginx/sites-enabled/gitlab"
 
@@ -56,6 +56,14 @@ update_template() {
 
 setup_nginx() {
   install_template root: nginx/grlc /etc/nginx/sites-enabled/grlc 
+  update_template /etc/nginx/sites-enabled/grlc \
+	GRLC_HOST \
+	NGINX_ACCEL_BUFFERING \
+	NGINX_HSTS_MAXAGE \
+	GRLC_LOG_DIR \
+	NGINX_PROXY_BUFFERING \
+	NGINX_X_FORWARDED_PROTO
+
   rm /etc/nginx/sites-enabled/default
   mkdir -p ${GRLC_LOG_DIR}/nginx
   service nginx restart

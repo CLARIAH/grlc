@@ -4,11 +4,9 @@ source ${GRLC_RUNTIME_DIR}/functions
 
 [[ $DEBUG == true ]] && set -x
 
-setup_nginx;
-
 case ${1} in
   app:start)
-
+    setup_nginx
     # initialize_system
     # configure_gitlab
     # configure_gitlab_shell
