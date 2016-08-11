@@ -4,4 +4,6 @@ services:
     image: clariah/grlc:1.0.0
     build: ./docker-build
     ports:
-     - "80:8000"
+     - "8001:80"
+    environment:
+     - DEBUG=true

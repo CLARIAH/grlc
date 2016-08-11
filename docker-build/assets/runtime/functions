@@ -55,7 +55,7 @@ update_template() {
 }
 
 setup_nginx() {
-  install_template root: nginx/grlc /etc/nginx/sites-enabled/grlc
+  install_template root: nginx/grlc /etc/nginx/sites-enabled/grlc 
   rm /etc/nginx/sites-enabled/default
   mkdir -p ${GRLC_LOG_DIR}/nginx
   service nginx restart
