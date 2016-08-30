@@ -38,6 +38,10 @@ By default grlc will direct your queries to the DBPedia SPARQL endpoint. To chan
 
 That's it!
 
+### Usage Docker
+
+- `docker-compose up`: launch grlc
+- `docker-compose up /bin/bash`: get into container 
 ### Decorator syntax
 A couple of SPARQL comment embedded decorators are available to make your swagger-ui look nicer (note all comments start with <code>#+ </code>):
 

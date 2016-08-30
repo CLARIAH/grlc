@@ -1,5 +1,3 @@
-
-
 .*!.gitignore
 */.DS_Store
 .Python
@@ -13,3 +11,5 @@ local/
 pip-selfcheck.json
 db.json
 \#*\#
+*.pyc
+db-cache.json
