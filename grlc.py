@@ -41,7 +41,7 @@ def hello():
 def query(user, repo, query_name, content=None):
     glogger.debug("Got request at endpoint /" + user + "/" + repo + "/" + query_name)
     glogger.debug("Request accept header: " +request.headers["Accept"])
-    raw_repo_uri = 'https://raw.githubusercontent.com/' + user + '/' + repo + '/master/'
+    raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
     raw_query_uri = raw_repo_uri + query_name + '.rq'
     stream = urllib2.urlopen(raw_query_uri)
     raw_query = stream.read()
@@ -107,7 +107,7 @@ def api_docs(user, repo):
 @app.route('/<user>/<repo>/spec')
 def swagger_spec(user, repo):
     glogger.info("Generating swagger spec for /" + user + "/" + repo)
-    api_repo_uri = 'https://api.github.com/repos/' + user + '/' + repo
+    api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
     # Check if we have an updated cached spec for this repo
     if cache.is_cache_updated(cache_obj, api_repo_uri):
         glogger.info("Reusing updated cache for this spec")
@@ -116,7 +116,7 @@ def swagger_spec(user, repo):
     resp = json.load(stream)
     swag = {}
     swag['swagger'] = '2.0'
-    swag['info'] = {'version': '1.0', 'title': resp['name'], 'contact': {'name': resp['owner']['login'], 'url': resp['owner']['html_url']}, 'license': {'name' : 'License', 'url': 'https://raw.githubusercontent.com/' + user + '/' + repo + '/master/LICENSE'}}
+    swag['info'] = {'version': '1.0', 'title': resp['name'], 'contact': {'name': resp['owner']['login'], 'url': resp['owner']['html_url']}, 'license': {'name' : 'License', 'url': static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/LICENSE'}}
     swag['host'] = app.config['SERVER_NAME']
     swag['basePath'] = '/' + user + '/' + repo + '/'
     swag['schemes'] = ['http']
@@ -130,7 +130,7 @@ def swagger_spec(user, repo):
         if ".rq" in c['name']:
             call_name = c['name'].split('.')[0]
             # Retrieve extra metadata from the query decorators
-            raw_repo_uri = 'https://raw.githubusercontent.com/' + user + '/' + repo + '/master/'
+            raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
             raw_query_uri = raw_repo_uri + c['name']
             stream = urllib2.urlopen(raw_query_uri)
             resp = stream.read()

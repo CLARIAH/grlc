@@ -17,3 +17,7 @@ LOG_FORMAT = '%(asctime)-15s [%(levelname)s] (%(module)s.%(funcName)s) %(message
 
 # Default endpoint, if none specified elsewhere
 DEFAULT_ENDPOINT = 'http://dbpedia.org/sparql'
+
+# GitHub base URLS
+GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/'
+GITHUB_API_BASE_URL = 'https://api.github.com/repos/'
