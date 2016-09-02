@@ -42,6 +42,7 @@ That's it!
 
 - `docker-compose up`: launch grlc
 - `docker-compose up /bin/bash`: get into container 
+
 ### Decorator syntax
 A couple of SPARQL comment embedded decorators are available to make your swagger-ui look nicer (note all comments start with <code>#+ </code>):
 
