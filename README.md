@@ -21,6 +21,13 @@ Direct your browser to [http://localhost:8088](http://localhost:8088).
 
 Alternatively, you can use the provided Gunicorn configuration to run it as a daemon on your server.
 
+#### Usage Docker
+
+grlc comes now with a docker image for greater installation ease. You'll need to have a working installation of [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/) in your system.
+
+- `docker-compose up`: launch grlc
+- `docker-compose up /bin/bash`: get into container 
+
 ### Usage
 
 grlc assumes a GitHub repository (support for general git repos is on the way) where you store your SPARQL queries as .rq files (like in [this one](https://github.com/CEDAR-project/Queries)). grlc will create an API operation per such a SPARQL query/.rq file.
@@ -37,11 +44,6 @@ By default grlc will direct your queries to the DBPedia SPARQL endpoint. To chan
 * Or you can directly modify the grlc source code (but it's nicer if the queries are self-contained)
 
 That's it!
-
-### Usage Docker
-
-- `docker-compose up`: launch grlc
-- `docker-compose up /bin/bash`: get into container 
 
 ### Decorator syntax
 A couple of SPARQL comment embedded decorators are available to make your swagger-ui look nicer (note all comments start with <code>#+ </code>):
