@@ -29,15 +29,15 @@ app.debug_log_format = static.LOG_FORMAT
 glogger = logging.getLogger(__name__)
 
 # Initialize cache
-cache_obj = cache.init_cache()
+# cache_obj = cache.init_cache()
 
 # Server routes
 @app.route('/')
 def hello():
     return render_template('index.html')
 
-@app.route('/<user>/<repo>/<query_name>', methods=['GET'])
-@app.route('/<user>/<repo>/<query_name>.<content>', methods=['GET'])
+@app.route('/grlc/<user>/<repo>/<query_name>', methods=['GET'])
+@app.route('/grlc/<user>/<repo>/<query_name>.<content>', methods=['GET'])
 def query(user, repo, query_name, content=None):
     glogger.debug("Got request at endpoint /" + user + "/" + repo + "/" + query_name)
     glogger.debug("Request accept header: " +request.headers["Accept"])
@@ -99,26 +99,26 @@ def query(user, repo, query_name, content=None):
 
     return resp
 
-@app.route('/<user>/<repo>/api-docs')
+@app.route('/grlc/<user>/<repo>/api-docs')
 def api_docs(user, repo):
     return render_template('api-docs.html', user=user, repo=repo)
 
 
-@app.route('/<user>/<repo>/spec')
+@app.route('/grlc/<user>/<repo>/spec')
 def swagger_spec(user, repo):
     glogger.info("Generating swagger spec for /" + user + "/" + repo)
     api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
     # Check if we have an updated cached spec for this repo
-    if cache.is_cache_updated(cache_obj, api_repo_uri):
-        glogger.info("Reusing updated cache for this spec")
-        return jsonify(cache_obj[api_repo_uri]['spec'])
+    # if cache.is_cache_updated(cache_obj, api_repo_uri):
+    #     glogger.info("Reusing updated cache for this spec")
+    #     return jsonify(cache_obj[api_repo_uri]['spec'])
     stream = urllib2.urlopen(api_repo_uri)
     resp = json.load(stream)
     swag = {}
     swag['swagger'] = '2.0'
     swag['info'] = {'version': '1.0', 'title': resp['name'], 'contact': {'name': resp['owner']['login'], 'url': resp['owner']['html_url']}, 'license': {'name' : 'License', 'url': static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/LICENSE'}}
     swag['host'] = app.config['SERVER_NAME']
-    swag['basePath'] = '/' + user + '/' + repo + '/'
+    swag['basePath'] = '/grlc/' + user + '/' + repo + '/'
     swag['schemes'] = ['http']
     swag['paths'] = {}
 
@@ -257,10 +257,10 @@ def swagger_spec(user, repo):
                                                }
                                                }
     # Store the generated spec in the cache
-    cache_obj[api_repo_uri] = {'date' : json.dumps(datetime.datetime.now(), default=util.date_handler).split('\"')[1], 'spec' : swag}
-    with open(cache.CACHE_NAME, 'w') as cache_file:
-        json.dump(cache_obj, cache_file)
-    glogger.debug("Local cache updated")
+    # cache_obj[api_repo_uri] = {'date' : json.dumps(datetime.datetime.now(), default=util.date_handler).split('\"')[1], 'spec' : swag}
+    # with open(cache.CACHE_NAME, 'w') as cache_file:
+    #     json.dump(cache_obj, cache_file)
+    # glogger.debug("Local cache updated")
 
     return jsonify(swag)
 
