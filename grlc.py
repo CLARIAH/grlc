@@ -38,8 +38,8 @@ def hello():
     #resp.headers['Cache-Control'] = 'public, max-age=43200'
     return resp
 
-@app.route('/grlc/<user>/<repo>/<query_name>', methods=['GET'])
-@app.route('/grlc/<user>/<repo>/<query_name>.<content>', methods=['GET'])
+@app.route('/api/<user>/<repo>/<query_name>', methods=['GET'])
+@app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET'])
 def query(user, repo, query_name, content=None):
     glogger.debug("Got request at endpoint /" + user + "/" + repo + "/" + query_name)
     glogger.debug("Request accept header: " +request.headers["Accept"])
@@ -101,12 +101,14 @@ def query(user, repo, query_name, content=None):
 
     return resp
 
-@app.route('/grlc/<user>/<repo>/api-docs')
+@app.route('/api/<user>/<repo>')
+@app.route('/api/<user>/<repo>/')
+@app.route('/api/<user>/<repo>/api-docs')
 def api_docs(user, repo):
     return render_template('api-docs.html', user=user, repo=repo)
 
 
-@app.route('/grlc/<user>/<repo>/spec')
+@app.route('/api/<user>/<repo>/spec')
 def swagger_spec(user, repo):
     glogger.info("Generating swagger spec for /" + user + "/" + repo)
     api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
@@ -120,7 +122,7 @@ def swagger_spec(user, repo):
     swag['swagger'] = '2.0'
     swag['info'] = {'version': '1.0', 'title': resp['name'], 'contact': {'name': resp['owner']['login'], 'url': resp['owner']['html_url']}, 'license': {'name' : 'License', 'url': static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/LICENSE'}}
     swag['host'] = app.config['SERVER_NAME']
-    swag['basePath'] = '/grlc/' + user + '/' + repo + '/'
+    swag['basePath'] = '/api/' + user + '/' + repo + '/'
     swag['schemes'] = ['http']
     swag['paths'] = {}
 
