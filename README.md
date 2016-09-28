@@ -34,8 +34,8 @@ grlc assumes a GitHub repository (support for general git repos is on the way) w
 
 If you're seeing this, your grlc instance is up and running, and ready to build APIs. Assuming you got it running at <code>http://localhost:8088/</code> and your queries are at <code>https://github.com/CEDAR-project/Queries</code>, just point your browser to the following locations:
 
-- To request the swagger spec of your API, <code>http://localhost:8088/username/repo/spec</code>, e.g. [http://localhost:8088/CEDAR-project/Queries/spec](http://localhost:8088/CEDAR-project/Queries/spec) or [http://localhost:8088/CLARIAH/wp4-queries/spec](http://localhost:8088/CLARIAH/wp4-queries/spec)
-- To request the api-docs of your API swagger-ui style, <code>http://localhost:8088/username/repo/api-docs</code>, e.g. [http://localhost:8088/CEDAR-project/Queries/api-docs](http://localhost:8088/CEDAR-project/Queries/api-docs) or [http://localhost:8088/CLARIAH/wp4-queries/api-docs](http://localhost:8088/CLARIAH/wp4-queries/api-docs)
+- To request the swagger spec of your API, <code>http://localhost:8088/api/username/repo/spec</code>, e.g. [http://localhost:8088/api/CEDAR-project/Queries/spec](http://localhost:8088/api/CEDAR-project/Queries/spec) or [http://localhost:8088/api/CLARIAH/wp4-queries/spec](http://localhost:8088/api/CLARIAH/wp4-queries/spec)
+- To request the api-docs of your API swagger-ui style, <code>http://localhost:8088/api/username/repo/api-docs</code>, e.g. [http://localhost:8088/api/CEDAR-project/Queries/api-docs](http://localhost:8088/api/CEDAR-project/Queries/api-docs) or [http://localhost:8088/api/CLARIAH/wp4-queries/api-docs](http://localhost:8088/api/CLARIAH/wp4-queries/api-docs)
 
 By default grlc will direct your queries to the DBPedia SPARQL endpoint. To change this either:
 
