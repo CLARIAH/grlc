@@ -35,9 +35,8 @@ glogger = logging.getLogger(__name__)
 @app.route('/')
 def hello():
     resp = make_response(render_template('index.html'))
-    resp.headers['Cache-Control'] = 'public, max-age=43200'
+    #resp.headers['Cache-Control'] = 'public, max-age=43200'
     return resp
-    #return render_template('index.html')
 
 @app.route('/grlc/<user>/<repo>/<query_name>', methods=['GET'])
 @app.route('/grlc/<user>/<repo>/<query_name>.<content>', methods=['GET'])
