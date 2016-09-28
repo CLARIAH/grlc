@@ -1,0 +1,11 @@
+.circ-number {
+    background-color: #fff;
+    border: 3px solid #00a9a4;
+    width: 40px;
+    line-height: 36px;
+    height: 40px;
+    display: block;
+    margin: 0 auto;
+    border-radius: 50%;
+    font-weight: bold;
+}
