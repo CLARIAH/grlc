@@ -34,7 +34,10 @@ glogger = logging.getLogger(__name__)
 # Server routes
 @app.route('/')
 def hello():
-    return render_template('index.html')
+    resp = make_response(render_template('index.html'))
+    resp.headers['Cache-Control'] = 'public, max-age=43200'
+    return resp
+    #return render_template('index.html')
 
 @app.route('/grlc/<user>/<repo>/<query_name>', methods=['GET'])
 @app.route('/grlc/<user>/<repo>/<query_name>.<content>', methods=['GET'])
@@ -262,7 +265,11 @@ def swagger_spec(user, repo):
     #     json.dump(cache_obj, cache_file)
     # glogger.debug("Local cache updated")
 
-    return jsonify(swag)
+    resp_spec = make_response(jsonify(swag))
+    resp_spec.headers['Cache-Control'] = 'public, max-age=900' # Caching JSON specs for 15 minutes
+    return resp_spec
+
+    # return jsonify(swag)
 
 # TODO: Issue #23 - catch GitHub webhook POST to auto-update spec cache
 # @app.route('/sparql', methods = ['POST'])
