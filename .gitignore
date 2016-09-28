@@ -1,3 +1,5 @@
+
+
 .*!.gitignore
 */.DS_Store
 .Python
@@ -7,6 +9,7 @@
 bin/
 include/
 lib/
+!static/swagger-ui/dist/lib
 local/
 pip-selfcheck.json
 db.json
