@@ -2,6 +2,11 @@
 ##
 ## Based on https://github.com/sameersbn/docker-gitlab
 ## Normal HTTP host
+## Contains grlc additions for caching requests contents
+
+proxy_cache_path /tmp/grlc-cache levels=1:2 keys_zone=my_zone:10m inactive=60m;
+proxy_cache_key "$http_accept$scheme$request_method$host$request_uri";
+
 server {
   ## Either remove "default_server" from the listen line below,
   ## or delete the /etc/nginx/sites-enabled/default file. This will cause gitlab
@@ -16,9 +21,14 @@ server {
   add_header X-Accel-Buffering {{NGINX_ACCEL_BUFFERING}};
   add_header Strict-Transport-Security "max-age={{NGINX_HSTS_MAXAGE}};";
 
-  ## Individual nginx logs for this grlc vhost
-  access_log  {{GRLC_LOG_DIR}}/nginx/grlc_access.log;
+  ## Individual nginx logs for this grlc vhost, with custom log format inc cache info
+  log_format log_cache [$time_local] $remote_addr " - " '"$request"' " - " $upstream_cache_status " " $request_time " - "  $status " " $body_bytes_sent ' "$http_referer" "$http_user_agent"';
+  access_log  {{GRLC_LOG_DIR}}/nginx/grlc_access.log log_cache;
   error_log   {{GRLC_LOG_DIR}}/nginx/grlc_error.log error;
+
+  ## Enabling cache for this server
+  proxy_cache my_zone;
+  add_header X-Proxy-Cache $upstream_cache_status;
 
   location / {
     proxy_pass http://127.0.0.1:8088/;
@@ -31,6 +41,8 @@ server {
     ## Some requests take more than 30 seconds.
     proxy_read_timeout      300;
     proxy_connect_timeout   300;
+    proxy_send_timeout      300;
+    send_timeout            300;
     proxy_redirect          off;
     proxy_buffering         {{NGINX_PROXY_BUFFERING}};
 
