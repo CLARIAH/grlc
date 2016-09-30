@@ -55,7 +55,7 @@ update_template() {
 }
 
 setup_nginx() {
-  install_template root: nginx/grlc /etc/nginx/sites-enabled/grlc 
+  install_template root: nginx/grlc /etc/nginx/sites-enabled/grlc
   update_template /etc/nginx/sites-enabled/grlc \
 	GRLC_HOST \
 	NGINX_ACCEL_BUFFERING \
@@ -64,7 +64,7 @@ setup_nginx() {
 	NGINX_PROXY_BUFFERING \
 	NGINX_X_FORWARDED_PROTO
 
-  rm /etc/nginx/sites-enabled/default
+  rm -f /etc/nginx/sites-enabled/default
   mkdir -p ${GRLC_LOG_DIR}/nginx
   service nginx restart
 }
