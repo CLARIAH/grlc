@@ -79,7 +79,7 @@ def query(user, repo, query_name, content=None):
     # If the query is paginated, set link HTTP headers
     if pagination:
         # Get number of total results
-        count = gquery.count_query_results(query, endpoint)
+        count = gquery.count_query_results(rewritten_query, endpoint)
         page = 1
         if 'page' in request.args:
             page = int(request.args['page'])
