@@ -1,4 +1,7 @@
 Flask==0.10.1
+gevent==1.1.2
+greenlet==0.4.10
+gunicorn==19.6.0
 html5lib==0.9999999
 isodate==0.5.4
 itsdangerous==0.24
