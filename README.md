@@ -21,10 +21,11 @@ Direct your browser to [http://localhost:8088](http://localhost:8088).
 
 Alternatively, you can use the provided Gunicorn configuration to run it as a daemon on your server.
 
-#### Usage Docker
+#### Docker
 
-grlc comes now with a docker image for greater installation ease. You'll need to have a working installation of [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/) in your system.
+A bundle containing grlc, nginx and other dependencies is available at https://hub.docker.com/. If you have a working installation of [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/), you can quickly deploy grlc in your system:
 
+- `docker pull clariah/grlc`: install the container
 - `docker-compose up`: launch grlc
 - `docker-compose up /bin/bash`: get into container 
 
