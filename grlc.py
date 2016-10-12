@@ -3,8 +3,7 @@
 # grlc.py: the grlc server
 
 from flask import Flask, request, jsonify, json, render_template, make_response
-import urllib
-import urllib2
+import requests
 import json
 import StringIO
 import logging
@@ -45,8 +44,7 @@ def query(user, repo, query_name, content=None):
     glogger.debug("Request accept header: " +request.headers["Accept"])
     raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
     raw_query_uri = raw_repo_uri + query_name + '.rq'
-    stream = urllib2.urlopen(raw_query_uri)
-    raw_query = stream.read()
+    raw_query = requests.get(raw_query_uri).text
 
     endpoint = gquery.guess_endpoint_uri(raw_query, raw_repo_uri)
     glogger.debug("Sending query to endpoint: " + endpoint)
@@ -66,16 +64,13 @@ def query(user, repo, query_name, content=None):
         headers = { 'Accept' : mimetypes[content] }
     data = { 'query' : paginated_query }
 
-    data_encoded = urllib.urlencode(data)
-    req = urllib2.Request(endpoint, data_encoded, headers)
-    glogger.debug("Sending request: " + req.get_full_url() + "?" + req.get_data())
-    response = urllib2.urlopen(req)
-    glogger.debug('Response header from endpoint: ' + response.info().getheader('Content-Type'))
+    response = requests.get(endpoint, params=data, headers=headers)
+    glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
 
     # Response headers
-    resp = make_response(response.read())
+    resp = make_response(response.text)
     resp.headers['Server'] = 'grlc/1.0.0'
-    resp.headers['Content-Type'] = response.info().getheader('Content-Type')
+    resp.headers['Content-Type'] = response.headers['Content-Type']
     # If the query is paginated, set link HTTP headers
     if pagination:
         # Get number of total results
@@ -116,8 +111,8 @@ def swagger_spec(user, repo):
     # if cache.is_cache_updated(cache_obj, api_repo_uri):
     #     glogger.info("Reusing updated cache for this spec")
     #     return jsonify(cache_obj[api_repo_uri]['spec'])
-    stream = urllib2.urlopen(api_repo_uri)
-    resp = json.load(stream)
+    resp = requests.get(api_repo_uri).json()
+
     swag = {}
     swag['swagger'] = '2.0'
     swag['info'] = {'version': '1.0', 'title': resp['name'], 'contact': {'name': resp['owner']['login'], 'url': resp['owner']['html_url']}, 'license': {'name' : 'License', 'url': static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/LICENSE'}}
@@ -127,8 +122,7 @@ def swagger_spec(user, repo):
     swag['paths'] = {}
 
     api_repo_content_uri = api_repo_uri + '/contents'
-    stream = urllib2.urlopen(api_repo_content_uri)
-    resp = json.load(stream)
+    resp = requests.get(api_repo_content_uri).json()
     # Fetch all .rq files
     for c in resp:
         if ".rq" in c['name']:
@@ -136,8 +130,7 @@ def swagger_spec(user, repo):
             # Retrieve extra metadata from the query decorators
             raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
             raw_query_uri = raw_repo_uri + c['name']
-            stream = urllib2.urlopen(raw_query_uri)
-            resp = stream.read()
+            resp = requests.get(raw_query_uri).text
 
             glogger.info("Processing query " + raw_query_uri)
 

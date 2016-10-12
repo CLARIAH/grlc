@@ -9,8 +9,7 @@ from pyparsing import ParseException
 import logging
 import traceback
 import re
-import urllib2
-import urllib
+import requests
 import json
 
 # grlc modules
@@ -35,8 +34,7 @@ def guess_endpoint_uri(rq, ru):
 	# File
     	try:
     	    endpoint_file_uri = ru + "endpoint.txt"
-    	    stream = urllib2.urlopen(endpoint_file_uri)
-    	    endpoint = stream.read().strip()
+            endpoint = requests.get(endpoint_file_uri).text.strip()
      	    glogger.debug("File guessed endpoint: " + endpoint)
         # TODO: except all is really ugly
     	except:
@@ -44,6 +42,30 @@ def guess_endpoint_uri(rq, ru):
             glogger.warning("No endpoint specified, using default ({})".format(endpoint))
 
     return endpoint
+
+def count_query_results(query, endpoint):
+    '''
+    Returns the total number of results that query 'query' will generate
+    '''
+
+    number_results_query, repl = re.subn("SELECT.*FROM", "SELECT COUNT (*) FROM", query)
+    if not repl:
+        number_results_query = re.sub("SELECT.*{", "SELECT COUNT(*) {", query)
+    number_results_query = re.sub("GROUP\s+BY\s+[\?\_\(\)a-zA-Z0-9]+", "", number_results_query)
+    number_results_query = re.sub("ORDER\s+BY\s+[\?\_\(\)a-zA-Z0-9]+", "", number_results_query)
+    number_results_query = re.sub("LIMIT\s+[0-9]+", "", number_results_query)
+    number_results_query = re.sub("OFFSET\s+[0-9]+", "", number_results_query)
+
+    glogger.debug("Query for result count: " + number_results_query)
+
+    # Preapre HTTP request
+    headers = { 'Accept' : 'application/json' }
+    data = { 'query' : number_results_query }
+    count_json = requests.get(endpoint, params=data, headers=headers).json()
+    count = int(count_json['results']['bindings'][0]['callret-0']['value'])
+    glogger.info("Paginated query has {} results in total".format(count))
+
+    return count
 
 def get_parameters(rq, endpoint):
     """
@@ -85,11 +107,7 @@ def get_parameters(rq, endpoint):
                 data = {
                     'query' : codes_subquery
                 }
-                data_encoded = urllib.urlencode(data)
-                req = urllib2.Request(endpoint, data_encoded, headers)
-                glogger.debug("Sending code subquery request: " + req.get_full_url() + "?" + req.get_data())
-                response = urllib2.urlopen(req)
-                codes_json = json.loads(response.read())
+                codes_json = requests.get(endpoint, params=data, headers=headers).json()
                 # glogger.debug(codes_json)
                 vcodes = []
                 for code in codes_json['results']['bindings']:
@@ -158,34 +176,6 @@ def get_metadata(rq):
         print traceback.print_exc()
 
     return query_metadata
-
-def count_query_results(query, endpoint):
-    '''
-    Returns the total number of results that query 'query' will generate
-    '''
-
-    number_results_query, repl = re.subn("SELECT.*FROM", "SELECT COUNT (*) FROM", query)
-    if not repl:
-        number_results_query = re.sub("SELECT.*{", "SELECT COUNT(*) {", query)
-    number_results_query = re.sub("GROUP\s+BY\s+[\?\_\(\)a-zA-Z0-9]+", "", number_results_query)
-    number_results_query = re.sub("ORDER\s+BY\s+[\?\_\(\)a-zA-Z0-9]+", "", number_results_query)
-    number_results_query = re.sub("LIMIT\s+[0-9]+", "", number_results_query)
-    number_results_query = re.sub("OFFSET\s+[0-9]+", "", number_results_query)
-
-    glogger.debug("Query for result count: " + number_results_query)
-
-    # Preapre HTTP request
-    headers = { 'Accept' : 'application/json' }
-    data = { 'query' : number_results_query }
-
-    data_encoded = urllib.urlencode(data)
-    req = urllib2.Request(endpoint, data_encoded, headers)
-    response = urllib2.urlopen(req)
-    count_json = json.loads(response.read())
-    count = int(count_json['results']['bindings'][0]['callret-0']['value'])
-    glogger.info("Paginated query has {} results in total".format(count))
-
-    return count
 
 def paginate_query(query, get_args):
     query_metadata = get_metadata(query)
