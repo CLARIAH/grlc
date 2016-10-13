@@ -187,3 +187,9 @@ body {
     border-radius: 50%;
     font-weight: bold;
 }
+
+/* Add space between p paragraphs */
+
+.lead {
+  margin-top: 10px;
+}
