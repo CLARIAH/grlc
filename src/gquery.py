@@ -94,6 +94,7 @@ def get_parameters(rq, endpoint):
         tpattern_matcher = re.compile(".*FROM\s+(?P<gnames>.*)\s+WHERE.*[\.\{][\n\t\s]*(?P<tpattern>.*\?" + re.escape(v) + ".*)\..*", flags=re.DOTALL)
         tp_match = tpattern_matcher.match(rq)
         if match :
+            vcodes = []
             if tp_match:
                 vtpattern = tp_match.group('tpattern')
                 gnames = tp_match.group('gnames')
@@ -109,7 +110,6 @@ def get_parameters(rq, endpoint):
                 }
                 codes_json = requests.get(endpoint, params=data, headers=headers).json()
                 # glogger.debug(codes_json)
-                vcodes = []
                 for code in codes_json['results']['bindings']:
                     vcodes.append(code.values()[0]["value"])
                 # glogger.debug(vcodes)
@@ -203,6 +203,7 @@ def rewrite_query(query, get_args, endpoint):
 
     glogger.debug("Query parameters")
     glogger.debug(parameters)
+    requireXSD = False
     for pname, p in parameters.items():
         # Get the parameter value from the GET request
         v = get_args.get(pname, None)
@@ -221,8 +222,13 @@ def rewrite_query(query, get_args, endpoint):
                     query = query.replace(p['original'], "\"{}\"@{}".format(v, p['lang']))
                 elif p['datatype']:
                     query = query.replace(p['original'], "\"{}\"^^{}".format(v, p['datatype']))
+                    if 'xsd' in p['datatype']:
+                        requireXSD = True
                 else:
                     query = query.replace(p['original'], "\"{}\"".format(v))
 
+    xsdPrefix = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
+    if requireXSD and xsdPrefix not in query:
+            query = query.replace('SELECT', xsdPrefix + '\n\nSELECT')
     glogger.debug("Query rewritten as: " + query)
     return query

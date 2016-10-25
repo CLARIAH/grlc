@@ -178,11 +178,12 @@ def swagger_spec(user, repo):
             for v, p in parameters.items():
                 param = {}
                 param['name'] = p['name']
-                param['type'] = "string"
+                param['type'] = p['type']
                 param['required'] = p['required']
                 param['in'] = "query"
-                param['enum'] = p['enum']
                 param['description'] = "A value of type {} that will substitute {} in the original query".format(p['type'], p['original'])
+                if p['enum']:
+                    param['enum'] = p['enum']
 
                 params.append(param)
 
