@@ -46,26 +46,30 @@ def guess_endpoint_uri(rq, ru):
 def count_query_results(query, endpoint):
     '''
     Returns the total number of results that query 'query' will generate
+    WARNING: This is too expensive just for providing a number of result pages
+             Providing a dummy count for now
     '''
 
-    number_results_query, repl = re.subn("SELECT.*FROM", "SELECT COUNT (*) FROM", query)
-    if not repl:
-        number_results_query = re.sub("SELECT.*{", "SELECT COUNT(*) {", query)
-    number_results_query = re.sub("GROUP\s+BY\s+[\?\_\(\)a-zA-Z0-9]+", "", number_results_query)
-    number_results_query = re.sub("ORDER\s+BY\s+[\?\_\(\)a-zA-Z0-9]+", "", number_results_query)
-    number_results_query = re.sub("LIMIT\s+[0-9]+", "", number_results_query)
-    number_results_query = re.sub("OFFSET\s+[0-9]+", "", number_results_query)
+    # number_results_query, repl = re.subn("SELECT.*FROM", "SELECT COUNT (*) FROM", query)
+    # if not repl:
+    #     number_results_query = re.sub("SELECT.*{", "SELECT COUNT(*) {", query)
+    # number_results_query = re.sub("GROUP\s+BY\s+[\?\_\(\)a-zA-Z0-9]+", "", number_results_query)
+    # number_results_query = re.sub("ORDER\s+BY\s+[\?\_\(\)a-zA-Z0-9]+", "", number_results_query)
+    # number_results_query = re.sub("LIMIT\s+[0-9]+", "", number_results_query)
+    # number_results_query = re.sub("OFFSET\s+[0-9]+", "", number_results_query)
+    #
+    # glogger.debug("Query for result count: " + number_results_query)
+    #
+    # # Preapre HTTP request
+    # headers = { 'Accept' : 'application/json' }
+    # data = { 'query' : number_results_query }
+    # count_json = requests.get(endpoint, params=data, headers=headers).json()
+    # count = int(count_json['results']['bindings'][0]['callret-0']['value'])
+    # glogger.info("Paginated query has {} results in total".format(count))
+    #
+    # return count
 
-    glogger.debug("Query for result count: " + number_results_query)
-
-    # Preapre HTTP request
-    headers = { 'Accept' : 'application/json' }
-    data = { 'query' : number_results_query }
-    count_json = requests.get(endpoint, params=data, headers=headers).json()
-    count = int(count_json['results']['bindings'][0]['callret-0']['value'])
-    glogger.info("Paginated query has {} results in total".format(count))
-
-    return count
+    return 1000
 
 def get_parameters(rq, endpoint):
     """
@@ -91,7 +95,7 @@ def get_parameters(rq, endpoint):
 
         match = variable_matcher.match(v)
 	# TODO: currently only one parameter per triple pattern is supported
-        tpattern_matcher = re.compile(".*FROM\s+(?P<gnames>.*)\s+WHERE.*[\.\{][\n\t\s]*(?P<tpattern>.*\?" + re.escape(v) + ".*)\..*", flags=re.DOTALL)
+        tpattern_matcher = re.compile(".*(FROM\s+)?(?P<gnames>.*)\s+WHERE.*[\.\{][\n\t\s]*(?P<tpattern>.*\?" + re.escape(v) + ".*?\.).*", flags=re.DOTALL)
         tp_match = tpattern_matcher.match(rq)
         if match :
             vcodes = []
@@ -101,7 +105,11 @@ def get_parameters(rq, endpoint):
                 glogger.debug("Matched triple pattern with parameter")
                 # glogger.debug(vtpattern)
                 # glogger.debug(gnames)
-                codes_subquery = re.sub("SELECT.*\{.*\}", "SELECT DISTINCT ?" + v + " FROM " + gnames + " WHERE { " + vtpattern + " . }", rq, flags=re.DOTALL)
+                if gnames:
+                    codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " FROM " + gnames + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
+                else:
+                    codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
+                glogger.debug("Codes subquery: {}".format(codes_subquery))
                 headers = {
                     'Accept' : 'application/json'
                 }
