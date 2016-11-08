@@ -4,25 +4,14 @@ import gquery
 import traceback
 import cgi
 
-def build_swagger_spec(user, repo, serverName, glogger):
+def build_spec(user, repo, glogger):
+    '''Build GRLC specification for the given github user / repo '''
     api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
-    # Check if we have an updated cached spec for this repo
-    # if cache.is_cache_updated(cache_obj, api_repo_uri):
-    #     glogger.info("Reusing updated cache for this spec")
-    #     return jsonify(cache_obj[api_repo_uri]['spec'])
-    resp = requests.get(api_repo_uri).json()
-
-    swag = {}
-    swag['swagger'] = '2.0'
-    swag['info'] = {'version': '1.0', 'title': resp['name'], 'contact': {'name': resp['owner']['login'], 'url': resp['owner']['html_url']}, 'license': {'name' : 'License', 'url': static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/LICENSE'}}
-    swag['host'] = serverName
-    swag['basePath'] = '/api/' + user + '/' + repo + '/'
-    swag['schemes'] = ['http']
-    swag['paths'] = {}
 
     api_repo_content_uri = api_repo_uri + '/contents'
     resp = requests.get(api_repo_content_uri).json()
     # Fetch all .rq files
+    items = []
     for c in resp:
         if ".rq" in c['name']:
             call_name = c['name'].split('.')[0]
@@ -32,7 +21,6 @@ def build_swagger_spec(user, repo, serverName, glogger):
             resp = requests.get(raw_query_uri).text
 
             glogger.info("Processing query " + raw_query_uri)
-
             try:
                 query_metadata = gquery.get_metadata(resp)
             except Exception as e:
@@ -93,7 +81,6 @@ def build_swagger_spec(user, repo, serverName, glogger):
                 pagination_param['type'] = "int"
                 pagination_param['in'] = "query"
                 pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
-
                 params.append(pagination_param)
 
             item_properties = {}
@@ -105,7 +92,7 @@ def build_swagger_spec(user, repo, serverName, glogger):
             else:
                 # We now know it is a SELECT query
                 for pv in query_metadata['variables']:
-                    i = {
+                    item_properties[pv] = {
                         "name": pv,
                         "type": "object",
                         "required": ["type", "value"],
@@ -124,33 +111,73 @@ def build_swagger_spec(user, repo, serverName, glogger):
                             }
                         }
                     }
+            item = {
+                'call_name': call_name,
+                'method': method,
+                'tags': tags,
+                'summary': summary,
+                'description': description,
+                'params': params,
+                'item_properties': item_properties,
+                'query': query_metadata['query']
+            }
+            items.append(item)
+    return items
 
+def build_swagger_spec(user, repo, serverName, glogger):
+    '''Build GRLC specification for the given github user / repo in swagger format '''
+    api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
+    # Check if we have an updated cached spec for this repo
+    # if cache.is_cache_updated(cache_obj, api_repo_uri):
+    #     glogger.info("Reusing updated cache for this spec")
+    #     return jsonify(cache_obj[api_repo_uri]['spec'])
+    resp = requests.get(api_repo_uri).json()
 
-                    item_properties[pv] = i
+    swag = {}
+    swag['swagger'] = '2.0'
+    swag['info'] = {
+        'version': '1.0',
+        'title': resp['name'],
+        'contact': {
+            'name': resp['owner']['login'],
+            'url': resp['owner']['html_url']
+        },
+        'license': {
+            'name' : 'License',
+            'url': static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/LICENSE'
+        }
+    }
+    swag['host'] = serverName
+    swag['basePath'] = '/api/' + user + '/' + repo + '/'
+    swag['schemes'] = ['http']
+    swag['paths'] = {}
 
-            swag['paths'][call_name] = {}
-            swag['paths'][call_name][method] = {"tags" : tags,
-                                               "summary" : summary,
-                                               "description" : description + "\n<pre>\n{}\n</pre>".format(cgi.escape(query_metadata['query'])),
-                                               "produces" : ["text/csv", "application/json", "text/html"],
-                                               "parameters": params,
-                                               "responses": {
-                                                   "200" : {
-                                                       "description" : "SPARQL query response",
-                                                       "schema" : {
-                                                           "type" : "array",
-                                                           "items": {
-                                                                "type": "object",
-                                                                "properties": item_properties
-                                                            },
-                                                           }
-                                                       },
-                                                   "default" : {
-                                                       "description" : "Unexpected error",
-                                                       "schema" : {
-                                                           "$ref" : "#/definitions/Message"
-                                                       }
-                                                   }
-                                               }
-                                               }
+    spec = build_spec(user, repo, glogger)
+    for item in spec:
+        swag['paths'][item['call_name']] = {}
+        swag['paths'][item['call_name']][item['method']] = {
+            "tags" : item['tags'],
+            "summary" : item['summary'],
+            "description" : item['description'] + "\n<pre>\n{}\n</pre>".format(cgi.escape(item['query'])),
+            "produces" : ["text/csv", "application/json", "text/html"],
+            "parameters": item['params'],
+            "responses": {
+                "200" : {
+                    "description" : "SPARQL query response",
+                    "schema" : {
+                        "type" : "array",
+                        "items": {
+                            "type": "object",
+                            "properties": item['item_properties']
+                        },
+                    }
+                },
+                "default" : {
+                    "description" : "Unexpected error",
+                    "schema" : {
+                        "$ref" : "#/definitions/Message"
+                    }
+                }
+            }
+        }
     return swag
