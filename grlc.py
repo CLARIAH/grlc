@@ -95,6 +95,9 @@ def query(user, repo, query_name, content=None):
 def api_docs(user, repo):
     return render_template('api-docs.html', user=user, repo=repo)
 
+@app.route('/api/<user>/<repo>/api-docs-default')
+def api_docs_default(user, repo):
+    return render_template('api-docs-default.html', user=user, repo=repo)
 
 @app.route('/api/<user>/<repo>/spec')
 def swagger_spec(user, repo):
@@ -107,6 +110,16 @@ def swagger_spec(user, repo):
     # with open(cache.CACHE_NAME, 'w') as cache_file:
     #     json.dump(cache_obj, cache_file)
     # glogger.debug("Local cache updated")
+
+    resp_spec = make_response(jsonify(swag))
+    resp_spec.headers['Cache-Control'] = 'public, max-age=900' # Caching JSON specs for 15 minutes
+    return resp_spec
+
+@app.route('/api/<user>/<repo>/spec-default')
+def swagger_spec_default(user, repo):
+    glogger.info("Generating default spec for /" + user + "/" + repo)
+
+    swag = utils.build_swagger_spec(user, repo, app.config['SERVER_NAME'], default=True)
 
     resp_spec = make_response(jsonify(swag))
     resp_spec.headers['Cache-Control'] = 'public, max-age=900' # Caching JSON specs for 15 minutes
