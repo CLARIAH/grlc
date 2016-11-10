@@ -100,7 +100,7 @@ def api_docs(user, repo):
 def swagger_spec(user, repo):
     glogger.info("Generating swagger spec for /" + user + "/" + repo)
 
-    swag = utils.build_swagger_spec(user, repo, app.config['SERVER_NAME'], glogger)
+    swag = utils.build_swagger_spec(user, repo, app.config['SERVER_NAME'])
 
     # Store the generated spec in the cache
     # cache_obj[api_repo_uri] = {'date' : json.dumps(datetime.datetime.now(), default=util.date_handler).split('\"')[1], 'spec' : swag}

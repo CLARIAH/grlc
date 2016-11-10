@@ -4,7 +4,11 @@ import gquery
 import traceback
 import cgi
 
-def build_spec(user, repo, glogger):
+import logging
+
+glogger = logging.getLogger(__name__)
+
+def build_spec(user, repo):
     '''Build GRLC specification for the given github user / repo '''
     api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
 
@@ -124,7 +128,7 @@ def build_spec(user, repo, glogger):
             items.append(item)
     return items
 
-def build_swagger_spec(user, repo, serverName, glogger):
+def build_swagger_spec(user, repo, serverName):
     '''Build GRLC specification for the given github user / repo in swagger format '''
     api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
     # Check if we have an updated cached spec for this repo
@@ -152,7 +156,7 @@ def build_swagger_spec(user, repo, serverName, glogger):
     swag['schemes'] = ['http']
     swag['paths'] = {}
 
-    spec = build_spec(user, repo, glogger)
+    spec = build_spec(user, repo)
     for item in spec:
         swag['paths'][item['call_name']] = {}
         swag['paths'][item['call_name']][item['method']] = {
