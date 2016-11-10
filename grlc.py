@@ -2,22 +2,15 @@
 
 # grlc.py: the grlc server
 
-from flask import Flask, request, jsonify, json, render_template, make_response
+from flask import Flask, request, jsonify, render_template, make_response
 import requests
-import json
-import StringIO
 import logging
 import re
 
-import traceback
-import cgi
-import datetime
-
 # grlc modules
 import src.static as static
-import src.cache as cache
 import src.gquery as gquery
-import src.util as util
+import src.utils as utils
 
 # The Flask app
 app = Flask(__name__)
@@ -61,7 +54,7 @@ def query(user, repo, query_name, content=None):
     # Preapre HTTP request
     headers = { 'Accept' : request.headers['Accept'] }
     if content:
-        headers = { 'Accept' : mimetypes[content] }
+        headers = { 'Accept' : static.mimetypes[content] }
     data = { 'query' : paginated_query }
 
     response = requests.get(endpoint, params=data, headers=headers)
@@ -106,154 +99,9 @@ def api_docs(user, repo):
 @app.route('/api/<user>/<repo>/spec')
 def swagger_spec(user, repo):
     glogger.info("Generating swagger spec for /" + user + "/" + repo)
-    api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
-    # Check if we have an updated cached spec for this repo
-    # if cache.is_cache_updated(cache_obj, api_repo_uri):
-    #     glogger.info("Reusing updated cache for this spec")
-    #     return jsonify(cache_obj[api_repo_uri]['spec'])
-    resp = requests.get(api_repo_uri).json()
 
-    swag = {}
-    swag['swagger'] = '2.0'
-    swag['info'] = {'version': '1.0', 'title': resp['name'], 'contact': {'name': resp['owner']['login'], 'url': resp['owner']['html_url']}, 'license': {'name' : 'License', 'url': static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/LICENSE'}}
-    swag['host'] = app.config['SERVER_NAME']
-    swag['basePath'] = '/api/' + user + '/' + repo + '/'
-    swag['schemes'] = ['http']
-    swag['paths'] = {}
+    swag = utils.build_swagger_spec(user, repo, app.config['SERVER_NAME'])
 
-    api_repo_content_uri = api_repo_uri + '/contents'
-    resp = requests.get(api_repo_content_uri).json()
-    # Fetch all .rq files
-    for c in resp:
-        if ".rq" in c['name']:
-            call_name = c['name'].split('.')[0]
-            # Retrieve extra metadata from the query decorators
-            raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
-            raw_query_uri = raw_repo_uri + c['name']
-            resp = requests.get(raw_query_uri).text
-
-            glogger.info("Processing query " + raw_query_uri)
-
-            try:
-                query_metadata = gquery.get_metadata(resp)
-            except Exception as e:
-                glogger.error("Could not parse query at {}".format(raw_query_uri))
-                glogger.error(e)
-                continue
-
-            tags = query_metadata['tags'] if 'tags' in query_metadata else []
-            glogger.debug("Read query tags: " + ', '.join(tags))
-
-            summary = query_metadata['summary'] if 'summary' in query_metadata else ""
-            glogger.debug("Read query summary: " + summary)
-
-            description = query_metadata['description'] if 'description' in query_metadata else ""
-            glogger.debug("Read query description: " + description)
-
-            method = query_metadata['method'].lower() if 'method' in query_metadata else "get"
-            if method not in ['get', 'post', 'head', 'put', 'delete', 'options', 'connect']:
-                method = "get"
-
-            pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
-            glogger.debug("Read query pagination: " + str(pagination))
-
-            # endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
-            endpoint = gquery.guess_endpoint_uri("", raw_repo_uri)
-            glogger.debug("Read query endpoint: " + endpoint)
-
-            try:
-                parameters = gquery.get_parameters(query_metadata['query'], endpoint)
-            except Exception as e:
-                print traceback.print_exc()
-
-                glogger.error("Could not parse parameters of query {}".format(raw_query_uri))
-                continue
-
-            glogger.debug("Read request parameters")
-            glogger.debug(parameters)
-            # TODO: do something intelligent with the parameters!
-            # As per #3, prefetching IRIs via SPARQL and filling enum
-
-            params = []
-            for v, p in parameters.items():
-                param = {}
-                param['name'] = p['name']
-                param['type'] = p['type']
-                param['required'] = p['required']
-                param['in'] = "query"
-                param['description'] = "A value of type {} that will substitute {} in the original query".format(p['type'], p['original'])
-                if p['enum']:
-                    param['enum'] = p['enum']
-
-                params.append(param)
-
-            # If this query allows pagination, add page number as parameter
-            if pagination:
-                pagination_param = {}
-                pagination_param['name'] = "page"
-                pagination_param['type'] = "int"
-                pagination_param['in'] = "query"
-                pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
-
-                params.append(pagination_param)
-
-            item_properties = {}
-            if query_metadata['type'] != 'SelectQuery':
-                # TODO: Turn this into a nicer thingamajim
-                glogger.warning("This is not a SelectQuery, don't really know what to do!")
-                summary += "WARNING: non-SELECT queries are not really treated properly yet"
-                # just continue with empty item_properties
-            else:
-                # We now know it is a SELECT query
-                for pv in query_metadata['variables']:
-                    i = {
-                        "name": pv,
-                        "type": "object",
-                        "required": ["type", "value"],
-                        "properties": {
-                            "type": {
-                                "type": "string"
-                            },
-                            "value": {
-                                "type": "string"
-                            },
-                            "xml:lang": {
-                                "type": "string"
-                            },
-                            "datatype": {
-                                "type": "string"
-                            }
-                        }
-                    }
-
-
-                    item_properties[pv] = i
-
-            swag['paths'][call_name] = {}
-            swag['paths'][call_name][method] = {"tags" : tags,
-                                               "summary" : summary,
-                                               "description" : description + "\n<pre>\n{}\n</pre>".format(cgi.escape(query_metadata['query'])),
-                                               "produces" : ["text/csv", "application/json", "text/html"],
-                                               "parameters": params,
-                                               "responses": {
-                                                   "200" : {
-                                                       "description" : "SPARQL query response",
-                                                       "schema" : {
-                                                           "type" : "array",
-                                                           "items": {
-                                                                "type": "object",
-                                                                "properties": item_properties
-                                                            },
-                                                           }
-                                                       },
-                                                   "default" : {
-                                                       "description" : "Unexpected error",
-                                                       "schema" : {
-                                                           "$ref" : "#/definitions/Message"
-                                                       }
-                                                   }
-                                               }
-                                               }
     # Store the generated spec in the cache
     # cache_obj[api_repo_uri] = {'date' : json.dumps(datetime.datetime.now(), default=util.date_handler).split('\"')[1], 'spec' : swag}
     # with open(cache.CACHE_NAME, 'w') as cache_file:
@@ -263,8 +111,6 @@ def swagger_spec(user, repo):
     resp_spec = make_response(jsonify(swag))
     resp_spec.headers['Cache-Control'] = 'public, max-age=900' # Caching JSON specs for 15 minutes
     return resp_spec
-
-    # return jsonify(swag)
 
 # TODO: Issue #23 - catch GitHub webhook POST to auto-update spec cache
 # @app.route('/sparql', methods = ['POST'])
