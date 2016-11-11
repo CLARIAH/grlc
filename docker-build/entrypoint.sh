@@ -15,7 +15,7 @@ case ${1} in
     case ${1} in
       app:start)
         cd ${GRLC_INSTALL_DIR}
-        gunicorn -c gunicorn_config.py grlc:app
+        gunicorn -c gunicorn_config.py grlc.server:app
         # migrate_database
         # rm -rf /var/run/supervisor.sock
         # exec /usr/bin/supervisord -nc /etc/supervisor/supervisord.conf

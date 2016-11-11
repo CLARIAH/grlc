@@ -6,7 +6,6 @@
 *~
 *.swp
 *.log
-bin/
 include/
 lib/
 !static/swagger-ui/dist/lib
