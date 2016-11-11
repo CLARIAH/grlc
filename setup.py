@@ -5,7 +5,7 @@ from distutils.core import setup
 with open('requirements.txt') as f:
     required = f.read().splitlines()
 
-setup(name='GRLC',
+setup(name='grlc',
       version='1.0',
       description='grlc, the git repository linked data API constructor',
       author='Albert Meroño',
