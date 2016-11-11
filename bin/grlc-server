@@ -1,0 +1,5 @@
+#!/usr/bin/env python
+
+from grlc.server import app
+
+app.run(port=8088, debug=True)

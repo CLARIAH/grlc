@@ -8,9 +8,9 @@ import logging
 import re
 
 # grlc modules
-import src.static as static
-import src.gquery as gquery
-import src.utils as utils
+import grlc.static as static
+import grlc.gquery as gquery
+import grlc.utils as utils
 
 # The Flask app
 app = Flask(__name__)
