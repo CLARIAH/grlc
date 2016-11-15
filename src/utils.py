@@ -26,17 +26,24 @@ def build_spec(user, repo, default=False):
         endpoint = gquery.guess_endpoint_uri("", raw_repo_uri)
         glogger.info("Building default API for endpoint {}".format(endpoint))
 
-        item = {
-            'call_name': 'foo',
-            'method': 'GET',
-            'tags': 'bar',
-            'summary': 'summary',
-            'description': 'description',
-            'params': None,
-            'item_properties': None,
-            'query': 'query'
-        }
-        items.append(item)
+        types_json = requests.get(endpoint, params={'query': static.SPARQL_TYPES}, headers={'Accept': 'application/json'}).json()
+        for entity_type in types_json['results']['bindings']:
+            # Each of these is an entity type in the endpoint
+            entity_type_uri = entity_type['type']['value']
+            entity_type_name = entity_type_uri.split('/')[-1].split('#')[-1]
+            glogger.debug('Processing API endpoints for entity type {}'.format(entity_type_name))
+
+            item = {
+                'call_name': entity_type_name,
+                'method': 'GET',
+                'tags': entity_type_name,
+                'summary': 'A list of all instances of type {}'.format(entity_type_uri),
+                'description': 'description',
+                'params': None,
+                'item_properties': None,
+                'query': 'query'
+            }
+            items.append(item)
     # SPARQL-custom API
     else:
         for c in resp:
@@ -180,6 +187,8 @@ def build_swagger_spec(user, repo, serverName, default=False):
     swag['paths'] = {}
 
     spec = build_spec(user, repo, default)
+    # glogger.debug("Current internal spec data structure")
+    # glogger.debug(spec)
     for item in spec:
         swag['paths'][item['call_name']] = {}
         swag['paths'][item['call_name']][item['method']] = {
