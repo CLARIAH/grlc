@@ -71,7 +71,7 @@ def count_query_results(query, endpoint):
 
     return 1000
 
-def get_parameters(rq, endpoint):
+def get_parameters(rq, endpoint, headers=None):
     """
         ?_name The variable specifies the API mandatory parameter name. The value is incorporated in the query as plain literal.
         ?__name The parameter name is optional.
@@ -110,9 +110,7 @@ def get_parameters(rq, endpoint):
                 else:
                     codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
                 glogger.debug("Codes subquery: {}".format(codes_subquery))
-                headers = {
-                    'Accept' : 'application/json'
-                }
+                headers = headers if headers else { 'Accept' : 'application/json' }
                 data = {
                     'query' : codes_subquery
                 }

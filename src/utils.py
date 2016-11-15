@@ -89,7 +89,8 @@ def process_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetada
     glogger.debug("Read query endpoint: " + endpoint)
 
     try:
-        parameters = gquery.get_parameters(query_metadata['query'], endpoint)
+        headers = query_metadata['headers'] if 'headers' in query_metadata else None
+        parameters = gquery.get_parameters(query_metadata['query'], endpoint, headers=headers)
     except Exception as e:
         print traceback.print_exc()
         glogger.error("Could not parse parameters of query {}".format(raw_query_uri))
