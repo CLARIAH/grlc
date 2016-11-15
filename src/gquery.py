@@ -10,7 +10,6 @@ import logging
 import traceback
 import re
 import requests
-import json
 
 # grlc modules
 import static
@@ -94,34 +93,11 @@ def get_parameters(rq, endpoint):
             continue
 
         match = variable_matcher.match(v)
-	# TODO: currently only one parameter per triple pattern is supported
+        # TODO: currently only one parameter per triple pattern is supported
         tpattern_matcher = re.compile(".*(FROM\s+)?(?P<gnames>.*)\s+WHERE.*[\.\{][\n\t\s]*(?P<tpattern>.*\?" + re.escape(v) + ".*?\.).*", flags=re.DOTALL)
         tp_match = tpattern_matcher.match(rq)
-        if match :
-            vcodes = []
-            if tp_match:
-                vtpattern = tp_match.group('tpattern')
-                gnames = tp_match.group('gnames')
-                glogger.debug("Matched triple pattern with parameter")
-                # glogger.debug(vtpattern)
-                # glogger.debug(gnames)
-                if gnames:
-                    codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " FROM " + gnames + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
-                else:
-                    codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
-                glogger.debug("Codes subquery: {}".format(codes_subquery))
-                headers = {
-                    'Accept' : 'application/json'
-                }
-                data = {
-                    'query' : codes_subquery
-                }
-                codes_json = requests.get(endpoint, params=data, headers=headers).json()
-                # glogger.debug(codes_json)
-                for code in codes_json['results']['bindings']:
-                    vcodes.append(code.values()[0]["value"])
-                # glogger.debug(vcodes)
 
+        if match :
             vname = match.group('name')
             vrequired = True if match.group('required') == '_' else False
             vtype = 'literal'
@@ -143,6 +119,26 @@ def get_parameters(rq, endpoint):
                         vlang = mtype
                     elif muserdefined :
                         vdatatype = '{}:{}'.format(mtype, muserdefined)
+
+            vcodes = []
+            if tp_match and mtype != 'string':
+                vtpattern = tp_match.group('tpattern')
+                gnames = tp_match.group('gnames')
+                glogger.debug("Matched triple pattern with parameter")
+                if gnames:
+                    codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " FROM " + gnames + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
+                else:
+                    codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
+                glogger.debug("Codes subquery: {}".format(codes_subquery))
+                headers = {
+                    'Accept' : 'application/json'
+                }
+                data = {
+                    'query' : codes_subquery
+                }
+                codes_json = requests.get(endpoint, params=data, headers=headers).json()
+                for code in codes_json['results']['bindings']:
+                    vcodes.append(code.values()[0]["value"])
 
             parameters[vname] = {
                 'original': '?{}'.format(v),
