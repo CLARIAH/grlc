@@ -10,7 +10,6 @@ import logging
 import traceback
 import re
 import requests
-import json
 
 # grlc modules
 import static
@@ -94,11 +93,12 @@ def get_parameters(rq, endpoint):
             continue
 
         match = variable_matcher.match(v)
-	# TODO: currently only one parameter per triple pattern is supported
+        # TODO: currently only one parameter per triple pattern is supported
         if match :
             vname = match.group('name')
             # We only fire the enum filling queries if indicated by the query metadata
-            vcodes = get_enumeration(rq, v, endpoint) if vname in get_metadata(rq)['enumerate'] else []
+            metadata = get_metadata(rq)
+            vcodes = get_enumeration(rq, v, endpoint) if 'enumerate' in metadata and vname in metadata['enumerate'] else []
             vrequired = True if match.group('required') == '_' else False
             vtype = 'literal'
             vlang = None
