@@ -95,34 +95,10 @@ def get_parameters(rq, endpoint):
 
         match = variable_matcher.match(v)
 	# TODO: currently only one parameter per triple pattern is supported
-        tpattern_matcher = re.compile(".*(FROM\s+)?(?P<gnames>.*)\s+WHERE.*[\.\{][\n\t\s]*(?P<tpattern>.*\?" + re.escape(v) + ".*?\.).*", flags=re.DOTALL)
-        tp_match = tpattern_matcher.match(rq)
         if match :
-            vcodes = []
-            if tp_match:
-                vtpattern = tp_match.group('tpattern')
-                gnames = tp_match.group('gnames')
-                glogger.debug("Matched triple pattern with parameter")
-                # glogger.debug(vtpattern)
-                # glogger.debug(gnames)
-                if gnames:
-                    codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " FROM " + gnames + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
-                else:
-                    codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
-                glogger.debug("Codes subquery: {}".format(codes_subquery))
-                headers = {
-                    'Accept' : 'application/json'
-                }
-                data = {
-                    'query' : codes_subquery
-                }
-                codes_json = requests.get(endpoint, params=data, headers=headers).json()
-                # glogger.debug(codes_json)
-                for code in codes_json['results']['bindings']:
-                    vcodes.append(code.values()[0]["value"])
-                # glogger.debug(vcodes)
-
             vname = match.group('name')
+            # We only fire the enum filling queries if indicated by the query metadata
+            vcodes = get_enumeration(rq, v, endpoint) if vname in get_metadata(rq)['enumerate'] else []
             vrequired = True if match.group('required') == '_' else False
             vtype = 'literal'
             vlang = None
@@ -156,10 +132,33 @@ def get_parameters(rq, endpoint):
 
     return parameters
 
+def get_enumeration(rq, v, endpoint):
+    '''
+    Returns a list of enumerated values for variable 'v' in query 'rq'
+    '''
+    glogger.info('Retrieving enumeration for variable {}'.format(v))
+    vcodes = []
+    tpattern_matcher = re.compile(".*(FROM\s+)?(?P<gnames>.*)\s+WHERE.*[\.\{][\n\t\s]*(?P<tpattern>.*\?" + re.escape(v) + ".*?\.).*", flags=re.DOTALL)
+    tp_match = tpattern_matcher.match(rq)
+    if tp_match:
+        vtpattern = tp_match.group('tpattern')
+        gnames = tp_match.group('gnames')
+        glogger.debug("Matched triple pattern with parameter")
+        if gnames:
+            codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " FROM " + gnames + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
+        else:
+            codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
+        glogger.debug("Codes subquery: {}".format(codes_subquery))
+        codes_json = requests.get(endpoint, params={'query' : codes_subquery}, headers={'Accept' : 'application/json'}).json()
+        for code in codes_json['results']['bindings']:
+            vcodes.append(code.values()[0]["value"])
+
+    return vcodes
+
 def get_metadata(rq):
     '''
     Returns the metadata 'exp' parsed from the raw query file 'rq'
-    'exp' is one of: 'endpoint', 'tags', 'summary', 'request', 'pagination'
+    'exp' is one of: 'endpoint', 'tags', 'summary', 'request', 'pagination', 'enumerate'
     '''
     if not rq:
         return None

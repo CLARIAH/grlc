@@ -84,12 +84,15 @@ def process_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetada
     pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
     glogger.debug("Read query pagination: " + str(pagination))
 
+    enums = query_metadata['enumerate'] if 'enumerate' in query_metadata else []
+    glogger.debug("Read query enumerates: " + ', '.join(enums))
+
     # endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
     endpoint = gquery.guess_endpoint_uri("", raw_repo_uri)
     glogger.debug("Read query endpoint: " + endpoint)
 
     try:
-        parameters = gquery.get_parameters(query_metadata['query'], endpoint)
+        parameters = gquery.get_parameters(resp, endpoint)
     except Exception as e:
         print traceback.print_exc()
         glogger.error("Could not parse parameters of query {}".format(raw_query_uri))
@@ -167,7 +170,7 @@ def process_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetada
     return item
 
 def build_swagger_spec(user, repo, serverName, default=False):
-    '''Build GRLC specification for the given github user / repo in swagger format '''
+    '''Build grlc specification for the given github user / repo in swagger format '''
     api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
     # Check if we have an updated cached spec for this repo
     # if cache.is_cache_updated(cache_obj, api_repo_uri):
