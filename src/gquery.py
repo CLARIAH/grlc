@@ -149,7 +149,7 @@ def get_enumeration(rq, v, endpoint):
         else:
             codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
         glogger.debug("Codes subquery: {}".format(codes_subquery))
-        codes_json = requests.get(endpoint, params={'query' : codes_subquery}, headers={'Accept' : 'application/json'}).json()
+        codes_json = requests.get(endpoint, params={'query' : codes_subquery}, headers={'Accept' : static.mimetypes['json']}).json()
         for code in codes_json['results']['bindings']:
             vcodes.append(code.values()[0]["value"])
 
