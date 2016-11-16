@@ -59,6 +59,12 @@ A couple of SPARQL comment embedded decorators are available to make your swagge
     <pre>&#35;+ tags:
   &#35;+   - firstTag
   &#35;+   - secondTag</pre>
+- To indicate which parameters of your query/operation should get enumerations (and get dropdown menus in the swagger-ui),
+    <pre>&#35;+ enumerate:
+  &#35;+   - var1
+  &#35;+   - var2</pre>
+  
+  Notice that these should be plain variable names without SPARQL/BASIL conventions (so var1 instead of ?_var1_iri)
 
 See examples at [https://github.com/CEDAR-project/Queries](https://github.com/CEDAR-project/Queries).
 
