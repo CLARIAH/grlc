@@ -35,6 +35,8 @@ def guess_endpoint_uri(rq, ru):
     	try:
     	    endpoint_file_uri = ru + "endpoint.txt"
             endpoint = requests.get(endpoint_file_uri).text.strip()
+            if endpoint.status_code != 200:
+                endpoint = static.DEFAULT_ENDPOINT
      	    glogger.debug("File guessed endpoint: " + endpoint)
         # TODO: except all is really ugly
     	except:
