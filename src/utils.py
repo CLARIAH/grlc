@@ -26,7 +26,7 @@ def build_spec(user, repo, default=False, extraMetadata=[]):
         endpoint = gquery.guess_endpoint_uri("", raw_repo_uri)
         glogger.info("Building default API for endpoint {}".format(endpoint))
 
-        types_json = requests.get(endpoint, params={'query': static.SPARQL_TYPES}, headers={'Accept': 'application/json'}).json()
+        types_json = requests.get(endpoint, params={'query': static.SPARQL_TYPES}, headers={'Accept': static.mimetypes['json']}).json()
         for entity_type in types_json['results']['bindings']:
             # Each of these is an entity type in the endpoint
             entity_type_uri = entity_type['type']['value']
