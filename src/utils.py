@@ -47,20 +47,75 @@ def build_spec(user, repo, default=False, extraMetadata=[]):
     # SPARQL-custom API
     else:
         for c in resp:
-            if ".rq" in c['name']:
+            if ".rq" in c['name'] or ".tpf" in c['name']:
                 call_name = c['name'].split('.')[0]
                 # Retrieve extra metadata from the query decorators
                 raw_query_uri = raw_repo_uri + c['name']
                 resp = requests.get(raw_query_uri).text
 
-                glogger.info("Processing query " + raw_query_uri)
-                item = process_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetadata)
-                if item:
-                    items.append(item)
-
+                if ".rq" in c['name']:
+                    glogger.info("Processing SPARQL query " + raw_query_uri)
+                    item = process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetadata)
+                    if item:
+                        items.append(item)
+                if ".tpf" in c['name']:
+                    glogger.info("Processing TPF query " + raw_query_uri)
+                    item = process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata)
+                    if item:
+                        items.append(item)
     return items
 
-def process_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetadata):
+def process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata):
+
+    query_metadata = gquery.get_yaml_decorators(resp)
+
+    tags = query_metadata['tags'] if 'tags' in query_metadata else []
+    glogger.debug("Read query tags: " + ', '.join(tags))
+
+    summary = query_metadata['summary'] if 'summary' in query_metadata else ""
+    glogger.debug("Read query summary: " + summary)
+
+    description = query_metadata['description'] if 'description' in query_metadata else ""
+    glogger.debug("Read query description: " + description)
+
+    method = query_metadata['method'].lower() if 'method' in query_metadata else "get"
+    if method not in ['get', 'post', 'head', 'put', 'delete', 'options', 'connect']:
+        method = "get"
+
+    pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
+    glogger.debug("Read query pagination: " + str(pagination))
+
+    # enums = query_metadata['enumerate'] if 'enumerate' in query_metadata else []
+    # glogger.debug("Read query enumerates: " + ', '.join(enums))
+
+    endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
+    glogger.debug("Read query endpoint: " + endpoint)
+
+    # If this query allows pagination, add page number as parameter
+    if pagination:
+        pagination_param = {}
+        pagination_param['name'] = "page"
+        pagination_param['type'] = "int"
+        pagination_param['in'] = "query"
+        pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
+        params.append(pagination_param)
+
+    item = {
+        'call_name': call_name,
+        'method': method,
+        'tags': tags,
+        'summary': summary,
+        'description': description,
+        'query': query_metadata['query']
+    }
+
+    for extraField in extraMetadata:
+        if extraField in query_metadata:
+            item[extraField] = query_metadata[extraField]
+
+    return item
+
+def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetadata):
     try:
         query_metadata = gquery.get_metadata(resp)
     except Exception as e:
@@ -207,15 +262,15 @@ def build_swagger_spec(user, repo, serverName, default=False):
             "summary" : item['summary'],
             "description" : item['description'] + "\n<pre>\n{}\n</pre>".format(cgi.escape(item['query'])),
             "produces" : ["text/csv", "application/json", "text/html"],
-            "parameters": item['params'],
+            "parameters": item['params'] if 'params' in item else None,
             "responses": {
                 "200" : {
-                    "description" : "SPARQL query response",
+                    "description" : "Query response",
                     "schema" : {
                         "type" : "array",
                         "items": {
                             "type": "object",
-                            "properties": item['item_properties']
+                            "properties": item['item_properties'] if 'item_properties' in item else None
                         },
                     }
                 },

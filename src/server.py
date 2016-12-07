@@ -37,57 +37,94 @@ def query(user, repo, query_name, content=None):
     glogger.debug("Request accept header: " +request.headers["Accept"])
     raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
     raw_query_uri = raw_repo_uri + query_name + '.rq'
-    raw_query = requests.get(raw_query_uri).text
+    raw_query = requests.get(raw_query_uri)
 
-    endpoint = gquery.guess_endpoint_uri(raw_query, raw_repo_uri)
-    glogger.debug("Sending query to endpoint: " + endpoint)
+    if raw_query.status_code == 200:
+        raw_query = raw_query.text
+        endpoint = gquery.guess_endpoint_uri(raw_query, raw_repo_uri)
+        glogger.debug("Sending query to SPARQL endpoint: " + endpoint)
 
-    query_metadata = gquery.get_metadata(raw_query)
-    pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
+        query_metadata = gquery.get_metadata(raw_query)
+        pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
 
-    # Rewrite query using parameter values
-    rewritten_query = gquery.rewrite_query(raw_query, request.args, endpoint)
+        # Rewrite query using parameter values
+        rewritten_query = gquery.rewrite_query(raw_query, request.args, endpoint)
 
-    # Rewrite query using pagination
-    paginated_query = gquery.paginate_query(rewritten_query, request.args)
+        # Rewrite query using pagination
+        paginated_query = gquery.paginate_query(rewritten_query, request.args)
 
-    # Preapre HTTP request
-    headers = { 'Accept' : request.headers['Accept'] }
-    if content:
-        headers = { 'Accept' : static.mimetypes[content] }
-    data = { 'query' : paginated_query }
+        # Preapre HTTP request
+        headers = { 'Accept' : request.headers['Accept'] }
+        if content:
+            headers = { 'Accept' : static.mimetypes[content] }
+        data = { 'query' : paginated_query }
 
-    response = requests.get(endpoint, params=data, headers=headers)
-    glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
+        response = requests.get(endpoint, params=data, headers=headers)
+        glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
 
-    # Response headers
-    resp = make_response(response.text)
-    resp.headers['Server'] = 'grlc/1.0.0'
-    resp.headers['Content-Type'] = response.headers['Content-Type']
-    # If the query is paginated, set link HTTP headers
-    if pagination:
-        # Get number of total results
-        count = gquery.count_query_results(rewritten_query, endpoint)
-        page = 1
-        if 'page' in request.args:
-            page = int(request.args['page'])
-            next_url = re.sub("page=[0-9]+", "page={}".format(page + 1), request.url)
-            prev_url = re.sub("page=[0-9]+", "page={}".format(page - 1), request.url)
-            first_url = re.sub("page=[0-9]+", "page=1", request.url)
-            last_url = re.sub("page=[0-9]+", "page={}".format(count / pagination), request.url)
+        # Response headers
+        resp = make_response(response.text)
+        resp.headers['Server'] = 'grlc/1.0.0'
+        resp.headers['Content-Type'] = response.headers['Content-Type']
+        # If the query is paginated, set link HTTP headers
+        if pagination:
+            # Get number of total results
+            count = gquery.count_query_results(rewritten_query, endpoint)
+            page = 1
+            if 'page' in request.args:
+                page = int(request.args['page'])
+                next_url = re.sub("page=[0-9]+", "page={}".format(page + 1), request.url)
+                prev_url = re.sub("page=[0-9]+", "page={}".format(page - 1), request.url)
+                first_url = re.sub("page=[0-9]+", "page=1", request.url)
+                last_url = re.sub("page=[0-9]+", "page={}".format(count / pagination), request.url)
+            else:
+                next_url = request.url + "?page={}".format(page + 1)
+                prev_url = request.url + "?page={}".format(page - 1)
+                first_url = request.url + "?page={}".format(page)
+                last_url = request.url + "?page={}".format(count / pagination)
+            if page == 1:
+                resp.headers['Link'] = "<{}>; rel=next, <{}>; rel=last".format(next_url, last_url)
+            elif page == count / pagination:
+                resp.headers['Link'] = "<{}>; rel=prev, <{}>; rel=first".format(prev_url, first_url)
+            else:
+                resp.headers['Link'] = "<{}>; rel=next, <{}>; rel=prev, <{}>; rel=first, <{}>; rel=last".format(next_url, prev_url, first_url, last_url)
+
+        return resp
+    else:
+        raw_tpf_uri = raw_repo_uri + query_name + '.tpf'
+        raw_tpf = requests.get(raw_tpf_uri)
+
+        if raw_tpf.status_code == 200:
+            raw_tpf = raw_tpf.text
+            endpoint = gquery.guess_endpoint_uri(raw_tpf, raw_repo_uri)
+            glogger.debug("Sending query to TPF endpoint: " + endpoint)
+
+            query_metadata = gquery.get_yaml_decorators(raw_tpf)
+
+            # TODO: pagination for TPF
+
+            # Preapre HTTP request
+            headers = { 'Accept' : request.headers['Accept'] }
+            if content:
+                headers = { 'Accept' : static.mimetypes[content] }
+            tpf_list = re.split('\n|=', raw_tpf)
+            subject = tpf_list[tpf_list.index('subject') + 1]
+            predicate = tpf_list[tpf_list.index('predicate') + 1]
+            object = tpf_list[tpf_list.index('object') + 1]
+            data = { 'subject' : subject, 'predicate' : predicate, 'object' : object}
+
+            response = requests.get(endpoint, params=data, headers=headers)
+            glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
+
+            # Response headers
+            resp = make_response(response.text)
+            resp.headers['Server'] = 'grlc/1.0.0'
+            resp.headers['Content-Type'] = response.headers['Content-Type']
+
+            return resp
         else:
-            next_url = request.url + "?page={}".format(page + 1)
-            prev_url = request.url + "?page={}".format(page - 1)
-            first_url = request.url + "?page={}".format(page)
-            last_url = request.url + "?page={}".format(count / pagination)
-        if page == 1:
-            resp.headers['Link'] = "<{}>; rel=next, <{}>; rel=last".format(next_url, last_url)
-        elif page == count / pagination:
-            resp.headers['Link'] = "<{}>; rel=prev, <{}>; rel=first".format(prev_url, first_url)
-        else:
-            resp.headers['Link'] = "<{}>; rel=next, <{}>; rel=prev, <{}>; rel=first, <{}>; rel=last".format(next_url, prev_url, first_url, last_url)
+            return "Couldn't find any SPARQL or TPF query with the requested name", 404
 
-    return resp
 
 @app.route('/api/<user>/<repo>')
 @app.route('/api/<user>/<repo>/')

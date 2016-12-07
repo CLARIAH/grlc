@@ -27,9 +27,9 @@ def guess_endpoint_uri(rq, ru):
 
     # Decorator
     try:
-        endpoint = get_metadata(rq)['endpoint']
+        endpoint = get_yaml_decorators(rq)['endpoint']
         glogger.info("Decorator guessed endpoint: " + endpoint)
-    except (TypeError, KeyError, ParseException):
+    except (TypeError, KeyError):
 	# File
     	try:
     	    endpoint_file_uri = ru + "endpoint.txt"
@@ -157,10 +157,9 @@ def get_enumeration(rq, v, endpoint):
 
     return vcodes
 
-def get_metadata(rq):
+def get_yaml_decorators(rq):
     '''
-    Returns the metadata 'exp' parsed from the raw query file 'rq'
-    'exp' is one of: 'endpoint', 'tags', 'summary', 'request', 'pagination', 'enumerate'
+    Returns the yaml decorator metadata only (this is needed by triple pattern fragments)
     '''
     if not rq:
         return None
@@ -174,6 +173,15 @@ def get_metadata(rq):
         query_metadata = {}
     query_metadata['query'] = query_string
 
+    return query_metadata
+
+def get_metadata(rq):
+    '''
+    Returns the metadata 'exp' parsed from the raw query file 'rq'
+    'exp' is one of: 'endpoint', 'tags', 'summary', 'request', 'pagination', 'enumerate'
+    '''
+    query_metadata = get_yaml_decorators(rq)
+
     try:
         parsed_query = translateQuery(Query.parseString(rq, parseAll=True))
         query_metadata['type'] = parsed_query.algebra.name
@@ -183,6 +191,7 @@ def get_metadata(rq):
         glogger.error("Could not parse query")
         glogger.error(query_string)
         print traceback.print_exc()
+        return query_metadata
 
     return query_metadata
 
