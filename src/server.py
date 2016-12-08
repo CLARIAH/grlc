@@ -79,10 +79,12 @@ def query(user, repo, query_name, content=None):
             # glogger.debug("Results of SPARQL query against locally loaded dump:")
             # Prepare return format as requested
             resp_string = ""
-            # glogger.debug("Requested formats are {} AND {}".format(request.headers['Accept'], static.mimetypes[content]))
-            if 'application/json' in request.headers['Accept'] or 'application/json' in static.mimetypes[content]:
+            # glogger.debug("Requested formats: {}".format(request.headers['Accept']))
+            # if content:
+            #     glogger.debug("Requested formats from extension: {}".format(static.mimetypes[content]))
+            if 'application/json' in request.headers['Accept'] or (content and 'application/json' in static.mimetypes[content]):
                 resp_string = results.serialize(format='json')
-            elif 'text/csv' in request.headers['Accept'] or 'text/csv' in static.mimetypes[content]:
+            elif 'text/csv' in request.headers['Accept'] or (content and 'text/csv' in static.mimetypes[content]):
                 resp_string = results.serialize(format='csv')
             # elif 'text/html' in request.headers['Accept']:
             #     resp_string = results.serialize(format='html')
