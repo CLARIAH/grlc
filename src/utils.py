@@ -47,22 +47,32 @@ def build_spec(user, repo, default=False, extraMetadata=[]):
     # SPARQL-custom API
     else:
         for c in resp:
-            if ".rq" in c['name'] or ".tpf" in c['name']:
+            if ".rq" in c['name'] or ".tpf" in c['name'] or ".dmp" in c['name']:
                 call_name = c['name'].split('.')[0]
                 # Retrieve extra metadata from the query decorators
                 raw_query_uri = raw_repo_uri + c['name']
                 resp = requests.get(raw_query_uri).text
 
+                item = None
                 if ".rq" in c['name']:
-                    glogger.info("Processing SPARQL query " + raw_query_uri)
+                    glogger.info("===================================================================")
+                    glogger.info("Processing SPARQL query: {}".format(c['name']))
+                    glogger.info("===================================================================")
                     item = process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetadata)
-                    if item:
-                        items.append(item)
-                if ".tpf" in c['name']:
-                    glogger.info("Processing TPF query " + raw_query_uri)
+                elif ".dmp" in c['name']:
+                    glogger.info("===================================================================")
+                    glogger.info("Processing SPARQL query for RDF dump: {}".format(c['name']))
+                    glogger.info("===================================================================")
+                    item = process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetadata)
+                elif ".tpf" in c['name']:
+                    glogger.info("===================================================================")
+                    glogger.info("Processing TPF query: {}".format(c['name']))
+                    glogger.info("===================================================================")
                     item = process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata)
-                    if item:
-                        items.append(item)
+                else:
+                    glogger.info("Ignoring unsupported source call name: {}".format(c['name']))
+                if item:
+                    items.append(item)
     return items
 
 def process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata):
@@ -141,6 +151,9 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
 
     enums = query_metadata['enumerate'] if 'enumerate' in query_metadata else []
     glogger.debug("Read query enumerates: " + ', '.join(enums))
+
+    mime = query_metadata['mime'] if 'mime' in query_metadata else ""
+    glogger.debug("Read endpoint dump MIME type: " + str(mime))
 
     # endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
     endpoint = gquery.guess_endpoint_uri("", raw_repo_uri)
