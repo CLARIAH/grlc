@@ -154,7 +154,7 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
         return None
 
     glogger.debug("Read request parameters")
-    glogger.debug(parameters)
+    # glogger.debug(parameters)
     # TODO: do something intelligent with the parameters!
     # As per #3, prefetching IRIs via SPARQL and filling enum
 

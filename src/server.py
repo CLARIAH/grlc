@@ -6,6 +6,7 @@ from flask import Flask, request, jsonify, render_template, make_response
 import requests
 import logging
 import re
+from rdflib import Graph
 
 # grlc modules
 import static as static
@@ -65,7 +66,23 @@ def query(user, repo, query_name, content=None):
         # Response headers
         resp = make_response(response.text)
         resp.headers['Server'] = 'grlc/1.0.0'
+
+        # ASSUMPTION: if content-type is text/plain, we try to ingest RDF dump
+        if 'text/plain' in response.headers['Content-Type']:
+            g = Graph()
+            try:
+                # TODO: guess remote dump format
+                g.parse(endpoint, format='text/turtle')
+            except Exception as e:
+                glogger.error(e)
+            results = g.query(paginated_query)
+            glogger.debug("Results of SPARQL query against locally loaded dump:")
+            for row in results:
+                glogger.debug(row)
+
         resp.headers['Content-Type'] = response.headers['Content-Type']
+
+
         # If the query is paginated, set link HTTP headers
         if pagination:
             # Get number of total results
