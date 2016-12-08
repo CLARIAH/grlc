@@ -75,10 +75,22 @@ def query(user, repo, query_name, content=None):
                 g.parse(endpoint, format='text/turtle')
             except Exception as e:
                 glogger.error(e)
-            results = g.query(paginated_query)
-            glogger.debug("Results of SPARQL query against locally loaded dump:")
-            for row in results:
-                glogger.debug(row)
+            results = g.query(paginated_query, result='sparql')
+            # glogger.debug("Results of SPARQL query against locally loaded dump:")
+            # Prepare return format as requested
+            resp_string = ""
+            # glogger.debug("Requested formats are {} AND {}".format(request.headers['Accept'], static.mimetypes[content]))
+            if 'application/json' in request.headers['Accept'] or 'application/json' in static.mimetypes[content]:
+                resp_string = results.serialize(format='json')
+            elif 'text/csv' in request.headers['Accept'] or 'text/csv' in static.mimetypes[content]:
+                resp_string = results.serialize(format='csv')
+            # elif 'text/html' in request.headers['Accept']:
+            #     resp_string = results.serialize(format='html')
+            else:
+                return 'Unacceptable requested format', 415
+            del g
+
+            resp = make_response(resp_string)
 
         resp.headers['Content-Type'] = response.headers['Content-Type']
 
