@@ -59,11 +59,6 @@ def build_spec(user, repo, default=False, extraMetadata=[]):
                     glogger.info("Processing SPARQL query: {}".format(c['name']))
                     glogger.info("===================================================================")
                     item = process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetadata)
-                elif ".dmp" in c['name']:
-                    glogger.info("===================================================================")
-                    glogger.info("Processing SPARQL query for RDF dump: {}".format(c['name']))
-                    glogger.info("===================================================================")
-                    item = process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetadata)
                 elif ".tpf" in c['name']:
                     glogger.info("===================================================================")
                     glogger.info("Processing TPF query: {}".format(c['name']))
