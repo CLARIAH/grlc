@@ -47,7 +47,7 @@ def build_spec(user, repo, default=False, extraMetadata=[]):
     # SPARQL-custom API
     else:
         for c in resp:
-            if ".rq" in c['name'] or ".tpf" in c['name'] or ".dmp" in c['name']:
+            if ".rq" in c['name'] or ".tpf" in c['name']:
                 call_name = c['name'].split('.')[0]
                 # Retrieve extra metadata from the query decorators
                 raw_query_uri = raw_repo_uri + c['name']
