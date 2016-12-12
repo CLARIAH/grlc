@@ -49,7 +49,11 @@ def query(user, repo, query_name, content=None):
 
     # Call name implemented with SPARQL query
     if raw_sparql_query.status_code == 200 or raw_alt_sparql_query.status_code == 200:
-        raw_sparql_query = raw_sparql_query.text
+        if raw_sparql_query.status_code == 200:
+            raw_sparql_query = raw_sparql_query.text
+        else:
+            raw_sparql_query = raw_alt_sparql_query.text 
+
         endpoint = gquery.guess_endpoint_uri(raw_sparql_query, raw_repo_uri)
         glogger.debug("=====================================================")
         glogger.debug("Sending query to SPARQL endpoint: {}".format(endpoint))
