@@ -40,13 +40,15 @@ def query(user, repo, query_name, content=None):
 
     # The URIs of all candidates
     raw_sparql_query_uri = raw_repo_uri + query_name + '.rq'
+    raw_alt_sparql_query_uri = raw_repo_uri + query_name + '.sparql'
     raw_tpf_query_uri = raw_repo_uri + query_name + '.tpf'
 
     raw_sparql_query = requests.get(raw_sparql_query_uri)
+    raw_alt_sparql_query = requests.get(raw_alt_sparql_query_uri)
     raw_tpf_query = requests.get(raw_tpf_query_uri)
 
     # Call name implemented with SPARQL query
-    if raw_sparql_query.status_code == 200:
+    if raw_sparql_query.status_code == 200 or raw_alt_sparql_query.status_code == 200:
         raw_sparql_query = raw_sparql_query.text
         endpoint = gquery.guess_endpoint_uri(raw_sparql_query, raw_repo_uri)
         glogger.debug("=====================================================")

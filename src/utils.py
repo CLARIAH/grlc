@@ -47,14 +47,14 @@ def build_spec(user, repo, default=False, extraMetadata=[]):
     # SPARQL-custom API
     else:
         for c in resp:
-            if ".rq" in c['name'] or ".tpf" in c['name']:
+            if ".rq" in c['name'] or ".tpf" in c['name'] or ".sparql" in c['name']:
                 call_name = c['name'].split('.')[0]
                 # Retrieve extra metadata from the query decorators
                 raw_query_uri = raw_repo_uri + c['name']
                 resp = requests.get(raw_query_uri).text
 
                 item = None
-                if ".rq" in c['name']:
+                if ".rq" in c['name'] or ".sparql" in c['name']:
                     glogger.info("===================================================================")
                     glogger.info("Processing SPARQL query: {}".format(c['name']))
                     glogger.info("===================================================================")
