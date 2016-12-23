@@ -8,10 +8,9 @@ import logging
 
 glogger = logging.getLogger(__name__)
 
-def build_spec(user, repo, default=False, extraMetadata=[]):
+def build_spec(user, repo, extraMetadata=[]):
     '''
     Build grlc specification for the given github user / repo
-    default: guess an API instead of reading it from remote .rq files
     '''
     api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
     api_repo_content_uri = api_repo_uri + '/contents'
@@ -21,53 +20,28 @@ def build_spec(user, repo, default=False, extraMetadata=[]):
     # Fetch all .rq files
     items = []
 
-    # default API
-    if default:
-        endpoint = gquery.guess_endpoint_uri("", raw_repo_uri)
-        glogger.info("Building default API for endpoint {}".format(endpoint))
+    for c in resp:
+        if ".rq" in c['name'] or ".tpf" in c['name'] or ".sparql" in c['name']:
+            call_name = c['name'].split('.')[0]
+            # Retrieve extra metadata from the query decorators
+            raw_query_uri = raw_repo_uri + c['name']
+            resp = requests.get(raw_query_uri).text
 
-        types_json = requests.get(endpoint, params={'query': static.SPARQL_TYPES}, headers={'Accept': static.mimetypes['json']}).json()
-        for entity_type in types_json['results']['bindings']:
-            # Each of these is an entity type in the endpoint
-            entity_type_uri = entity_type['type']['value']
-            entity_type_name = entity_type_uri.split('/')[-1].split('#')[-1]
-            glogger.debug('Processing API endpoints for entity type {}'.format(entity_type_name))
-
-            item = {
-                'call_name': entity_type_name,
-                'method': 'GET',
-                'tags': entity_type_name,
-                'summary': 'A list of all instances of type {}'.format(entity_type_uri),
-                'description': 'description',
-                'params': None,
-                'item_properties': None,
-                'query': 'query'
-            }
-            items.append(item)
-    # SPARQL-custom API
-    else:
-        for c in resp:
-            if ".rq" in c['name'] or ".tpf" in c['name'] or ".sparql" in c['name']:
-                call_name = c['name'].split('.')[0]
-                # Retrieve extra metadata from the query decorators
-                raw_query_uri = raw_repo_uri + c['name']
-                resp = requests.get(raw_query_uri).text
-
-                item = None
-                if ".rq" in c['name'] or ".sparql" in c['name']:
-                    glogger.info("===================================================================")
-                    glogger.info("Processing SPARQL query: {}".format(c['name']))
-                    glogger.info("===================================================================")
-                    item = process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetadata)
-                elif ".tpf" in c['name']:
-                    glogger.info("===================================================================")
-                    glogger.info("Processing TPF query: {}".format(c['name']))
-                    glogger.info("===================================================================")
-                    item = process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata)
-                else:
-                    glogger.info("Ignoring unsupported source call name: {}".format(c['name']))
-                if item:
-                    items.append(item)
+            item = None
+            if ".rq" in c['name'] or ".sparql" in c['name']:
+                glogger.info("===================================================================")
+                glogger.info("Processing SPARQL query: {}".format(c['name']))
+                glogger.info("===================================================================")
+                item = process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetadata)
+            elif ".tpf" in c['name']:
+                glogger.info("===================================================================")
+                glogger.info("Processing TPF query: {}".format(c['name']))
+                glogger.info("===================================================================")
+                item = process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata)
+            else:
+                glogger.info("Ignoring unsupported source call name: {}".format(c['name']))
+            if item:
+                items.append(item)
     return items
 
 def process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata):
@@ -232,7 +206,7 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
 
     return item
 
-def build_swagger_spec(user, repo, serverName, default=False):
+def build_swagger_spec(user, repo, serverName):
     '''Build grlc specification for the given github user / repo in swagger format '''
     api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
     # Check if we have an updated cached spec for this repo
@@ -260,7 +234,7 @@ def build_swagger_spec(user, repo, serverName, default=False):
     swag['schemes'] = ['http']
     swag['paths'] = {}
 
-    spec = build_spec(user, repo, default)
+    spec = build_spec(user, repo)
     # glogger.debug("Current internal spec data structure")
     # glogger.debug(spec)
     for item in spec:

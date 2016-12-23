@@ -34,8 +34,8 @@ def hello():
 @app.route('/api/<user>/<repo>/<query_name>', methods=['GET'])
 @app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET'])
 def query(user, repo, query_name, content=None):
-    glogger.debug("Got request at endpoint /" + user + "/" + repo + "/" + query_name)
-    glogger.debug("Request accept header: " +request.headers["Accept"])
+    glogger.debug("-----> Executing call name at /{}/{}/{}".format(user, repo, query_name))
+    glogger.debug("Request accept header: " + request.headers["Accept"])
     raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
 
     # The URIs of all candidates
@@ -52,7 +52,7 @@ def query(user, repo, query_name, content=None):
         if raw_sparql_query.status_code == 200:
             raw_sparql_query = raw_sparql_query.text
         else:
-            raw_sparql_query = raw_alt_sparql_query.text 
+            raw_sparql_query = raw_alt_sparql_query.text
 
         endpoint = gquery.guess_endpoint_uri(raw_sparql_query, raw_repo_uri)
         glogger.debug("=====================================================")
@@ -171,39 +171,22 @@ def query(user, repo, query_name, content=None):
     else:
         return "Couldn't find a SPARQL, RDF dump, or TPF query with the requested name", 404
 
+
 @app.route('/api/<user>/<repo>')
 @app.route('/api/<user>/<repo>/')
 @app.route('/api/<user>/<repo>/api-docs')
 def api_docs(user, repo):
     return render_template('api-docs.html', user=user, repo=repo)
 
-@app.route('/api/<user>/<repo>/api-docs-default')
-def api_docs_default(user, repo):
-    return render_template('api-docs-default.html', user=user, repo=repo)
-
 @app.route('/api/<user>/<repo>/spec')
 def swagger_spec(user, repo):
-    glogger.info("Generating swagger spec for /" + user + "/" + repo)
+    glogger.info("-----> Generating swagger spec for /{}/{}".format(user,repo))
 
     swag = utils.build_swagger_spec(user, repo, app.config['SERVER_NAME'])
-
-    # Store the generated spec in the cache
-    # cache_obj[api_repo_uri] = {'date' : json.dumps(datetime.datetime.now(), default=util.date_handler).split('\"')[1], 'spec' : swag}
-    # with open(cache.CACHE_NAME, 'w') as cache_file:
-    #     json.dump(cache_obj, cache_file)
-    # glogger.debug("Local cache updated")
+    glogger.info("-----> API spec generation for /{}/{} complete".format(user, repo))
 
     resp_spec = make_response(jsonify(swag))
-    resp_spec.headers['Cache-Control'] = 'public, max-age=900' # Caching JSON specs for 15 minutes
-    return resp_spec
-
-@app.route('/api/<user>/<repo>/spec-default')
-def swagger_spec_default(user, repo):
-    glogger.info("Generating default spec for /" + user + "/" + repo)
-
-    swag = utils.build_swagger_spec(user, repo, app.config['SERVER_NAME'], default=True)
-
-    resp_spec = make_response(jsonify(swag))
+    # TODO: make max-age customizable
     resp_spec.headers['Cache-Control'] = 'public, max-age=900' # Caching JSON specs for 15 minutes
     return resp_spec
 

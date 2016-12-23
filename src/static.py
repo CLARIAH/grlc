@@ -21,11 +21,3 @@ DEFAULT_ENDPOINT = 'http://dbpedia.org/sparql'
 # GitHub base URLS
 GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/'
 GITHUB_API_BASE_URL = 'https://api.github.com/repos/'
-
-# Default queries for automatic API construction ('default mode')
-SPARQL_TYPES = """ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-SELECT DISTINCT ?type (COUNT(?sub) AS ?inst)  WHERE {
-  ?sub a ?type .
-} GROUP BY ?type ORDER BY DESC(?inst)
-"""
