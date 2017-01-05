@@ -11,17 +11,19 @@ grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor
 ### Install and run
 
 <pre>
-git clone https://github.com/CLARIAH/grlc
-cd grlc
 virtualenv .
 source bin/activate
-pip install -r requirements.txt
-python src/server.py
+pip install git+git://github.com/CLARIAH/grlc
+grlc-server
 </pre>
 
 Direct your browser to [http://localhost:8088](http://localhost:8088).
 
-Alternatively, you can use the provided Gunicorn configuration to run it as a daemon on your server.
+Alternatively, you can use the provided Gunicorn configuration to run it as a daemon on your server. You can use [this gunicorn_config.py](./gunicorn_config.py).
+
+<pre>
+gunicorn -c gunicorn_config.py grlc.server:app
+</pre>
 
 #### Docker
 
@@ -29,7 +31,7 @@ A bundle containing grlc, nginx and other dependencies is available at https://h
 
 - `docker pull clariah/grlc:1.0.0`: install the container
 - `docker-compose up`: launch grlc
-- `docker-compose up /bin/bash`: get into container 
+- `docker-compose up /bin/bash`: get into container
 
 ### Usage
 
@@ -63,7 +65,7 @@ A couple of SPARQL comment embedded decorators are available to make your swagge
     <pre>&#35;+ enumerate:
   &#35;+   - var1
   &#35;+   - var2</pre>
-  
+
   Notice that these should be plain variable names without SPARQL/BASIL conventions (so `var1` instead of `?_var1_iri`)
 
 See examples at [https://github.com/CEDAR-project/Queries](https://github.com/CEDAR-project/Queries).
