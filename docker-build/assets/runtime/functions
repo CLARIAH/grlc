@@ -68,3 +68,22 @@ setup_nginx() {
   mkdir -p ${GRLC_LOG_DIR}/nginx
   service nginx restart
 }
+
+map_uidgid() {
+  echo "Mapping UID/GID"
+  ## Adapt uid and gid for ${REDMINE_USER}:${REDMINE_USER}
+  USERMAP_ORIG_UID=$(id -u ${GRLC_USER})
+  USERMAP_ORIG_GID=$(id -g ${GRLC_USER})
+  USERMAP_GID=${USERMAP_GID:-${USERMAP_UID:-$USERMAP_ORIG_GID}}
+  USERMAP_UID=${USERMAP_UID:-$USERMAP_ORIG_UID}
+  if [[ ${USERMAP_UID} != ${USERMAP_ORIG_UID} ]] || [[ ${USERMAP_GID} != ${USERMAP_ORIG_GID} ]]; then
+    echo "Adapting uid and gid for ${GRLC_USER}:${GRLC_USER} to $USERMAP_UID:$USERMAP_GID"
+    groupmod -g ${USERMAP_GID} ${GRLC_USER}
+    sed -i -e "s/:${USERMAP_ORIG_UID}:${USERMAP_GID}:/:${USERMAP_UID}:${USERMAP_GID}:/" /etc/passwd
+    # find ${TRIPLY_HOME} -path ${TRIPLY_DATA_DIR}/\* -prune -o -print0 | xargs -0 chown -h ${TRIPLY_USER}:${TRIPLY_USER}
+  fi
+
+  # take ownership of directories
+  chown -R ${GRLC_USER}:${GRLC_USER} ${GRLC_HOME}
+  chown -R ${GRLC_USER}:${GRLC_USER} ${GRLC_LOG_DIR}
+}
