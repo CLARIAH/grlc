@@ -196,4 +196,4 @@ def swagger_spec(user, repo):
 #         return 'foo'
 
 if __name__ == '__main__':
-    app.run(port=8088, debug=True)
+    app.run(host=static.DEFAULT_HOST, port=static.DEFAULT_PORT, debug=True)
