@@ -11,12 +11,12 @@ grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor
 ### Install and run
 
 <pre>
-git clone --recursive https://github.com/CLARIAH/grlc
+git clone https://github.com/CLARIAH/grlc
 cd grlc
 virtualenv .
 source bin/activate
 pip install -r requirements.txt
-python grlc.py
+python src/server.py
 </pre>
 
 Direct your browser to [http://localhost:8088](http://localhost:8088).
