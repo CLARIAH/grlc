@@ -109,9 +109,8 @@ def query(user, repo, query_name, content=None):
 
             # Response headers
             resp = make_response(response.text)
-
-        resp.headers['Server'] = 'grlc/1.0.0'
-        resp.headers['Content-Type'] = request.headers['Content-Type']
+            resp.headers['Server'] = 'grlc/1.0.0'
+            resp.headers['Content-Type'] = request.headers['Content-Type']
 
         # If the query is paginated, set link HTTP headers
         if pagination:
