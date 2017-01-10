@@ -6,3 +6,5 @@ services:
      - "8001:80"
     environment:
      - DEBUG=true
+     - USERMAP_GID=1000
+     - USERMAP_UID=1000
