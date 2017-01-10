@@ -8,7 +8,7 @@ grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor
 **Copyright:**	Albert Meroño, VU University Amsterdam  
 **License:**	MIT License (see [license.txt](license.txt))
 
-### Install and run
+## Install and run
 
 Running via [docker](https://www.docker.com/) is the easiest and preferred form of deploying grlc. You'll need a working installation of [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/). To deploy grlc, just pull the latest image from Docker hub, and run docker compose with a `docker-compose.yml` that suits your needs (an example is provided in the root directory):
 
@@ -22,17 +22,17 @@ docker-compose up
 (You can omit the first two commands if you just copy the contents of [this file](docker-compose.yml) in a file named `docker-compose.yml` somehwere in your filesystem)
 If you use the supplied `docker-compose.yml` your grlc instance will be available at http://localhost:8001
 
-## Alternative install methods
+### Alternative install methods
 
-### pip
+#### pip
 
 Coming soon.
 
-### Flask application
+#### Flask application
 
 You'll miss some docker bundled features (like nginx-based caching), but you can find an example of how to run grlc natively [here](https://github.com/CLARIAH/grlc/blob/master/docker-build/entrypoint.sh#L20)
 
-### Usage
+## Usage
 
 grlc assumes a GitHub repository (support for general git repos is on the way) where you store your SPARQL queries as .rq files (like in [this one](https://github.com/CEDAR-project/Queries)). grlc will create an API operation per such a SPARQL query/.rq file.
 
@@ -49,7 +49,7 @@ By default grlc will direct your queries to the DBPedia SPARQL endpoint. To chan
 
 That's it!
 
-### Decorator syntax
+## Decorator syntax
 A couple of SPARQL comment embedded decorators are available to make your swagger-ui look nicer (note all comments start with <code>#+ </code>):
 
 - To specify a query-specific endpoint, <code>#+ endpoint: http://example.com/sparql</code>.
@@ -69,7 +69,7 @@ A couple of SPARQL comment embedded decorators are available to make your swagge
 
 See examples at [https://github.com/albertmeronyo/lodapi](https://github.com/albertmeronyo/lodapi).
 
-### Features
+## Features
 
 - Request parameter mappings into SPARQL: grlc is compliant with [BASIL's convention](https://github.com/the-open-university/basil/wiki/SPARQL-variable-name-convention-for-WEB-API-parameters-mapping) on how to map GET/POST request parameters into SPARQL
 - Automatic, user customizable population of parameter values in swagger-ui's dropdown menus via SPARQL triple pattern querying
