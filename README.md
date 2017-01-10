@@ -10,26 +10,27 @@ grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor
 
 ### Install and run
 
+Running via [docker](https://www.docker.com/) is the easiest and preferred form of deploying grlc. You'll need a working installation of [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/). To deploy grlc, just pull the latest image from Docker hub, and run docker compose with a `docker-compose.yml` that suits your needs (an example is provided in the root directory):
+
 <pre>
 git clone https://github.com/CLARIAH/grlc
 cd grlc
-virtualenv .
-source bin/activate
-pip install -r requirements.txt
-python src/server.py
+docker pull clariah/grlc
+docker-compose up
 </pre>
 
-Direct your browser to [http://localhost:8088](http://localhost:8088).
+(You can omit the first two commands if you just copy the contents of [this file](docker-compose.yml) in a file named `docker-compose.yml` somehwere in your filesystem)
+If you use the supplied `docker-compose.yml` your grlc instance will be available at http://localhost:8001
 
-Alternatively, you can use the provided Gunicorn configuration to run it as a daemon on your server.
+## Alternative install methods
 
-#### Docker
+### pip
 
-A bundle containing grlc, nginx and other dependencies is available at https://hub.docker.com/. If you have a working installation of [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/), you can quickly deploy grlc in your system:
+Coming soon.
 
-- `docker pull clariah/grlc:1.0.0`: install the container
-- `docker-compose up`: launch grlc
-- `docker-compose up /bin/bash`: get into container 
+### Flask application
+
+You'll miss some docker bundled features (like nginx-based caching), but you can find an example of how to run grlc natively [here](https://github.com/CLARIAH/grlc/blob/master/docker-build/entrypoint.sh#L20)
 
 ### Usage
 
@@ -66,7 +67,7 @@ A couple of SPARQL comment embedded decorators are available to make your swagge
   
   Notice that these should be plain variable names without SPARQL/BASIL conventions (so `var1` instead of `?_var1_iri`)
 
-See examples at [https://github.com/CEDAR-project/Queries](https://github.com/CEDAR-project/Queries).
+See examples at [https://github.com/albertmeronyo/lodapi](https://github.com/albertmeronyo/lodapi).
 
 ### Features
 
@@ -74,3 +75,5 @@ See examples at [https://github.com/CEDAR-project/Queries](https://github.com/CE
 - Automatic, user customizable population of parameter values in swagger-ui's dropdown menus via SPARQL triple pattern querying
 - URL-based content negotiation: you can request for specific content types by attaching them to the operation request URL, e.g. [http://localhost:8088/CEDAR-project/Queries/residenceStatus_all.csv](http://localhost:8088/CEDAR-project/Queries/residenceStatus_all.csv) will request for results in CSV
 - Pagination of API results, as per the `pagination` decorator and [GitHub's API Pagination Traversal](https://developer.github.com/guides/traversing-with-pagination/)
+- Docker images in Docker Hub for easy deployment
+- Compatibility with [Linked Data Fragments](http://linkeddatafragments.org/) servers, RDF dumps, and HTML+RDFa files
