@@ -20,7 +20,6 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 COPY assets/build/ ${GRLC_BUILD_DIR}/
-ARG CACHE_BUST=1
 RUN bash ${GRLC_BUILD_DIR}/install.sh
 
 COPY assets/runtime/ ${GRLC_RUNTIME_DIR}/
