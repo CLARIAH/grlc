@@ -21,7 +21,7 @@ exec_as_grlc git config --global gc.auto 0
 
 
 
-exec_as_grlc git clone -b dev ${GRLC_CLONE_URL} ${GRLC_INSTALL_DIR}
+exec_as_grlc git clone ${GRLC_CLONE_URL} ${GRLC_INSTALL_DIR}
 cd ${GRLC_INSTALL_DIR}
 pip install -r requirements.txt
 
