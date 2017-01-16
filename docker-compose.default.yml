@@ -8,5 +8,3 @@ services:
      - DEBUG=true
      - USERMAP_GID=1000
      - USERMAP_UID=1000
-    volumes:
-     - /home/amp/src/grlc:/home/grlc/grlc
