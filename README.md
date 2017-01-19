@@ -10,17 +10,17 @@ grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor
 
 ## Install and run
 
-Running via [docker](https://www.docker.com/) is the easiest and preferred form of deploying grlc. You'll need a working installation of [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/). To deploy grlc, just pull the latest image from Docker hub, and run docker compose with a `docker-compose.yml` that suits your needs (an example is provided in the root directory):
+Running via [docker](https://www.docker.com/) is the easiest and preferred form of deploying grlc. You'll need a working installation of [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/). To deploy grlc, just pull the latest image from Docker hub, and run docker compose with a `docker-compose.yml` that suits your needs (an [example](docker-compose.default.yml) is provided in the root directory):
 
 <pre>
 git clone https://github.com/CLARIAH/grlc
 cd grlc
 docker pull clariah/grlc
-docker-compose up
+docker-compose -f docker-compose.default.yml up
 </pre>
 
-(You can omit the first two commands if you just copy the contents of [this file](docker-compose.yml) in a file named `docker-compose.yml` somehwere in your filesystem)
-If you use the supplied `docker-compose.yml` your grlc instance will be available at http://localhost:8001
+(You can omit the first two commands if you just copy [this file](docker-compose.default.yml) somehwere in your filesystem)
+If you use the supplied `docker-compose.default.yml` your grlc instance will be available at http://localhost:8001
 
 ### Alternative install methods
 
