@@ -125,7 +125,7 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
     glogger.debug("Read endpoint dump MIME type: " + str(mime))
 
     # endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
-    endpoint = gquery.guess_endpoint_uri("", raw_repo_uri)
+    endpoint = gquery.guess_endpoint_uri(resp, raw_repo_uri)
     glogger.debug("Read query endpoint: " + endpoint)
 
     try:
