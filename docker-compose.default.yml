@@ -2,6 +2,7 @@ version: '2'
 services:
   grlc:
     image: clariah/grlc:latest
+    restart: unless-stopped
     ports:
      - "8001:80"
     environment:
