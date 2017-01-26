@@ -49,6 +49,14 @@ By default grlc will direct your queries to the DBPedia SPARQL endpoint. To chan
 
 That's it!
 
+### Example APIs
+
+Check these out:
+
+- http://grlc.io/api/CLARIAH/wp4-queries/
+- http://grlc.io/api/albertmeronyo/lodapi/
+- http://grlc.io/api/albertmeronyo/lsq-api
+
 ## Decorator syntax
 A couple of SPARQL comment embedded decorators are available to make your swagger-ui look nicer (note all comments start with <code>#+ </code>):
 
