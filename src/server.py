@@ -171,8 +171,7 @@ def query(user, repo, query_name, content=None):
         return "Couldn't find a SPARQL, RDF dump, or TPF query with the requested name", 404
 
 
-@app.route('/api/<user>/<repo>')
-@app.route('/api/<user>/<repo>/')
+@app.route('/api/<user>/<repo>', strict_slashes=False)
 @app.route('/api/<user>/<repo>/api-docs')
 def api_docs(user, repo):
     return render_template('api-docs.html', user=user, repo=repo)
