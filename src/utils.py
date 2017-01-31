@@ -3,10 +3,19 @@ import requests
 import gquery
 import traceback
 import cgi
+from rdflib import Graph
 
 import logging
 
 glogger = logging.getLogger(__name__)
+
+def turtleize(swag):
+    '''
+    Transforoms a JSON swag object into a text/turtle LDA equivalent representation
+    '''
+    swag_graph = Graph()
+
+    return swag_graph.serialize(format='turtle')
 
 def build_spec(user, repo, extraMetadata=[]):
     '''

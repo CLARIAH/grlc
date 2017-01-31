@@ -12,7 +12,8 @@ XSD_DATATYPES = ["decimal", "float", "double", "integer", "positiveInteger", "ne
 mimetypes = {
     'csv' : 'text/csv; q=1.0, */*; q=0.1',
     'json' : 'application/json; q=1.0, application/sparql-results+json; q=0.8, */*; q=0.1',
-    'html' : 'text/html; q=1.0, */*; q=0.1'
+    'html' : 'text/html; q=1.0, */*; q=0.1',
+    'ttl' : 'text/turtle'
 }
 
 # Logging format (prettier than the ugly standard in Flask)
@@ -24,3 +25,6 @@ DEFAULT_ENDPOINT = 'http://dbpedia.org/sparql'
 # GitHub base URLS
 GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/'
 GITHUB_API_BASE_URL = 'https://api.github.com/repos/'
+
+# Cache control
+CACHE_CONTROL_POLICY = 'public, max-age=900'
