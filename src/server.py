@@ -21,14 +21,10 @@ logging.basicConfig(level=logging.DEBUG, format=static.LOG_FORMAT)
 app.debug_log_format = static.LOG_FORMAT
 glogger = logging.getLogger(__name__)
 
-# Initialize cache
-# cache_obj = cache.init_cache()
-
 # Server routes
 @app.route('/')
 def hello():
     resp = make_response(render_template('index.html'))
-    #resp.headers['Cache-Control'] = 'public, max-age=43200'
     return resp
 
 @app.route('/api/<user>/<repo>/<query_name>', methods=['GET'])
@@ -109,9 +105,8 @@ def query(user, repo, query_name, content=None):
 
             # Response headers
             resp = make_response(response.text)
-
-        resp.headers['Server'] = 'grlc/1.0.0'
-        resp.headers['Content-Type'] = request.headers['Content-Type']
+            resp.headers['Server'] = 'grlc/1.0.0'
+            resp.headers['Content-Type'] = response.headers['Content-Type']
 
         # If the query is paginated, set link HTTP headers
         if pagination:
@@ -172,28 +167,34 @@ def query(user, repo, query_name, content=None):
         return "Couldn't find a SPARQL, RDF dump, or TPF query with the requested name", 404
 
 
-@app.route('/api/<user>/<repo>')
-@app.route('/api/<user>/<repo>/')
+@app.route('/api/<user>/<repo>', strict_slashes=False)
 @app.route('/api/<user>/<repo>/api-docs')
 def api_docs(user, repo):
     return render_template('api-docs.html', user=user, repo=repo)
 
-@app.route('/api/<user>/<repo>/spec')
-def swagger_spec(user, repo):
+@app.route('/api/<user>/<repo>/spec', methods=['GET'])
+def swagger_spec(user, repo, content=None):
     glogger.info("-----> Generating swagger spec for /{}/{}".format(user,repo))
 
     swag = utils.build_swagger_spec(user, repo, app.config['SERVER_NAME'])
-    glogger.info("-----> API spec generation for /{}/{} complete".format(user, repo))
 
     resp_spec = make_response(jsonify(swag))
+    resp_spec.headers['Content-Type'] = 'application/json'
+
+    if 'text/turtle' in request.headers['Accept']:
+        resp_spec = make_response(utils.turtleize(swag))
+        resp_spec.headers['Content-Type'] = 'text/turtle'
+
+    # elif 'text/html' in request.headers['Accept']:
+    #     resp_string = results.serialize(format='html')
+
     # TODO: make max-age customizable
-    resp_spec.headers['Cache-Control'] = 'public, max-age=900' # Caching JSON specs for 15 minutes
+    resp_spec.headers['Cache-Control'] = static.CACHE_CONTROL_POLICY # Caching JSON specs for 15 minutes
+
+    glogger.info("-----> API spec generation for /{}/{} complete".format(user, repo))
+
     return resp_spec
 
-# TODO: Issue #23 - catch GitHub webhook POST to auto-update spec cache
-# @app.route('/sparql', methods = ['POST'])
-# def github_push():
-#         return 'foo'
 
 if __name__ == '__main__':
-    app.run(port=8088, debug=True)
+    app.run(host=static.DEFAULT_HOST, port=static.DEFAULT_PORT, debug=True)

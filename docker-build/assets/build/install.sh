@@ -12,7 +12,7 @@ exec_as_grlc() {
 }
 
 #add grlc user
-adduser --disabled-login --gecos 'Grlc' ${GRLC_USER}
+adduser --disabled-login --gecos 'grlc' ${GRLC_USER}
 passwd -d ${GRLC_USER}
 
 #configure git

@@ -13,16 +13,11 @@ ENV GRLC_INSTALL_DIR="${GRLC_HOME}/grlc" \
     GRLC_RUNTIME_DIR="${GRLC_CACHE_DIR}/runtime"
 
 RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y nginx git-core logrotate python-pip locales gettext-base \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y nginx git-core logrotate python-pip locales gettext-base sudo \
  && update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX \
  && locale-gen en_US.UTF-8 \
  && DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales \
  && rm -rf /var/lib/apt/lists/*
-
- RUN apt-get update \
-  && DEBIAN_FRONTEND=noninteractive apt-get install -y sudo ;
-
-
 
 COPY assets/build/ ${GRLC_BUILD_DIR}/
 RUN bash ${GRLC_BUILD_DIR}/install.sh

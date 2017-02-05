@@ -3,10 +3,19 @@ import requests
 import gquery
 import traceback
 import cgi
+from rdflib import Graph
 
 import logging
 
 glogger = logging.getLogger(__name__)
+
+def turtleize(swag):
+    '''
+    Transforoms a JSON swag object into a text/turtle LDA equivalent representation
+    '''
+    swag_graph = Graph()
+
+    return swag_graph.serialize(format='turtle')
 
 def build_spec(user, repo, extraMetadata=[]):
     '''
@@ -125,7 +134,7 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
     glogger.debug("Read endpoint dump MIME type: " + str(mime))
 
     # endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
-    endpoint = gquery.guess_endpoint_uri("", raw_repo_uri)
+    endpoint = gquery.guess_endpoint_uri(resp, raw_repo_uri)
     glogger.debug("Read query endpoint: " + endpoint)
 
     try:

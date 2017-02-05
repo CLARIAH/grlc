@@ -4,6 +4,8 @@ source ${GRLC_RUNTIME_DIR}/functions
 
 [[ $DEBUG == true ]] && set -x
 
+map_uidgid
+
 case ${1} in
   app:start)
     setup_nginx
@@ -15,7 +17,7 @@ case ${1} in
     case ${1} in
       app:start)
         cd ${GRLC_INSTALL_DIR}
-        gunicorn -c gunicorn_config.py grlc.server:app
+        gunicorn -c gunicorn_config.py src.server:app
         # migrate_database
         # rm -rf /var/run/supervisor.sock
         # exec /usr/bin/supervisord -nc /etc/supervisor/supervisord.conf

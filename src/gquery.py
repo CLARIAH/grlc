@@ -27,6 +27,7 @@ def guess_endpoint_uri(rq, ru):
 
     # Decorator
     try:
+        glogger.debug("{}".format(get_yaml_decorators(rq)['endpoint']))
         endpoint = get_yaml_decorators(rq)['endpoint']
         glogger.info("Decorator guessed endpoint: " + endpoint)
     except (TypeError, KeyError):
@@ -161,6 +162,7 @@ def get_yaml_decorators(rq):
     '''
     Returns the yaml decorator metadata only (this is needed by triple pattern fragments)
     '''
+    glogger.debug('Guessing decorators for query {}'.format(rq))
     if not rq:
         return None
 
@@ -172,6 +174,8 @@ def get_yaml_decorators(rq):
     if query_metadata == None:
         query_metadata = {}
     query_metadata['query'] = query_string
+
+    glogger.debug("Parsed query metadata: {}".format(query_metadata))
 
     return query_metadata
 
@@ -189,7 +193,7 @@ def get_metadata(rq):
             query_metadata['variables'] = parsed_query.algebra['PV']
     except ParseException:
         glogger.error("Could not parse query")
-        glogger.error(query_string)
+        glogger.error(query_metadata['query'])
         print traceback.print_exc()
         return query_metadata
 
