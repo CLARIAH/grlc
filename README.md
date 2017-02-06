@@ -6,7 +6,7 @@ grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor
 
 **Author:**	Albert Meroño  
 **Copyright:**	Albert Meroño, VU University Amsterdam  
-**License:**	MIT License (see [license.txt](license.txt))
+**License:**	MIT License (see [LICENSE.txt](LICENSE.txt))
 
 ## Install and run
 

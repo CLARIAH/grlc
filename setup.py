@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: iso-8859-15 -*-
 
 from distutils.core import setup
 import os
@@ -14,6 +15,7 @@ setup(name='grlc',
       description='grlc, the git repository linked data API constructor',
       author='Albert Meroño',
       url='https://github.com/CLARIAH/grlc',
+      download_url='https://github.com/c-martinez/grlc/tarball/0.9',
       packages=['grlc'],
       package_dir = {'grlc': 'src'},
       package_data = {'grlc': grlc_data},
