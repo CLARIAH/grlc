@@ -6,7 +6,7 @@ grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor
 
 **Author:**	Albert Meroño  
 **Copyright:**	Albert Meroño, VU University Amsterdam  
-**License:**	MIT License (see [license.txt](license.txt))
+**License:**	MIT License (see [LICENSE.txt](LICENSE.txt))
 
 ## Install and run
 
@@ -72,7 +72,7 @@ A couple of SPARQL comment embedded decorators are available to make your swagge
     <pre>&#35;+ enumerate:
   &#35;+   - var1
   &#35;+   - var2</pre>
-  
+
   Notice that these should be plain variable names without SPARQL/BASIL conventions (so `var1` instead of `?_var1_iri`)
 
 See examples at [https://github.com/albertmeronyo/lodapi](https://github.com/albertmeronyo/lodapi).
