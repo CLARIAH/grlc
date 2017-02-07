@@ -185,10 +185,6 @@ def swagger_spec(user, repo, content=None):
         resp_spec = make_response(utils.turtleize(swag))
         resp_spec.headers['Content-Type'] = 'text/turtle'
 
-    # elif 'text/html' in request.headers['Accept']:
-    #     resp_string = results.serialize(format='html')
-
-    # TODO: make max-age customizable
     resp_spec.headers['Cache-Control'] = static.CACHE_CONTROL_POLICY # Caching JSON specs for 15 minutes
 
     glogger.info("-----> API spec generation for /{}/{} complete".format(user, repo))
