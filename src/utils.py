@@ -1,7 +1,6 @@
-import static
+import grlc.static as static
+import grlc.gquery as gquery
 import requests
-import gquery
-import traceback
 import cgi
 from rdflib import Graph
 
@@ -80,6 +79,7 @@ def process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata):
     glogger.debug("Read query endpoint: " + endpoint)
 
     # If this query allows pagination, add page number as parameter
+    params = []
     if pagination:
         pagination_param = {}
         pagination_param['name'] = "page"
@@ -94,6 +94,7 @@ def process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata):
         'tags': tags,
         'summary': summary,
         'description': description,
+        'params': params,
         'query': query_metadata['query']
     }
 
@@ -140,7 +141,7 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
     try:
         parameters = gquery.get_parameters(resp, endpoint)
     except Exception as e:
-        print traceback.print_exc()
+        glogger.error(e)
         glogger.error("Could not parse parameters of query {}".format(raw_query_uri))
         return None
 
@@ -150,7 +151,7 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
     # As per #3, prefetching IRIs via SPARQL and filling enum
 
     params = []
-    for v, p in parameters.items():
+    for v, p in list(parameters.items()):
         param = {}
         param['name'] = p['name']
         param['type'] = p['type']

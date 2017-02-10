@@ -9,9 +9,9 @@ import re
 from rdflib import Graph
 
 # grlc modules
-import static as static
-import gquery as gquery
-import utils as utils
+import grlc.static as static
+import grlc.gquery as gquery
+import grlc.utils as utils
 
 # The Flask app
 app = Flask(__name__)
