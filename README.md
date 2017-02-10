@@ -24,13 +24,22 @@ If you use the supplied `docker-compose.default.yml` your grlc instance will be 
 
 ### Alternative install methods
 
+Through these you'll miss some cool docker bundled features (like nginx-based caching). We provide these alternatives just for testing, development scenarios, or docker compatibility reasons.
+
 #### pip
 
-Coming soon.
+If you want to use grlc as a library, you'll find it useful to install via `pip`.
+
+<pre>
+pip install grlc
+grlc-server
+</pre>
+
+More details can be found at [grlc's PyPi page](https://pypi.python.org/pypi/grlc/1.0) (thanks to [c-martinez](https://github.com/c-martinez)!).
 
 #### Flask application
 
-You'll miss some docker bundled features (like nginx-based caching), but you can find an example of how to run grlc natively [here](https://github.com/CLARIAH/grlc/blob/master/docker-build/entrypoint.sh#L20)
+ you can find an example of how to run grlc natively [here](https://github.com/CLARIAH/grlc/blob/master/docker-build/entrypoint.sh#L20)
 
 ## Usage
 
