@@ -19,11 +19,11 @@ def init_cache():
             try:
                 cache_obj = json.load(cache_file)
             except ValueError:
-                print "The cache file seems to be empty, starting with flushed cache"
+                print("The cache file seems to be empty, starting with flushed cache")
     except IOError:
-        print "The cache file seems to be empty, starting with flushed cache"
+        print("The cache file seems to be empty, starting with flushed cache")
 
-    print "Loaded JSON cache"
+    print("Loaded JSON cache")
 
     return cache_obj
 

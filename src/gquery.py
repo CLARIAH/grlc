@@ -12,7 +12,7 @@ import re
 import requests
 
 # grlc modules
-import static
+import grlc.static as static
 
 glogger = logging.getLogger(__name__)
 
@@ -31,16 +31,16 @@ def guess_endpoint_uri(rq, ru):
         endpoint = get_yaml_decorators(rq)['endpoint']
         glogger.info("Decorator guessed endpoint: " + endpoint)
     except (TypeError, KeyError):
-	# File
-    	try:
-    	    endpoint_file_uri = ru + "endpoint.txt"
+    # File
+        try:
+            endpoint_file_uri = ru + "endpoint.txt"
             endpoint = requests.get(endpoint_file_uri).text.strip()
             if endpoint.status_code != 200:
                 endpoint = static.DEFAULT_ENDPOINT
-     	    glogger.debug("File guessed endpoint: " + endpoint)
+            glogger.debug("File guessed endpoint: " + endpoint)
         # TODO: except all is really ugly
-    	except:
-    	    # Default
+        except:
+            # Default
             glogger.warning("No endpoint specified, using default ({})".format(endpoint))
 
     return endpoint
@@ -194,7 +194,7 @@ def get_metadata(rq):
     except ParseException:
         glogger.error("Could not parse query")
         glogger.error(query_metadata['query'])
-        print traceback.print_exc()
+        print(traceback.print_exc())
         return query_metadata
 
     return query_metadata
