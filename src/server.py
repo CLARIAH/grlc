@@ -15,7 +15,6 @@ import utils as utils
 
 # The Flask app
 app = Flask(__name__)
-app.config['SERVER_NAME'] = static.SERVER_NAME
 
 # Set logging format
 logging.basicConfig(level=logging.DEBUG, format=static.LOG_FORMAT)
