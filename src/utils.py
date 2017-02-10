@@ -150,7 +150,7 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
     # As per #3, prefetching IRIs via SPARQL and filling enum
 
     params = []
-    for v, p in parameters.items():
+    for v, p in list(parameters.items()):
         param = {}
         param['name'] = p['name']
         param['type'] = p['type']

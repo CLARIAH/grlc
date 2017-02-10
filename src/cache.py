@@ -2,7 +2,7 @@
 
 # cache.py: grlc spec caching utilities
 import json
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import logging
 
 # Name of the cache json file
@@ -31,7 +31,7 @@ def is_cache_updated(cache_obj, repo_uri):
     if repo_uri not in cache_obj:
         return False
     cache_date = cache_obj[repo_uri]['date']
-    stream = urllib2.urlopen(repo_uri)
+    stream = urllib.request.urlopen(repo_uri)
     resp = json.load(stream)
     github_date = resp['pushed_at']
 
