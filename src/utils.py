@@ -1,5 +1,5 @@
-import grlc.static as static
-import grlc.gquery as gquery
+import static as static
+import gquery as gquery
 import requests
 import cgi
 from rdflib import Graph

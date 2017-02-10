@@ -12,7 +12,7 @@ import re
 import requests
 
 # grlc modules
-import grlc.static as static
+import static as static
 
 glogger = logging.getLogger(__name__)
 
