@@ -15,6 +15,7 @@ import utils as utils
 
 # The Flask app
 app = Flask(__name__)
+app.config['SERVER_NAME'] = static.SERVER_NAME
 
 # Set logging format
 logging.basicConfig(level=logging.DEBUG, format=static.LOG_FORMAT)
@@ -176,7 +177,7 @@ def api_docs(user, repo):
 def swagger_spec(user, repo, content=None):
     glogger.info("-----> Generating swagger spec for /{}/{}".format(user,repo))
 
-    swag = utils.build_swagger_spec(user, repo, app.config['SERVER_NAME'])
+    swag = utils.build_swagger_spec(user, repo, static.SERVER_NAME)
 
     resp_spec = make_response(jsonify(swag))
     resp_spec.headers['Content-Type'] = 'application/json'
