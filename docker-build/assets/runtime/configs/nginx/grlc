@@ -54,4 +54,8 @@ server {
     proxy_set_header    X-Forwarded-Proto   {{NGINX_X_FORWARDED_PROTO}};
   }
 
+  location ~* \.(eot|ttf|woff|woff2)$ {
+    add_header Access-Control-Allow-Origin *;
+  }
+
 }
