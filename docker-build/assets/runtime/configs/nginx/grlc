@@ -54,7 +54,7 @@ server {
     proxy_set_header    X-Forwarded-Proto   {{NGINX_X_FORWARDED_PROTO}};
 
     add_header Access-Control-Allow-Origin *;
-
+    
   }
 
 }

@@ -6,6 +6,8 @@ from rdflib import Graph
 
 import logging
 
+from prov import grlcPROV
+
 glogger = logging.getLogger(__name__)
 
 def turtleize(swag):
@@ -16,7 +18,7 @@ def turtleize(swag):
 
     return swag_graph.serialize(format='turtle')
 
-def build_spec(user, repo, extraMetadata=[]):
+def build_spec(user, repo, prov, extraMetadata=[]):
     '''
     Build grlc specification for the given github user / repo
     '''
@@ -25,6 +27,7 @@ def build_spec(user, repo, extraMetadata=[]):
     raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
 
     resp = requests.get(api_repo_content_uri).json()
+
     # Fetch all .rq files
     items = []
 
@@ -34,6 +37,9 @@ def build_spec(user, repo, extraMetadata=[]):
             # Retrieve extra metadata from the query decorators
             raw_query_uri = raw_repo_uri + c['name']
             resp = requests.get(raw_query_uri).text
+
+            # Add query URI as used entity by the logged activity
+            prov.add_used_entity(raw_query_uri)
 
             item = None
             if ".rq" in c['name'] or ".sparql" in c['name']:
@@ -216,7 +222,7 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
 
     return item
 
-def build_swagger_spec(user, repo, serverName):
+def build_swagger_spec(user, repo, serverName, prov):
     '''Build grlc specification for the given github user / repo in swagger format '''
     api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
     # Check if we have an updated cached spec for this repo
@@ -224,6 +230,9 @@ def build_swagger_spec(user, repo, serverName):
     #     glogger.info("Reusing updated cache for this spec")
     #     return jsonify(cache_obj[api_repo_uri]['spec'])
     resp = requests.get(api_repo_uri).json()
+
+    # Add the API URI as a used entity by the activity
+    prov.add_used_entity(api_repo_uri)
 
     swag = {}
     swag['swagger'] = '2.0'
@@ -244,7 +253,7 @@ def build_swagger_spec(user, repo, serverName):
     swag['schemes'] = ['http']
     swag['paths'] = {}
 
-    spec = build_spec(user, repo)
+    spec = build_spec(user, repo, prov)
     # glogger.debug("Current internal spec data structure")
     # glogger.debug(spec)
     for item in spec:

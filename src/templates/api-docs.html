@@ -53,6 +53,7 @@
               appName: "your-app-name",
               scopeSeparator: ","
             });
+            get_prov(swaggerApi);
           }
 
           if(window.SwaggerTranslator) {
@@ -115,5 +116,30 @@
 
 <div id="message-bar" class="swagger-ui-wrap" data-sw-translate>&nbsp;</div>
 <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+<div id="ohyeah" class="swagger-ui-wrap" style="margin-top: 20px; display: none;"><a href='#'>Oh, yeah?</a></div>
+<div id="prov" class="swagger-ui-wrap" style="margin-top: 20px"></div>
 </body>
+
+<script>
+$('#ohyeah').click(function(e){
+  console.log('Oh yeah clicked!')
+  var prov = $('#prov');
+  if (prov.is(":visible")) {
+    prov.hide();
+  } else {
+    prov.show();
+  }
+});
+
+function get_prov(api) {
+  $('#ohyeah').show();
+  data = api.swaggerObject['prov'].split("\n");
+  console.log(data);
+  var html = '';
+  for (var i=0; i < data.length; i++) {
+    html += '<div class="swagger-ui-wrap">' + data[i].replace("<", "&lt;").replace(">", "&gt;") + '</div>';
+  }
+  $('#prov').html(html).hide();
+}
+</script>
 </html>

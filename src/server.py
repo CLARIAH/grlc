@@ -12,6 +12,7 @@ from rdflib import Graph
 import static as static
 import gquery as gquery
 import utils as utils
+from prov import grlcPROV
 
 # The Flask app
 app = Flask(__name__)
@@ -176,7 +177,15 @@ def api_docs(user, repo):
 def swagger_spec(user, repo, content=None):
     glogger.info("-----> Generating swagger spec for /{}/{}".format(user,repo))
 
-    swag = utils.build_swagger_spec(user, repo, static.SERVER_NAME)
+    # Init provenance recording
+    prov_g = grlcPROV("http://{}/api/{}/{}/spec".format(static.SERVER_NAME, user, repo))
+
+    swag = utils.build_swagger_spec(user, repo, static.SERVER_NAME, prov_g)
+
+    prov_g.end_prov_graph()
+    prov_g.log_prov_graph()
+
+    swag['prov'] = prov_g.serialize(format='turtle')
 
     resp_spec = make_response(jsonify(swag))
     resp_spec.headers['Content-Type'] = 'application/json'
@@ -190,6 +199,10 @@ def swagger_spec(user, repo, content=None):
     glogger.info("-----> API spec generation for /{}/{} complete".format(user, repo))
 
     return resp_spec
+
+# @app.route('/api/<user>/<repo>/prov', methods=['GET'])
+# def prov(user, repo):
+#     return prov_g.serialize(format='json-ld')
 
 
 if __name__ == '__main__':
