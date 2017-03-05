@@ -30,4 +30,4 @@ GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/'
 GITHUB_API_BASE_URL = 'https://api.github.com/repos/'
 
 # Cache control
-CACHE_CONTROL_POLICY = 'public, max-age=900'
+CACHE_CONTROL_POLICY = 'public, max-age=60'
