@@ -119,30 +119,30 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
         return None
 
     tags = query_metadata['tags'] if 'tags' in query_metadata else []
-    glogger.debug("Read query tags: " + ', '.join(tags))
+    glogger.debug("Read query tags: {}".format(', '.join(tags)))
 
     summary = query_metadata['summary'] if 'summary' in query_metadata else ""
-    glogger.debug("Read query summary: " + summary)
+    glogger.debug("Read query summary: {}".format(summary))
 
     description = query_metadata['description'] if 'description' in query_metadata else ""
-    glogger.debug("Read query description: " + description)
+    glogger.debug("Read query description: {}".format(description))
 
     method = query_metadata['method'].lower() if 'method' in query_metadata else "get"
     if method not in ['get', 'post', 'head', 'put', 'delete', 'options', 'connect']:
         method = "get"
 
     pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
-    glogger.debug("Read query pagination: " + str(pagination))
+    glogger.debug("Read query pagination: {}".format(pagination))
 
     enums = query_metadata['enumerate'] if 'enumerate' in query_metadata else []
-    glogger.debug("Read query enumerates: " + ', '.join(enums))
+    glogger.debug("Read query enumerates: {}".format(', '.join(enums)))
 
     mime = query_metadata['mime'] if 'mime' in query_metadata else ""
-    glogger.debug("Read endpoint dump MIME type: " + str(mime))
+    glogger.debug("Read endpoint dump MIME type: {}".format(mime))
 
     # endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
     endpoint = gquery.guess_endpoint_uri(resp, raw_repo_uri)
-    glogger.debug("Read query endpoint: " + endpoint)
+    glogger.debug("Read query endpoint: {}".format(endpoint))
 
     try:
         parameters = gquery.get_parameters(resp, endpoint)
