@@ -26,7 +26,7 @@ def build_spec(user, repo, prov, extraMetadata=[]):
     api_repo_content_uri = api_repo_uri + '/contents'
     raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
 
-    resp = requests.get(api_repo_content_uri).json()
+    resp = requests.get(api_repo_content_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).json()
 
     # Fetch all .rq files
     items = []
@@ -36,7 +36,7 @@ def build_spec(user, repo, prov, extraMetadata=[]):
             call_name = c['name'].split('.')[0]
             # Retrieve extra metadata from the query decorators
             raw_query_uri = raw_repo_uri + c['name']
-            resp = requests.get(raw_query_uri).text
+            resp = requests.get(raw_query_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).text
 
             # Add query URI as used entity by the logged activity
             prov.add_used_entity(raw_query_uri)
@@ -229,7 +229,7 @@ def build_swagger_spec(user, repo, serverName, prov):
     # if cache.is_cache_updated(cache_obj, api_repo_uri):
     #     glogger.info("Reusing updated cache for this spec")
     #     return jsonify(cache_obj[api_repo_uri]['spec'])
-    resp = requests.get(api_repo_uri).json()
+    resp = requests.get(api_repo_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).json()
 
     # Add the API URI as a used entity by the activity
     prov.add_used_entity(api_repo_uri)

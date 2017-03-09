@@ -34,7 +34,7 @@ def guess_endpoint_uri(rq, ru):
     # File
         try:
             endpoint_file_uri = ru + "endpoint.txt"
-            endpoint = requests.get(endpoint_file_uri).text.strip()
+            endpoint = requests.get(endpoint_file_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).text.strip()
             if endpoint.status_code != 200:
                 endpoint = static.DEFAULT_ENDPOINT
             glogger.debug("File guessed endpoint: " + endpoint)
@@ -152,7 +152,7 @@ def get_enumeration(rq, v, endpoint):
         else:
             codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
         glogger.debug("Codes subquery: {}".format(codes_subquery))
-        codes_json = requests.get(endpoint, params={'query' : codes_subquery}, headers={'Accept' : static.mimetypes['json']}).json()
+        codes_json = requests.get(endpoint, params={'query' : codes_subquery}, headers={'Accept' : static.mimetypes['json'], 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).json()
         for code in codes_json['results']['bindings']:
             vcodes.append(list(code.values())[0]["value"])
 

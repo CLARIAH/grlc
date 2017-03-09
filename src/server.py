@@ -40,9 +40,9 @@ def query(user, repo, query_name, content=None):
     raw_alt_sparql_query_uri = raw_repo_uri + query_name + '.sparql'
     raw_tpf_query_uri = raw_repo_uri + query_name + '.tpf'
 
-    raw_sparql_query = requests.get(raw_sparql_query_uri)
-    raw_alt_sparql_query = requests.get(raw_alt_sparql_query_uri)
-    raw_tpf_query = requests.get(raw_tpf_query_uri)
+    raw_sparql_query = requests.get(raw_sparql_query_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)})
+    raw_alt_sparql_query = requests.get(raw_alt_sparql_query_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)})
+    raw_tpf_query = requests.get(raw_tpf_query_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)})
 
     # Call name implemented with SPARQL query
     if raw_sparql_query.status_code == 200 or raw_alt_sparql_query.status_code == 200:
@@ -98,7 +98,7 @@ def query(user, repo, query_name, content=None):
             # Preapre HTTP request
             headers = { 'Accept' : request.headers['Accept'] }
             if content:
-                headers = { 'Accept' : static.mimetypes[content] }
+                headers = { 'Accept' : static.mimetypes[content] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
             data = { 'query' : paginated_query }
 
             response = requests.get(endpoint, params=data, headers=headers)
@@ -146,9 +146,9 @@ def query(user, repo, query_name, content=None):
         # TODO: pagination for TPF
 
         # Preapre HTTP request
-        headers = { 'Accept' : request.headers['Accept'] }
+        headers = { 'Accept' : request.headers['Accept'] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
         if content:
-            headers = { 'Accept' : static.mimetypes[content] }
+            headers = { 'Accept' : static.mimetypes[content] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
         tpf_list = re.split('\n|=', raw_tpf_query)
         subject = tpf_list[tpf_list.index('subject') + 1]
         predicate = tpf_list[tpf_list.index('predicate') + 1]
