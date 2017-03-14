@@ -25,9 +25,7 @@ exec_as_grlc git clone ${GRLC_CLONE_URL} ${GRLC_INSTALL_DIR}
 cd ${GRLC_INSTALL_DIR}
 pip install -r requirements.txt
 
-# put github's access_token in place
-cp config.default.ini config.ini
-sed -ie "s/xxx/$GRLC_GITHUB_ACCESS_TOKEN/g" config.ini
+exec_as_grlc npm install git2prov
 
 
 

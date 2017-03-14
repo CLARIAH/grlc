@@ -5,6 +5,7 @@
 from rdflib import Graph, URIRef, Namespace, RDF, Literal
 import logging
 from datetime import datetime
+from subprocess import check_output
 
 # grlc modules
 import static as static
@@ -31,6 +32,11 @@ class grlcPROV():
         '''
         Initialize PROV graph with all we know at the start of the recording
         '''
+
+        # Use git2prov to get prov on the repo
+        repo_prov = check_output('git2prov', 'https://github.com/albertmeronyo/lodapi/lodapi.git', 'PROV-O')
+        glogger.debug('Git2PROV output: {}'.format(repo_prov))
+
         self.prov_g.add( (self.agent, RDF.type, self.prov.Agent) )
         self.prov_g.add( (self.entity_d, RDF.type, self.prov.Entity) )
         self.prov_g.add( (self.activity, RDF.type, self.prov.Activity) )

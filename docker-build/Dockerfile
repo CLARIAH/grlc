@@ -13,7 +13,7 @@ ENV GRLC_INSTALL_DIR="${GRLC_HOME}/grlc" \
     GRLC_RUNTIME_DIR="${GRLC_CACHE_DIR}/runtime"
 
 RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y nginx git-core logrotate python-pip locales gettext-base sudo \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y nginx git-core logrotate python-pip locales gettext-base sudo npm nodejs-legacy\
  && update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX \
  && locale-gen en_US.UTF-8 \
  && DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales \
