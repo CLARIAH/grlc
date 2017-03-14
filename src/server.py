@@ -178,7 +178,7 @@ def swagger_spec(user, repo, content=None):
     glogger.info("-----> Generating swagger spec for /{}/{}".format(user,repo))
 
     # Init provenance recording
-    prov_g = grlcPROV("http://{}/api/{}/{}/spec".format(static.SERVER_NAME, user, repo))
+    prov_g = grlcPROV(user, repo)
 
     swag = utils.build_swagger_spec(user, repo, static.SERVER_NAME, prov_g)
 
