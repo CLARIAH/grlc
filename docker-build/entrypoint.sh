@@ -17,6 +17,10 @@ case ${1} in
     case ${1} in
       app:start)
         cd ${GRLC_INSTALL_DIR}
+        # put github's access_token in place
+        cp config.default.ini config.ini
+        sed -i "s/xxx/${GRLC_GITHUB_ACCESS_TOKEN}/" config.ini
+
         gunicorn -c gunicorn_config.py src.server:app
         # migrate_database
         # rm -rf /var/run/supervisor.sock
