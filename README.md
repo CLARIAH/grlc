@@ -4,7 +4,7 @@
 
 grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor, automatically builds Web APIs using SPARQL queries stored in git repositories. http://grlc.io/
 
-**Author:**	Albert Meroño  
+**Contributors:**	[Albert Meroño](https://github.com/albertmeronyo), [Rinke Hoekstra](https://github.com/RinkeHoekstra), [Carlos Martínez](https://github.com/c-martinez)
 **Copyright:**	Albert Meroño, VU University Amsterdam  
 **License:**	MIT License (see [LICENSE.txt](LICENSE.txt))
 
