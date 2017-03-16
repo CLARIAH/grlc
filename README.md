@@ -23,6 +23,8 @@ docker-compose -f docker-compose.default.yml up
 (You can omit the first two commands if you just copy [this file](docker-compose.default.yml) somehwere in your filesystem)
 If you use the supplied `docker-compose.default.yml` your grlc instance will be available at http://localhost:8001
 
+If you want to run grlc at system boot as a service, you can find example upstart scripts at [upstart/](upstart/grlc-docker.conf)
+
 ### Alternative install methods
 
 Through these you'll miss some cool docker bundled features (like nginx-based caching). We provide these alternatives just for testing, development scenarios, or docker compatibility reasons.
