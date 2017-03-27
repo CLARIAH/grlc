@@ -32,7 +32,8 @@ GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/'
 GITHUB_API_BASE_URL = 'https://api.github.com/repos/'
 
 # Cache control
-CACHE_CONTROL_POLICY = 'public, max-age=60'
+# CACHE_CONTROL_POLICY = 'public, max-age=60'
+CACHE_CONTROL_POLICY = 'public, max-age=86400' # 24 hours
 
 # Setting headers to use access_token for the GitHub API
 config = SafeConfigParser()
