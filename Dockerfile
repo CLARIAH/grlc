@@ -19,11 +19,15 @@ RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales \
  && rm -rf /var/lib/apt/lists/*
 
-COPY assets/build/ ${GRLC_BUILD_DIR}/
+COPY ./ ${GRLC_INSTALL_DIR}
+
+COPY docker-assets/assets/build/ ${GRLC_BUILD_DIR}/
 RUN bash ${GRLC_BUILD_DIR}/install.sh
 
-COPY assets/runtime/ ${GRLC_RUNTIME_DIR}/
-COPY entrypoint.sh /sbin/entrypoint.sh
+COPY docker-assets/assets/runtime/ ${GRLC_RUNTIME_DIR}/
+COPY docker-assets/entrypoint.sh /sbin/entrypoint.sh
+
+
 RUN chmod 755 /sbin/entrypoint.sh
 
 EXPOSE 80/tcp

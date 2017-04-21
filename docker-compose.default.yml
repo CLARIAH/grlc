@@ -1,6 +1,7 @@
 version: '2'
 services:
   grlc:
+    build: ./
     image: clariah/grlc:latest
     restart: unless-stopped
     ports:
