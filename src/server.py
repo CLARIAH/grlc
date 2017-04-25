@@ -183,7 +183,7 @@ def swagger_spec(user, repo, content=None):
     swag = utils.build_swagger_spec(user, repo, static.SERVER_NAME, prov_g)
 
     prov_g.end_prov_graph()
-    prov_g.log_prov_graph()
+    # prov_g.log_prov_graph()
 
     swag['prov'] = prov_g.serialize(format='turtle')
 
