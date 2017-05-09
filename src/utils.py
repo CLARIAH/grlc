@@ -18,15 +18,22 @@ def turtleize(swag):
 
     return swag_graph.serialize(format='turtle')
 
-def build_spec(user, repo, prov, extraMetadata=[]):
+def build_spec(user, repo, sha, prov, extraMetadata=[]):
     '''
     Build grlc specification for the given github user / repo
     '''
     api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
     api_repo_content_uri = api_repo_uri + '/contents'
-    raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
 
-    resp = requests.get(api_repo_content_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).json()
+    params = {'ref' : 'master'}
+    if sha is not None:
+        params = {'ref' : sha}
+
+    resp = requests.get(api_repo_content_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}, params=params).json()
+
+    raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
+    if sha is not None:
+        raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/blob/{}/'.format(sha)
 
     # Fetch all .rq files
     items = []
@@ -35,7 +42,8 @@ def build_spec(user, repo, prov, extraMetadata=[]):
         if ".rq" in c['name'] or ".tpf" in c['name'] or ".sparql" in c['name']:
             call_name = c['name'].split('.')[0]
             # Retrieve extra metadata from the query decorators
-            raw_query_uri = raw_repo_uri + c['name']
+            # raw_query_uri = raw_repo_uri + c['name']
+            raw_query_uri = c['download_url']
             resp = requests.get(raw_query_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).text
 
             # Add query URI as used entity by the logged activity
@@ -222,22 +230,41 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
 
     return item
 
-def build_swagger_spec(user, repo, serverName, prov):
+def build_swagger_spec(user, repo, sha, serverName, prov):
     '''Build grlc specification for the given github user / repo in swagger format '''
     api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
-    # Check if we have an updated cached spec for this repo
-    # if cache.is_cache_updated(cache_obj, api_repo_uri):
-    #     glogger.info("Reusing updated cache for this spec")
-    #     return jsonify(cache_obj[api_repo_uri]['spec'])
+
+    # params = {'ref' : 'master'}
+    # if sha is not None:
+    #     params = {'ref' : sha}
+
+    # resp = requests.get(api_repo_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}, params=params).json()
     resp = requests.get(api_repo_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).json()
 
     # Add the API URI as a used entity by the activity
     prov.add_used_entity(api_repo_uri)
 
+    commits = requests.get(api_repo_uri + '/commits', headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).json()
+    commit_list = [c['sha'] for c in commits]
+
+    prev_commit = None
+    next_commit = None
+
+    version = sha
+    if sha is None:
+        version = commits[0]['sha']
+
+    if commit_list.index(version) < len(commit_list) - 1:
+        prev_commit = commit_list[commit_list.index(version)+1]
+    if commit_list.index(version) > 0:
+        next_commit = commit_list[commit_list.index(version)-1]
+
     swag = {}
+    swag['prev_commit'] = prev_commit
+    swag['next_commit'] = next_commit
     swag['swagger'] = '2.0'
     swag['info'] = {
-        'version': '1.0',
+        'version': version,
         'title': resp['name'],
         'contact': {
             'name': resp['owner']['login'],
@@ -250,10 +277,12 @@ def build_swagger_spec(user, repo, serverName, prov):
     }
     swag['host'] = serverName
     swag['basePath'] = '/api/' + user + '/' + repo + '/'
+    if sha is not None:
+        swag['basePath'] = '/api/' + user + '/' + repo + '/commit/' + sha + '/'
     swag['schemes'] = ['http']
     swag['paths'] = {}
 
-    spec = build_spec(user, repo, prov)
+    spec = build_spec(user, repo, sha, prov)
     # glogger.debug("Current internal spec data structure")
     # glogger.debug(spec)
     for item in spec:

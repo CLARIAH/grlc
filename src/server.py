@@ -30,10 +30,14 @@ def hello():
 
 @app.route('/api/<user>/<repo>/<query_name>', methods=['GET'])
 @app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET'])
-def query(user, repo, query_name, content=None):
-    glogger.debug("-----> Executing call name at /{}/{}/{}".format(user, repo, query_name))
+@app.route('/api/<user>/<repo>/commit/<sha>/<query_name>', methods=['GET'])
+@app.route('/api/<user>/<repo>/commit/<sha>/<query_name>.<content>', methods=['GET'])
+def query(user, repo, query_name, sha=None, content=None):
+    glogger.debug("-----> Executing call name at /{}/{}/{} on commit {}".format(user, repo, query_name, sha))
     glogger.debug("Request accept header: " + request.headers["Accept"])
     raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
+    if sha is not None:
+        raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/{}/'.format(sha)
 
     # The URIs of all candidates
     raw_sparql_query_uri = raw_repo_uri + query_name + '.rq'
@@ -170,17 +174,20 @@ def query(user, repo, query_name, content=None):
 
 @app.route('/api/<user>/<repo>', strict_slashes=False)
 @app.route('/api/<user>/<repo>/api-docs')
-def api_docs(user, repo):
-    return render_template('api-docs.html', user=user, repo=repo)
+@app.route('/api/<user>/<repo>/commit/<sha>')
+@app.route('/api/<user>/<repo>/commit/<sha>/api-docs')
+def api_docs(user, repo, sha=None):
+    return render_template('api-docs.html', user=user, repo=repo, sha=sha)
 
 @app.route('/api/<user>/<repo>/spec', methods=['GET'])
-def swagger_spec(user, repo, content=None):
-    glogger.info("-----> Generating swagger spec for /{}/{}".format(user,repo))
+@app.route('/api/<user>/<repo>/commit/<sha>/spec')
+def swagger_spec(user, repo, sha=None, content=None):
+    glogger.info("-----> Generating swagger spec for /{}/{} on commit {}".format(user,repo,sha))
 
     # Init provenance recording
     prov_g = grlcPROV(user, repo)
 
-    swag = utils.build_swagger_spec(user, repo, static.SERVER_NAME, prov_g)
+    swag = utils.build_swagger_spec(user, repo, sha, static.SERVER_NAME, prov_g)
 
     prov_g.end_prov_graph()
     # prov_g.log_prov_graph()
@@ -196,7 +203,7 @@ def swagger_spec(user, repo, content=None):
 
     resp_spec.headers['Cache-Control'] = static.CACHE_CONTROL_POLICY # Caching JSON specs for 15 minutes
 
-    glogger.info("-----> API spec generation for /{}/{} complete".format(user, repo))
+    glogger.info("-----> API spec generation for /{}/{} on commit {} complete".format(user, repo, sha))
 
     return resp_spec
 
