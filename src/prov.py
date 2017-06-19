@@ -3,6 +3,7 @@
 # prov.py: class generating grlc related W3C prov triples
 
 from rdflib import Graph, URIRef, Namespace, RDF, Literal
+from rdflib.plugins.parsers.notation3 import BadSyntax
 import logging
 from datetime import datetime
 from subprocess import check_output
@@ -42,7 +43,11 @@ class grlcPROV():
         glogger.debug('Ingesting Git2PROV output into RDF graph')
         with open('temp.prov.ttl', 'w') as temp_prov:
             temp_prov.write(repo_prov)
-        self.prov_g.parse('temp.prov.ttl', format='turtle')
+        try:
+            self.prov_g.parse('temp.prov.ttl', format='turtle')
+        except BadSyntax:
+            glogger.error("Couldn't parse Git2PROV graph, continuing without repo PROV")
+            pass
 
         self.prov_g.add( (self.agent, RDF.type, self.prov.Agent) )
         self.prov_g.add( (self.entity_d, RDF.type, self.prov.Entity) )
