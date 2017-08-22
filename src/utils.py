@@ -3,6 +3,7 @@ import gquery as gquery
 import requests
 import cgi
 from rdflib import Graph
+import traceback
 
 import logging
 
@@ -123,7 +124,7 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
         query_metadata = gquery.get_metadata(resp)
     except Exception as e:
         glogger.error("Could not parse query at {}".format(raw_query_uri))
-        glogger.error(e)
+        glogger.error(traceback.print_exc())
         return None
 
     tags = query_metadata['tags'] if 'tags' in query_metadata else []
@@ -135,9 +136,9 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
     description = query_metadata['description'] if 'description' in query_metadata else ""
     glogger.debug("Read query description: {}".format(description))
 
-    method = query_metadata['method'].lower() if 'method' in query_metadata else "get"
+    method = query_metadata['method'].lower() if 'method' in query_metadata else ""
     if method not in ['get', 'post', 'head', 'put', 'delete', 'options', 'connect']:
-        method = "get"
+        method = ""
 
     pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
     glogger.debug("Read query pagination: {}".format(pagination))
@@ -152,30 +153,31 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
     endpoint = gquery.guess_endpoint_uri(resp, raw_repo_uri)
     glogger.debug("Read query endpoint: {}".format(endpoint))
 
-    try:
-        parameters = gquery.get_parameters(resp, endpoint)
-    except Exception as e:
-        glogger.error(e)
-        glogger.error("Could not parse parameters of query {}".format(raw_query_uri))
-        return None
+    if query_metadata['type'] == 'SelectQuery':
+        try:
+            parameters = gquery.get_parameters(resp, endpoint)
+        except Exception as e:
+            glogger.error(e)
+            glogger.error("Could not parse parameters of query {}".format(raw_query_uri))
+            return None
 
-    glogger.debug("Read request parameters")
-    # glogger.debug(parameters)
-    # TODO: do something intelligent with the parameters!
-    # As per #3, prefetching IRIs via SPARQL and filling enum
+        glogger.debug("Read request parameters")
+        # glogger.debug(parameters)
+        # TODO: do something intelligent with the parameters!
+        # As per #3, prefetching IRIs via SPARQL and filling enum
 
-    params = []
-    for v, p in list(parameters.items()):
-        param = {}
-        param['name'] = p['name']
-        param['type'] = p['type']
-        param['required'] = p['required']
-        param['in'] = "query"
-        param['description'] = "A value of type {} that will substitute {} in the original query".format(p['type'], p['original'])
-        if p['enum']:
-            param['enum'] = p['enum']
+        params = []
+        for v, p in list(parameters.items()):
+            param = {}
+            param['name'] = p['name']
+            param['type'] = p['type']
+            param['required'] = p['required']
+            param['in'] = "query"
+            param['description'] = "A value of type {} that will substitute {} in the original query".format(p['type'], p['original'])
+            if p['enum']:
+                param['enum'] = p['enum']
 
-        params.append(param)
+            params.append(param)
 
     # If this query allows pagination, add page number as parameter
     if pagination:
@@ -186,14 +188,11 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
         pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
         params.append(pagination_param)
 
-    item_properties = {}
-    if query_metadata['type'] != 'SelectQuery':
-        # TODO: Turn this into a nicer thingamajim
-        glogger.warning("This is not a SelectQuery, don't really know what to do!")
-        summary += "WARNING: non-SELECT queries are not really treated properly yet"
-        # just continue with empty item_properties
-    else:
+    if query_metadata['type'] == 'SelectQuery':
         # We now know it is a SELECT query
+        if not method:
+            method = 'get'
+        item_properties = {}
         for pv in query_metadata['variables']:
             item_properties[pv] = {
                 "name": pv,
@@ -214,16 +213,29 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
                     }
                 }
             }
-    item = {
-        'call_name': call_name,
-        'method': method,
-        'tags': tags,
-        'summary': summary,
-        'description': description,
-        'params': params,
-        'item_properties': item_properties,
-        'query': query_metadata['query']
-    }
+        item = {
+            'call_name': call_name,
+            'method': method,
+            'tags': tags,
+            'summary': summary,
+            'description': description,
+            'params': params,
+            'item_properties': item_properties,
+            'query': query_metadata['query']
+        }
+    else:
+        # We know it is an UPDATE; ignore params and props
+        if not method:
+            method = 'post'
+        item = {
+            'call_name': call_name,
+            'method': method,
+            'tags': tags,
+            'summary': summary,
+            'description': description,
+            'query': query_metadata['query']
+        }
+    
     for extraField in extraMetadata:
         if extraField in query_metadata:
             item[extraField] = query_metadata[extraField]

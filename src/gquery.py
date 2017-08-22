@@ -3,8 +3,8 @@
 # gquery.py: functions that deal with / transform SPARQL queries in grlc
 
 import yaml
-from rdflib.plugins.sparql.parser import Query
-from rdflib.plugins.sparql.processor import translateQuery
+from rdflib.plugins.sparql.parser import Query, UpdateUnit
+from rdflib.plugins.sparql.processor import translateQuery, translateUpdate
 from pyparsing import ParseException
 import logging
 import traceback
@@ -191,15 +191,32 @@ def get_metadata(rq):
     query_metadata = get_yaml_decorators(rq)
 
     try:
+        # select, describe, construct, ask
         parsed_query = translateQuery(Query.parseString(rq, parseAll=True))
         query_metadata['type'] = parsed_query.algebra.name
         if query_metadata['type'] == 'SelectQuery':
             query_metadata['variables'] = parsed_query.algebra['PV']
     except ParseException:
-        glogger.error("Could not parse query")
+        glogger.warning("Could not parse SELECT, DESCRIBE, CONSTRUCT, ASK query")
+        # glogger.warning(traceback.print_exc())
+        pass
+
+    try:
+        # insert, update query
+        glogger.info("Trying to parse udpate query")
+        parsed_query = UpdateUnit.parseString(rq, parseAll=True)
+        glogger.info(parsed_query)
+        query_metadata['type'] = parsed_query[0]['request'][0].name
+        glogger.info("Update query parsed with {}".format(query_metadata['type']))
+        # if query_metadata['type'] == 'InsertData':
+        #     query_metadata['variables'] = parsed_query.algebra['PV']
+    except:
+        glogger.error("Could not parse UPDATE query")
         glogger.error(query_metadata['query'])
-        print(traceback.print_exc())
-        return query_metadata
+        glogger.error(traceback.print_exc())
+        pass
+
+    glogger.info("Finished parsing query of type {}".format(query_metadata['type']))
 
     return query_metadata
 
