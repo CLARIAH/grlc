@@ -21,7 +21,7 @@ chown ${GRLC_USER}:${GRLC_USER} ${GRLC_HOME} -R
 
 pip install -r requirements.txt
 
-exec_as_grlc npm install git2prov
+npm install git2prov
 
 
 
