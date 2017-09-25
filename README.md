@@ -106,7 +106,7 @@ Use [this GitHub search](https://github.com/search?q=endpoint+summary+language%3
 
 ## Contribute!
 
-grlc needs '''you''' to continue bringing Semantic Web content to developers, applications and users. No matter if you are just a curious user, a developer, or a researcher; there are many ways in which you can contribute!
+grlc needs **you** to continue bringing Semantic Web content to developers, applications and users. No matter if you are just a curious user, a developer, or a researcher; there are many ways in which you can contribute:
 
 - File in bug reports
 - Request new features
@@ -116,8 +116,8 @@ Check our [contributing](CONTRIBUTING.md) guidelines for these and more, and joi
 
 If you cannot code, that's no problem! There's still plenty you can contribute:
 
-- Share your experience at using grlc in Twitter (mention the handler '''@grlcldapi''')
-- If you are good with HTML/CSS, [mailto:albert.merono@vu.nl](let us know)
+- Share your experience at using grlc in Twitter (mention the handler **@grlcldapi**)
+- If you are good with HTML/CSS, [let us know](mailto:albert.merono@vu.nl)
 
 
 ## Related tools

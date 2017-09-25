@@ -6,7 +6,7 @@ The official channel to file bug reports is via our GitHub's [issue tracker](htt
 - Your issue title briefly describes the bug
 - You include log output (try `docker logs grlc_grlc_1` if you daemonized your instance)
 - Name the file/module if known/available
-- You tag your issue as ''bug''
+- You tag your issue as **bug**
 
 ## Sending feature requests
 
@@ -15,7 +15,7 @@ As with bug reports, for requesting features please use the [issue tracker](http
 - Describe the desired feature
 - Describe your use case so we understand what you are using grlc for
 - Name the file/module if known/available
-- Tag the issue as ''enhancement''
+- Tag the issue as **enhancement**
 
 ## Testing environment
 
@@ -37,4 +37,4 @@ To get started with hacking grlc, follow these steps to create a local testing e
 
 ## Questions
 
-Please open an issue at the [issue tracker](https://github.com/CLARIAH/grlc/issues) and tag it as ''question''
+Please open an issue at the [issue tracker](https://github.com/CLARIAH/grlc/issues) and tag it as **question**
