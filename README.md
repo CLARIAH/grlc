@@ -65,9 +65,11 @@ That's it!
 
 Check these out:
 
-- http://grlc.io/api/CLARIAH/wp4-queries/
+- http://grlc.io/api/CLARIAH/wp4-queries-hisco/
 - http://grlc.io/api/albertmeronyo/lodapi/
 - http://grlc.io/api/albertmeronyo/lsq-api
+
+You'll find the sources of these and many more in [GitHub](https://github.com/search?o=desc&q=endpoint+summary+language%3ASPARQL&s=indexed&type=Code&utf8=%E2%9C%93)
 
 ## Decorator syntax
 A couple of SPARQL comment embedded decorators are available to make your swagger-ui look nicer (note all comments start with <code>#+ </code>):
@@ -99,6 +101,24 @@ Use [this GitHub search](https://github.com/search?q=endpoint+summary+language%3
 - Pagination of API results, as per the `pagination` decorator and [GitHub's API Pagination Traversal](https://developer.github.com/guides/traversing-with-pagination/)
 - Docker images in Docker Hub for easy deployment
 - Compatibility with [Linked Data Fragments](http://linkeddatafragments.org/) servers, RDF dumps, and HTML+RDFa files
+- Generation of provenance in [PROV](https://www.w3.org/TR/prov-primer/) of both the repo history (via [Git2PROV](https://github.com/IDLabResearch/Git2PROV)) and grlc's activity additions
+- Commit-based API versioning that's coherent with the repo versioning with git hashes
+
+## Contribute!
+
+grlc needs '''you''' to continue bringing Semantic Web content to developers, applications and users. No matter if you are just a curious user, a developer, or a researcher; there are many ways in which you can contribute!
+
+- File in bug reports
+- Request new features
+- Set up your own environment and start hacking
+
+Check our [contributing](CONTRIBUTING.md) guidelines for these and more, and join us today!
+
+If you cannot code, that's no problem! There's still plenty you can contribute:
+
+- Share your experience at using grlc in Twitter (mention the handler '''@grlcldapi''')
+- If you are good with HTML/CSS, [mailto:albert.merono@vu.nl](let us know)
+
 
 ## Related tools
 
