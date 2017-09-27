@@ -173,7 +173,13 @@ def get_yaml_decorators(rq):
     yaml_string = "\n".join([row.lstrip('#+') for row in rq.split('\n') if row.startswith('#+')])
     query_string = "\n".join([row for row in rq.split('\n') if not row.startswith('#+')])
 
-    query_metadata = yaml.load(yaml_string)
+    query_metadata = None
+    try: # Invalid YAMLs will produce empty metadata
+        query_metadata = yaml.load(yaml_string)
+    except yaml.scanner.ScannerError:
+        glogger.warning("Query metadata could not be parsed; check your YAML syntax")
+        pass
+
     # If there is no YAML string
     if query_metadata == None:
         query_metadata = {}
