@@ -35,6 +35,8 @@ To get started with hacking grlc, follow these steps to create a local testing e
 6. `docker-compose up`
 7. Your local grlc instance should be available at http://localhost:8001 and should respond to code modifications you make on `<GRLC_CLONE_PATH>`
 
+You're good to pick any issue at the  [issue tracker](https://github.com/CLARIAH/grlc/issues) marked as **enhancement** and start implementing it :)
+
 ## Questions
 
 Please open an issue at the [issue tracker](https://github.com/CLARIAH/grlc/issues) and tag it as **question**
