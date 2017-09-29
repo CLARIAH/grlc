@@ -34,7 +34,7 @@ def guess_endpoint_uri(rq, ru):
     # File
         try:
             endpoint_file_uri = ru + "endpoint.txt"
-            endpoint = requests.get(endpoint_file_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).text.strip()
+            endpoint = requests.get(endpoint_file_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).text.strip().splitlines()[0]
             if endpoint.status_code != 200:
                 endpoint = static.DEFAULT_ENDPOINT
             glogger.debug("File guessed endpoint: " + endpoint)
