@@ -35,11 +35,8 @@
   <body>
 
     <div class="site-wrapper">
-
       <div class="site-wrapper-inner">
-
         <div class="cover-container">
-
           <div class="inner cover">
             <div class="inner">
               <h3 class="masthead-brand"><a href="#">grlc</a></h3>
@@ -53,38 +50,48 @@
               </nav>
             </div>
           </div>
-
           <div class="inner cover" style="margin-top: 30px">
-	    <img src="{{url_for('.static', filename='grlc_logo_01.png')}}" >
+	          <img src="{{url_for('.static', filename='grlc_logo_01.png')}}" >
             <p class="lead"> <b>grlc</b> makes all your <a href="https://www.w3.org/DesignIssues/LinkedData.html" target="_blank">Linked Data</a> accessible to the Web by automatically converting your SPARQL queries into RESTful APIs. With (almost) no effort! Simply: </p>
-	    <p class="lead circ-number">1</p>
-	    <p class="lead smaller">Create a GitHub repository, and store all your SPARQL queries in there (like in <a href="https://github.com/CEDAR-project/Queries" target="_blank">this example</a>). If you don't have a GitHub account, <a href="https://github.com/join">go get one</a>. You can also just write down the username and the repository name of somebody else :-)</p>
-	    <p class="lead circ-number">2</p>
-	    <p class="lead smaller"> Go to the address bar of this page, and append <b>/api/github_username/repository_name</b> to it. So if I want the API derived from GitHub's username <i>foo</i> and repository <i>bar</i>, I append <i>/api/foo/bar/</i> to the domain name (<i>/api/foo/bar/api-docs</i> will work too). Now hit enter. Done!</p>
+        	  <p class="lead circ-number">1</p>
+        	  <p class="lead smaller">Create a GitHub repository, and store all your SPARQL queries in there (like in <a href="https://github.com/CEDAR-project/Queries" target="_blank">this example</a>). If you don't have a GitHub account, <a href="https://github.com/join">go get one</a>. You can also just write down the username and the repository name of somebody else :-)</p>
+        	  <p class="lead circ-number">2</p>
+        	  <p class="lead smaller"> Go to the address bar of this page, and append <b>/api/github_username/repository_name</b> to it. So if I want the API derived from GitHub's username <i>foo</i> and repository <i>bar</i>, I append <i>/api/foo/bar/</i> to the domain name (<i>/api/foo/bar/api-docs</i> will work too). Now hit enter. Done!</p>
             <p class="lead">
-	      <a href="https://github.com/albertmeronyo/lodapi/" class="btn btn-md btn-block btn-default">Show me an example SPARQL repo</a>
+	            <a href="https://github.com/albertmeronyo/lodapi/" class="btn btn-md btn-block btn-default">Show me an example SPARQL repo</a>
               <a href="/api/albertmeronyo/lodapi/" class="btn btn-md btn-block btn-default">Show me the equivalent API</a>
             </p>
           </div>
+          <div class="inner cover">
+      	    <p class="lead smaller">Take a look at the increasing number of <a href="https://github.com/search?o=desc&q=endpoint+summary+language%3ASPARQL&s=indexed&type=Code&utf8=%E2%9C%93" target="_blank">users and SPARQL repositories</a> on GitHub that are using <b>grlc</b> to generate APIs!</p>
+      	  </div>
 
-    <div class="inner cover">
-	    <p class="lead smaller">Take a look at the increasing number of <a href="https://github.com/search?o=desc&q=endpoint+summary+language%3ASPARQL&s=indexed&type=Code&utf8=%E2%9C%93" target="_blank">users and SPARQL repositories</a> on GitHub that are using <b>grlc</b> to generate APIs!</p>
-	  </div>
+          <div class="inner cover" id="loadGrlc">
+            <h2>Find your GRLC-ready projects</h2>
+            Github username:
+            <div class="input-group">
+              <input class="form-control width100" id="gh_username">
+              <span class="input-group-btn">
+                <button onclick="fetchGrlcRepos()" class="btn btn-info">Go!</button>
+              </span>
+            </div>
+            <div>
+              <h3>These are your grlc repos:</h3>
+              <div id='resultset'></div>
+            </div>
+          </div>
 
-	  <div class="inner cover">
-	    <p class="lead smaller">Find out more in <a href="https://github.com/CLARIAH/grlc" target="_blank">GitHub</a> and in <a href="https://www.albertmeronyo.org/wp-content/uploads/2016/04/SALAD2016_paper_4.pdf" target="_blank">this paper</a>.</p>
-	  </div>
+          <div class="inner cover">
+      	    <p class="lead smaller">Find out more in <a href="https://github.com/CLARIAH/grlc" target="_blank">GitHub</a> and in <a href="https://www.albertmeronyo.org/wp-content/uploads/2016/04/SALAD2016_paper_4.pdf" target="_blank">this paper</a>.</p>
+      	  </div>
 
           <div class="inner cover">
             <div class="inner">
               <p>Adapted from cover template for <a href="http://getbootstrap.com">Bootstrap</a>, by <a href="https://twitter.com/mdo">@mdo</a>.</p>
             </div>
           </div>
-
         </div>
-
       </div>
-
     </div>
 
     <!-- Bootstrap core JavaScript
@@ -92,5 +99,6 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="{{url_for('.static', filename='js/fetchgrlc.js')}}"></script>
   </body>
 </html>
