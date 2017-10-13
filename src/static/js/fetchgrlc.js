@@ -33,7 +33,7 @@ function listFiles(idx, repo) {
 
 function isSparql(file) {
   var filename = file.name;
-  return filename.endsWith('.rq');
+  return filename.endsWith('.rq') || filename.endsWith('.sparql');
 }
 
 function displayRepos(grlcRepos) {
