@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# grlc.py: the grlc server
+# server.py: the grlc server
 
 from flask import Flask, request, jsonify, render_template, make_response
 import requests
@@ -24,28 +24,7 @@ glogger = logging.getLogger(__name__)
 
 # Server routes
 @app.route('/')
-def hello():
-    # next_link = "https://api.github.com/search/code?q=endpoint+summary+language:SPARQL+in:file&sort=indexed"
-    # hit_pool = []
-    # while next_link:
-    #
-    #     grlc_users_req = requests.get(next_link, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)})
-    #     #glogger.debug(grlc_users_req.headers['Link'])
-    #
-    #     links = requests.utils.parse_header_links(grlc_users_req.headers['Link'].rstrip('>').replace('>,<', ',<'))
-    #     next_link = None
-    #     for l in links:
-    #         if l['rel'] == 'next':
-    #             next_link = l['url']
-    #     #glogger.debug(next_link)
-    #
-    #     grlc_users_req_json = grlc_users_req.json()
-    #     #glogger.debug("Found {} results".format(grlc_users_req_json['total_count']))
-    #
-    #     for r in grlc_users_req_json['items']:
-    #
-    #         glogger.debug("Hit: {} {} {} {}".format(r['name'], r['html_url'], r['repository']['full_name'], r['repository']['html_url']))
-
+def grlc():
     resp = make_response(render_template('index.html'))
     return resp
 
