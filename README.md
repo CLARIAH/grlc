@@ -25,7 +25,7 @@ If you use the supplied `docker-compose.default.yml` your grlc instance will be 
 
 In order for grlc to communicate with GitHub, you'll need to tell grlc what your access token is:
 
-1. Get a GitHub personal access token. You'll find them in the web interface: go to your profile, then _Settings_, then _Developer settings_, _Personal access tokens_, and _Generate new token_
+1. Get a GitHub personal access token. In your GitHub's profile page, go to _Settings_, then _Developer settings_, _Personal access tokens_, and _Generate new token_
 2. You'll get an access token string, copy it and save it somewhere safe (GitHub won't let you see it again!)
 3. Edit your `docker-compose.yml` or `docker-compose.default.yml` file, and paste this token as value of the environment variable GRLC_GITHUB_ACCESS_TOKEN
 
