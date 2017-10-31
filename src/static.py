@@ -24,9 +24,6 @@ mimetypes = {
 # Logging format (prettier than the ugly standard in Flask)
 LOG_FORMAT = '%(asctime)-15s [%(levelname)s] (%(module)s.%(funcName)s) %(message)s'
 
-# Default endpoint, if none specified elsewhere
-DEFAULT_ENDPOINT = 'http://dbpedia.org/sparql'
-
 # GitHub base URLS
 GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/'
 GITHUB_API_BASE_URL = 'https://api.github.com/repos/'
@@ -39,3 +36,6 @@ CACHE_CONTROL_POLICY = 'public, max-age=86400' # 24 hours
 config = SafeConfigParser()
 config.read('config.ini')
 ACCESS_TOKEN = config.get('auth', 'github_access_token')
+
+# Default endpoint, if none specified elsewhere
+DEFAULT_ENDPOINT = config.get('defaults', 'sparql_endpoint')

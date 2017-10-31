@@ -41,6 +41,7 @@ def guess_endpoint_uri(rq, ru):
         # TODO: except all is really ugly
         except:
             # Default
+            endpoint = static.DEFAULT_ENDPOINT
             glogger.warning("No endpoint specified, using default ({})".format(endpoint))
 
     return endpoint
