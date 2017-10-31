@@ -7,9 +7,6 @@ from ConfigParser import SafeConfigParser
 DEFAULT_HOST = None
 DEFAULT_PORT = 8088
 
-# server name, used by the Flask app and in the swagger spec
-SERVER_NAME = "grlc.io"
-
 # XSD datatypes for parsing queries with parameters
 XSD_DATATYPES = ["decimal", "float", "double", "integer", "positiveInteger", "negativeInteger", "nonPositiveInteger", "nonNegativeInteger", "long", "int", "short", "byte", "unsignedLong", "unsignedInt", "unsignedShort", "unsignedByte", "dateTime", "date", "gYearMonth", "gYear", "duration", "gMonthDay", "gDay", "gMonth", "string", "normalizedString", "token", "language", "NMTOKEN", "NMTOKENS", "Name", "NCName", "ID", "IDREFS", "ENTITY", "ENTITIES", "QName", "boolean", "hexBinary", "base64Binary", "anyURI", "notation"]
 
@@ -39,3 +36,9 @@ ACCESS_TOKEN = config.get('auth', 'github_access_token')
 
 # Default endpoint, if none specified elsewhere
 DEFAULT_ENDPOINT = config.get('defaults', 'sparql_endpoint')
+
+# Local folder where queries are loaded from
+LOCAL_SPARQL_DIR = config.get('local', 'local_sparql_dir')
+
+# server name, used by the Flask app and in the swagger spec
+SERVER_NAME = config.get('defaults', 'server_name')

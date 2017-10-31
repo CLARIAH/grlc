@@ -15,6 +15,8 @@ import gquery as gquery
 import utils as utils
 from prov import grlcPROV
 
+from fileLoaders import GithubLoader, LocalLoader
+
 # The Flask app
 app = Flask(__name__)
 
@@ -29,6 +31,12 @@ def grlc():
     resp = make_response(render_template('index.html'))
     return resp
 
+@app.route('/api/local/local/<query_name>', methods=['GET'])
+def query_local(query_name):
+    return query(user=None, repo=None, query_name=query_name)
+
+from queryTypes import qType
+
 @app.route('/api/<user>/<repo>/<query_name>', methods=['GET'])
 @app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET'])
 @app.route('/api/<user>/<repo>/commit/<sha>/<query_name>', methods=['GET'])
@@ -37,28 +45,19 @@ def query(user, repo, query_name, sha=None, content=None):
     glogger.debug("-----> Executing call name at /{}/{}/{} on commit {}".format(user, repo, query_name, sha))
     glogger.debug("Request accept header: " + request.headers["Accept"])
 
-    gh = Github(static.ACCESS_TOKEN)
-    gh_repo = gh.get_repo(user + '/' + repo)
+    if user is None and repo is None:
+        loader = LocalLoader()
+    else:
+        loader = GithubLoader(user, repo, sha, None)
 
-    # The URIs of all candidates
-    query_names = [ ( query_name + '.rq'    , 'SPARQL' ),
-                    ( query_name + '.sparql', 'SPARQL' ),
-                    ( query_name + '.tpf'   , 'TPF'    ) ]
-
-    ref = sha if sha is not None else 'master'
-    for qname, qtype in query_names:
-        try:
-            qfile = gh_repo.get_contents(qname, ref)
-            raw_query = qfile.decoded_content
-            break
-        except:
-            qtype = 'ERROR'
+    query, q_type = loader.getTextForName(query_name)
 
     # Call name implemented with SPARQL query
-    if qtype == 'SPARQL':
-        raw_sparql_query = raw_query
+    if q_type == qType['SPARQL']:
+        raw_sparql_query = query
+        raw_repo_uri = loader.getRawRepoUri()
 
-        endpoint = gquery.guess_endpoint_uri(raw_sparql_query, gh_repo)
+        endpoint = gquery.guess_endpoint_uri(raw_sparql_query, loader)
         glogger.debug("=====================================================")
         glogger.debug("Sending query to SPARQL endpoint: {}".format(endpoint))
         glogger.debug("=====================================================")
@@ -141,9 +140,9 @@ def query(user, repo, query_name, sha=None, content=None):
 
         return resp
     # Call name implemented with TPF query
-    elif qtype == 'TPF':
-        raw_tpf_query = raw_query
-        endpoint = gquery.guess_endpoint_uri(raw_tpf_query, gh_repo)
+    elif q_type == qType['TPF']:
+        raw_tpf_query = query
+        endpoint = gquery.guess_endpoint_uri(raw_tpf_query, raw_repo_uri)
         glogger.debug("=====================================================")
         glogger.debug("Sending query to TPF endpoint: {}".format(endpoint))
         glogger.debug("=====================================================")
@@ -175,6 +174,14 @@ def query(user, repo, query_name, sha=None, content=None):
         return "Couldn't find a SPARQL, RDF dump, or TPF query with the requested name", 404
 
 
+@app.route('/api/local', methods=['GET'])
+def api_docs_local():
+    return api_docs(user='local', repo='local', sha=None)
+
+@app.route('/api/local/local/spec', methods=['GET'])
+def swagger_spec_local():
+    return swagger_spec(user=None, repo=None, sha=None, content=None)
+
 @app.route('/api/<user>/<repo>', strict_slashes=False)
 @app.route('/api/<user>/<repo>/api-docs')
 @app.route('/api/<user>/<repo>/commit/<sha>')
@@ -188,17 +195,20 @@ def swagger_spec(user, repo, sha=None, content=None):
     glogger.info("-----> Generating swagger spec for /{}/{} on commit {}".format(user,repo,sha))
 
     # Init provenance recording
-    prov_g = grlcPROV(user, repo)
-
-    gh = Github(static.ACCESS_TOKEN)
-    gh_repo = gh.get_repo(user + '/' + repo)
+    if user is not None and repo is not None:
+        prov_g = grlcPROV(user, repo)
+        gh = Github(static.ACCESS_TOKEN)
+        gh_repo = gh.get_repo(user + '/' + repo)
+    else:
+        prov_g = None
+        gh_repo = None
 
     swag = utils.build_swagger_spec(user, repo, sha, static.SERVER_NAME, prov_g, gh_repo)
 
-    prov_g.end_prov_graph()
+    if user is not None and repo is not None:
+        prov_g.end_prov_graph()
+        swag['prov'] = prov_g.serialize(format='turtle')
     # prov_g.log_prov_graph()
-
-    swag['prov'] = prov_g.serialize(format='turtle')
 
     resp_spec = make_response(jsonify(swag))
     resp_spec.headers['Content-Type'] = 'application/json'
