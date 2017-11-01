@@ -4,7 +4,7 @@
 
 import yaml
 from rdflib.plugins.sparql.parser import Query, UpdateUnit
-from rdflib.plugins.sparql.processor import translateQuery, translateUpdate
+from rdflib.plugins.sparql.processor import translateQuery
 from pyparsing import ParseException
 import logging
 import traceback
@@ -73,6 +73,12 @@ def count_query_results(query, endpoint):
 
     return 1000
 
+def _getDictWithKey(key, dict_list):
+    for d in dict_list:
+        if key in d:
+            return d
+    return None
+
 def get_parameters(rq, endpoint):
     """
         ?_name The variable specifies the API mandatory parameter name. The value is incorporated in the query as plain literal.
@@ -101,7 +107,7 @@ def get_parameters(rq, endpoint):
             vname = match.group('name')
             # We only fire the enum filling queries if indicated by the query metadata
             metadata = get_metadata(rq)
-            vcodes = get_enumeration(rq, v, endpoint) if 'enumerate' in metadata and vname in metadata['enumerate'] else []
+            vcodes = get_enumeration(rq, v, endpoint, metadata, vname)
             vrequired = True if match.group('required') == '_' else False
             vtype = 'literal'
             vlang = None
@@ -135,7 +141,17 @@ def get_parameters(rq, endpoint):
 
     return parameters
 
-def get_enumeration(rq, v, endpoint):
+def get_enumeration(rq, v, endpoint, metadata, vname):
+    if 'enumerate' not in metadata:
+        return []
+    if vname in metadata['enumerate']:
+        return get_enumeration_sparql(rq, v, endpoint)
+    enumDict = _getDictWithKey(vname, metadata['enumerate'])
+    if enumDict:
+        return enumDict[vname]
+    return []
+
+def get_enumeration_sparql(rq, v, endpoint):
     '''
     Returns a list of enumerated values for variable 'v' in query 'rq'
     '''
