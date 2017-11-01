@@ -49,7 +49,7 @@ class GithubLoader(BaseLoader):
 
     def getTextFor(self, fileItem):
         raw_query_uri = fileItem['download_url']
-        resp = self._getUriText(raw_query_uri)
+        resp = self._getText(raw_query_uri)
 
         # Add query URI as used entity by the logged activity
         self.prov.add_used_entity(raw_query_uri)
