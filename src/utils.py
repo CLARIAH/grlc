@@ -23,10 +23,6 @@ def build_spec(user, repo, sha, prov, gh_repo, extraMetadata=[]):
     ref = sha if sha is not None else 'master'
     files = gh_repo.get_contents('/', ref)
 
-    raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
-    if sha is not None:
-        raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/blob/{}/'.format(sha)
-
     # Fetch all .rq files
     items = []
 
@@ -46,19 +42,19 @@ def build_spec(user, repo, sha, prov, gh_repo, extraMetadata=[]):
                 glogger.info("===================================================================")
                 glogger.info("Processing SPARQL query: {}".format(c_name))
                 glogger.info("===================================================================")
-                item = process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetadata, gh_repo)
+                item = process_sparql_query_text(resp, call_name, extraMetadata, gh_repo)
             elif ".tpf" in c_name:
                 glogger.info("===================================================================")
                 glogger.info("Processing TPF query: {}".format(c_name))
                 glogger.info("===================================================================")
-                item = process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata)
+                item = process_tpf_query_text(resp, call_name, extraMetadata)
             else:
                 glogger.info("Ignoring unsupported source call name: {}".format(c_name))
             if item:
                 items.append(item)
     return items
 
-def process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata):
+def process_tpf_query_text(resp, call_name, extraMetadata):
     query_metadata = gquery.get_yaml_decorators(resp)
 
     tags = query_metadata['tags'] if 'tags' in query_metadata else []
@@ -109,11 +105,11 @@ def process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata):
 
     return item
 
-def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetadata, gh_repo):
+def process_sparql_query_text(resp, call_name, extraMetadata, gh_repo):
     try:
         query_metadata = gquery.get_metadata(resp)
     except Exception as e:
-        glogger.error("Could not parse query at {}".format(raw_query_uri))
+        glogger.error("Could not parse query at {}".format(call_name))
         glogger.error(traceback.print_exc())
         return None
 
@@ -148,7 +144,7 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
             parameters = gquery.get_parameters(resp, endpoint)
         except Exception as e:
             glogger.error(e)
-            glogger.error("Could not parse parameters of query {}".format(raw_query_uri))
+            glogger.error("Could not parse parameters of query {}".format(call_name))
             return None
 
         glogger.debug("Read request parameters")
