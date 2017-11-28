@@ -1,13 +1,10 @@
 import static as static
 import gquery as gquery
-import requests
 import cgi
 from rdflib import Graph
 import traceback
 
 import logging
-
-from prov import grlcPROV
 
 glogger = logging.getLogger(__name__)
 
@@ -19,56 +16,45 @@ def turtleize(swag):
 
     return swag_graph.serialize(format='turtle')
 
-def build_spec(user, repo, sha, prov, extraMetadata=[]):
+def build_spec(user, repo, sha, prov, gh_repo, extraMetadata=[]):
     '''
     Build grlc specification for the given github user / repo
     '''
-    api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
-    api_repo_content_uri = api_repo_uri + '/contents'
-
-    params = {'ref' : 'master'}
-    if sha is not None:
-        params = {'ref' : sha}
-
-    resp = requests.get(api_repo_content_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}, params=params).json()
-
-    raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
-    if sha is not None:
-        raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/blob/{}/'.format(sha)
+    ref = sha if sha is not None else 'master'
+    files = gh_repo.get_contents('/', ref)
 
     # Fetch all .rq files
     items = []
 
-    for c in resp:
-        if ".rq" in c['name'] or ".tpf" in c['name'] or ".sparql" in c['name']:
-            call_name = c['name'].split('.')[0]
+    for c in files:
+        c_name = c.name
+        if ".rq" in c_name or ".tpf" in c_name or ".sparql" in c_name:
+            call_name = c_name.split('.')[0]
             # Retrieve extra metadata from the query decorators
-            # raw_query_uri = raw_repo_uri + c['name']
-            raw_query_uri = c['download_url']
-            resp = requests.get(raw_query_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).text
+            raw_query_uri = c.git_url # Use git_url instead of raw.github url
+            resp = c.decoded_content
 
             # Add query URI as used entity by the logged activity
             prov.add_used_entity(raw_query_uri)
 
             item = None
-            if ".rq" in c['name'] or ".sparql" in c['name']:
+            if ".rq" in c_name or ".sparql" in c_name:
                 glogger.info("===================================================================")
-                glogger.info("Processing SPARQL query: {}".format(c['name']))
+                glogger.info("Processing SPARQL query: {}".format(c_name))
                 glogger.info("===================================================================")
-                item = process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetadata)
-            elif ".tpf" in c['name']:
+                item = process_sparql_query_text(resp, call_name, extraMetadata, gh_repo)
+            elif ".tpf" in c_name:
                 glogger.info("===================================================================")
-                glogger.info("Processing TPF query: {}".format(c['name']))
+                glogger.info("Processing TPF query: {}".format(c_name))
                 glogger.info("===================================================================")
-                item = process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata)
+                item = process_tpf_query_text(resp, call_name, extraMetadata)
             else:
-                glogger.info("Ignoring unsupported source call name: {}".format(c['name']))
+                glogger.info("Ignoring unsupported source call name: {}".format(c_name))
             if item:
                 items.append(item)
     return items
 
-def process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata):
-
+def process_tpf_query_text(resp, call_name, extraMetadata):
     query_metadata = gquery.get_yaml_decorators(resp)
 
     tags = query_metadata['tags'] if 'tags' in query_metadata else []
@@ -119,11 +105,11 @@ def process_tpf_query_text(resp, raw_repo_uri, call_name, extraMetadata):
 
     return item
 
-def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extraMetadata):
+def process_sparql_query_text(resp, call_name, extraMetadata, gh_repo):
     try:
         query_metadata = gquery.get_metadata(resp)
     except Exception as e:
-        glogger.error("Could not parse query at {}".format(raw_query_uri))
+        glogger.error("Could not parse query at {}".format(call_name))
         glogger.error(traceback.print_exc())
         return None
 
@@ -143,14 +129,14 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
     pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
     glogger.debug("Read query pagination: {}".format(pagination))
 
-    enums = query_metadata['enumerate'] if 'enumerate' in query_metadata else []
-    glogger.debug("Read query enumerates: {}".format(', '.join(enums)))
+    # enums = query_metadata['enumerate'] if 'enumerate' in query_metadata else []
+    # glogger.debug("Read query enumerates: {}".format(', '.join(enums)))
 
     mime = query_metadata['mime'] if 'mime' in query_metadata else ""
     glogger.debug("Read endpoint dump MIME type: {}".format(mime))
 
     # endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
-    endpoint = gquery.guess_endpoint_uri(resp, raw_repo_uri)
+    endpoint = gquery.guess_endpoint_uri(resp, gh_repo)
     glogger.debug("Read query endpoint: {}".format(endpoint))
 
     if query_metadata['type'] == 'SelectQuery':
@@ -158,7 +144,7 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
             parameters = gquery.get_parameters(resp, endpoint)
         except Exception as e:
             glogger.error(e)
-            glogger.error("Could not parse parameters of query {}".format(raw_query_uri))
+            glogger.error("Could not parse parameters of query {}".format(call_name))
             return None
 
         glogger.debug("Read request parameters")
@@ -235,36 +221,32 @@ def process_sparql_query_text(resp, raw_query_uri, raw_repo_uri, call_name, extr
             'description': description,
             'query': query_metadata['query']
         }
-    
+
     for extraField in extraMetadata:
         if extraField in query_metadata:
             item[extraField] = query_metadata[extraField]
 
     return item
 
-def build_swagger_spec(user, repo, sha, serverName, prov):
+def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
     '''Build grlc specification for the given github user / repo in swagger format '''
     api_repo_uri = static.GITHUB_API_BASE_URL + user + '/' + repo
 
-    # params = {'ref' : 'master'}
-    # if sha is not None:
-    #     params = {'ref' : sha}
-
-    # resp = requests.get(api_repo_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}, params=params).json()
-    resp = requests.get(api_repo_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).json()
+    repo_name = gh_repo.name
+    repo_login = gh_repo.owner.login
+    repo_url =  gh_repo.owner.html_url
 
     # Add the API URI as a used entity by the activity
     prov.add_used_entity(api_repo_uri)
 
-    commits = requests.get(api_repo_uri + '/commits', headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).json()
-    commit_list = [c['sha'] for c in commits]
+    commit_list = [ c.sha for c in gh_repo.get_commits() ]
 
     prev_commit = None
     next_commit = None
 
     version = sha
     if sha is None:
-        version = commits[0]['sha']
+        version = commit_list[0]
 
     if commit_list.index(version) < len(commit_list) - 1:
         prev_commit = commit_list[commit_list.index(version)+1]
@@ -277,10 +259,10 @@ def build_swagger_spec(user, repo, sha, serverName, prov):
     swag['swagger'] = '2.0'
     swag['info'] = {
         'version': version,
-        'title': resp['name'],
+        'title': repo_name,
         'contact': {
-            'name': resp['owner']['login'],
-            'url': resp['owner']['html_url']
+            'name': repo_login,
+            'url': repo_url
         },
         'license': {
             'name' : 'License',
@@ -294,7 +276,7 @@ def build_swagger_spec(user, repo, sha, serverName, prov):
     swag['schemes'] = ['http']
     swag['paths'] = {}
 
-    spec = build_spec(user, repo, sha, prov)
+    spec = build_spec(user, repo, sha, prov, gh_repo)
     # glogger.debug("Current internal spec data structure")
     # glogger.debug(spec)
     for item in spec:

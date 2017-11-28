@@ -16,7 +16,7 @@ import static as static
 
 glogger = logging.getLogger(__name__)
 
-def guess_endpoint_uri(rq, ru):
+def guess_endpoint_uri(rq, gh_repo):
     '''
     Guesses the endpoint URI from (in this order):
     - An #+endpoint decorator
@@ -27,16 +27,16 @@ def guess_endpoint_uri(rq, ru):
 
     # Decorator
     try:
-        glogger.debug("{}".format(get_yaml_decorators(rq)['endpoint']))
-        endpoint = get_yaml_decorators(rq)['endpoint']
+        decorators = get_yaml_decorators(rq)
+        glogger.debug("{}".format(decorators['endpoint']))
+        endpoint = decorators['endpoint']
         glogger.info("Decorator guessed endpoint: " + endpoint)
     except (TypeError, KeyError):
-    # File
+        # File
         try:
-            endpoint_file_uri = ru + "endpoint.txt"
-            endpoint = requests.get(endpoint_file_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).text.strip().splitlines()[0]
-            if endpoint.status_code != 200:
-                endpoint = static.DEFAULT_ENDPOINT
+            endpoint_file = gh_repo.get_contents('endpoint.txt')
+            endpoint_content = endpoint_file.decoded_content
+            endpoint = endpoint_content.strip().splitlines()[0]
             glogger.debug("File guessed endpoint: " + endpoint)
         # TODO: except all is really ugly
         except:

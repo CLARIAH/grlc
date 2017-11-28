@@ -7,6 +7,7 @@ import requests
 import logging
 import re
 from rdflib import Graph
+from github import Github
 
 # grlc modules
 import static as static
@@ -35,27 +36,29 @@ def grlc():
 def query(user, repo, query_name, sha=None, content=None):
     glogger.debug("-----> Executing call name at /{}/{}/{} on commit {}".format(user, repo, query_name, sha))
     glogger.debug("Request accept header: " + request.headers["Accept"])
-    raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/master/'
-    if sha is not None:
-        raw_repo_uri = static.GITHUB_RAW_BASE_URL + user + '/' + repo + '/{}/'.format(sha)
+
+    gh = Github(static.ACCESS_TOKEN)
+    gh_repo = gh.get_repo(user + '/' + repo)
 
     # The URIs of all candidates
-    raw_sparql_query_uri = raw_repo_uri + query_name + '.rq'
-    raw_alt_sparql_query_uri = raw_repo_uri + query_name + '.sparql'
-    raw_tpf_query_uri = raw_repo_uri + query_name + '.tpf'
+    query_names = [ ( query_name + '.rq'    , 'SPARQL' ),
+                    ( query_name + '.sparql', 'SPARQL' ),
+                    ( query_name + '.tpf'   , 'TPF'    ) ]
 
-    raw_sparql_query = requests.get(raw_sparql_query_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)})
-    raw_alt_sparql_query = requests.get(raw_alt_sparql_query_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)})
-    raw_tpf_query = requests.get(raw_tpf_query_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)})
+    ref = sha if sha is not None else 'master'
+    for qname, qtype in query_names:
+        try:
+            qfile = gh_repo.get_contents(qname, ref)
+            raw_query = qfile.decoded_content
+            break
+        except:
+            qtype = 'ERROR'
 
     # Call name implemented with SPARQL query
-    if raw_sparql_query.status_code == 200 or raw_alt_sparql_query.status_code == 200:
-        if raw_sparql_query.status_code == 200:
-            raw_sparql_query = raw_sparql_query.text
-        else:
-            raw_sparql_query = raw_alt_sparql_query.text
+    if qtype == 'SPARQL':
+        raw_sparql_query = raw_query
 
-        endpoint = gquery.guess_endpoint_uri(raw_sparql_query, raw_repo_uri)
+        endpoint = gquery.guess_endpoint_uri(raw_sparql_query, gh_repo)
         glogger.debug("=====================================================")
         glogger.debug("Sending query to SPARQL endpoint: {}".format(endpoint))
         glogger.debug("=====================================================")
@@ -138,9 +141,9 @@ def query(user, repo, query_name, sha=None, content=None):
 
         return resp
     # Call name implemented with TPF query
-    elif raw_tpf_query.status_code == 200:
-        raw_tpf_query = raw_tpf_query.text
-        endpoint = gquery.guess_endpoint_uri(raw_tpf_query, raw_repo_uri)
+    elif qtype == 'TPF':
+        raw_tpf_query = raw_query
+        endpoint = gquery.guess_endpoint_uri(raw_tpf_query, gh_repo)
         glogger.debug("=====================================================")
         glogger.debug("Sending query to TPF endpoint: {}".format(endpoint))
         glogger.debug("=====================================================")
@@ -187,7 +190,10 @@ def swagger_spec(user, repo, sha=None, content=None):
     # Init provenance recording
     prov_g = grlcPROV(user, repo)
 
-    swag = utils.build_swagger_spec(user, repo, sha, static.SERVER_NAME, prov_g)
+    gh = Github(static.ACCESS_TOKEN)
+    gh_repo = gh.get_repo(user + '/' + repo)
+
+    swag = utils.build_swagger_spec(user, repo, sha, static.SERVER_NAME, prov_g, gh_repo)
 
     prov_g.end_prov_graph()
     # prov_g.log_prov_graph()
@@ -206,11 +212,6 @@ def swagger_spec(user, repo, sha=None, content=None):
     glogger.info("-----> API spec generation for /{}/{} on commit {} complete".format(user, repo, sha))
 
     return resp_spec
-
-# @app.route('/api/<user>/<repo>/prov', methods=['GET'])
-# def prov(user, repo):
-#     return prov_g.serialize(format='json-ld')
-
 
 if __name__ == '__main__':
     app.run(host=static.DEFAULT_HOST, port=static.DEFAULT_PORT, debug=True)
