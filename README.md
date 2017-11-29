@@ -11,6 +11,9 @@ grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor
 **Copyright:**	Albert Meroño, VU University Amsterdam  
 **License:**	MIT License (see [LICENSE.txt](LICENSE.txt))
 
+## What is grlc ?
+grlc is a lightweight server that takes SPARQL queries curated in GitHub repositories, and translates them to Linked Data Web APIs. This enables universal access to Linked Data. Users are not required to know SPARQL to query their data, but instead can access a web API.
+
 ## Install and run
 
 Running via [docker](https://www.docker.com/) is the easiest and preferred form of deploying grlc. You'll need a working installation of [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/). To deploy grlc, just pull the latest image from Docker hub, and run docker compose with a `docker-compose.yml` that suits your needs (an [example](docker-compose.default.yml) is provided in the root directory):
