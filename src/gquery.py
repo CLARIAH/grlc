@@ -34,8 +34,7 @@ def guess_endpoint_uri(rq, gh_repo):
     except (TypeError, KeyError):
         # File
         try:
-            endpoint_file = gh_repo.get_contents('endpoint.txt')
-            endpoint_content = endpoint_file.decoded_content
+            endpoint_content = gh_repo.getTextFor('endpoint.txt')
             endpoint = endpoint_content.strip().splitlines()[0]
             glogger.debug("File guessed endpoint: " + endpoint)
         # TODO: except all is really ugly
@@ -208,20 +207,20 @@ def get_metadata(rq):
         # glogger.warning(traceback.print_exc())
         pass
 
-    try:
-        # insert, update query
-        glogger.info("Trying to parse udpate query")
-        parsed_query = UpdateUnit.parseString(rq, parseAll=True)
-        glogger.info(parsed_query)
-        query_metadata['type'] = parsed_query[0]['request'][0].name
-        glogger.info("Update query parsed with {}".format(query_metadata['type']))
-        # if query_metadata['type'] == 'InsertData':
-        #     query_metadata['variables'] = parsed_query.algebra['PV']
-    except:
-        glogger.error("Could not parse UPDATE query")
-        glogger.error(query_metadata['query'])
-        glogger.error(traceback.print_exc())
-        pass
+        try:
+            # insert, update query
+            glogger.info("Trying to parse update query")
+            parsed_query = UpdateUnit.parseString(rq, parseAll=True)
+            glogger.info(parsed_query)
+            query_metadata['type'] = parsed_query[0]['request'][0].name
+            glogger.info("Update query parsed with {}".format(query_metadata['type']))
+            # if query_metadata['type'] == 'InsertData':
+            #     query_metadata['variables'] = parsed_query.algebra['PV']
+        except:
+            glogger.error("Could not parse UPDATE query")
+            glogger.error(query_metadata['query'])
+            glogger.error(traceback.print_exc())
+            pass
 
     glogger.info("Finished parsing query of type {}".format(query_metadata['type']))
 
