@@ -36,6 +36,8 @@ ACCESS_TOKEN = config.get('auth', 'github_access_token')
 
 # Default endpoint, if none specified elsewhere
 DEFAULT_ENDPOINT = config.get('defaults', 'sparql_endpoint')
+DEFAULT_ENDPOINT_USER = config.get('defaults', 'user')
+DEFAULT_ENDPOINT_PASSWORD = config.get('defaults', 'password')
 
 # Local folder where queries are loaded from
 LOCAL_SPARQL_DIR = config.get('local', 'local_sparql_dir')

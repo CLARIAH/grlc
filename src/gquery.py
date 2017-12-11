@@ -24,26 +24,34 @@ def guess_endpoint_uri(rq, gh_repo):
     Otherwise assigns a default one
     '''
     endpoint = static.DEFAULT_ENDPOINT
+    auth = (static.DEFAULT_ENDPOINT_USER, static.DEFAULT_ENDPOINT_PASSWORD)
+    if auth == ('none','none'):
+        auth = None
 
     # Decorator
     try:
         decorators = get_yaml_decorators(rq)
         glogger.debug("{}".format(decorators['endpoint']))
         endpoint = decorators['endpoint']
+        auth = None
         glogger.info("Decorator guessed endpoint: " + endpoint)
     except (TypeError, KeyError):
         # File
         try:
             endpoint_content = gh_repo.getTextFor('endpoint.txt')
             endpoint = endpoint_content.strip().splitlines()[0]
+            auth = None
             glogger.debug("File guessed endpoint: " + endpoint)
         # TODO: except all is really ugly
         except:
             # Default
             endpoint = static.DEFAULT_ENDPOINT
+            auth = (static.DEFAULT_ENDPOINT_USER, static.DEFAULT_ENDPOINT_PASSWORD)
+            if auth == ('none','none'):
+                auth = None
             glogger.warning("No endpoint specified, using default ({})".format(endpoint))
 
-    return endpoint
+    return endpoint, auth
 
 def count_query_results(query, endpoint):
     '''
@@ -73,7 +81,7 @@ def count_query_results(query, endpoint):
 
     return 1000
 
-def get_parameters(rq, endpoint):
+def get_parameters(rq, endpoint, auth=None):
     """
         ?_name The variable specifies the API mandatory parameter name. The value is incorporated in the query as plain literal.
         ?__name The parameter name is optional.
@@ -101,7 +109,7 @@ def get_parameters(rq, endpoint):
             vname = match.group('name')
             # We only fire the enum filling queries if indicated by the query metadata
             metadata = get_metadata(rq)
-            vcodes = get_enumeration(rq, v, endpoint) if 'enumerate' in metadata and vname in metadata['enumerate'] else []
+            vcodes = get_enumeration(rq, v, endpoint, auth) if 'enumerate' in metadata and vname in metadata['enumerate'] else []
             vrequired = True if match.group('required') == '_' else False
             vtype = 'literal'
             vlang = None
@@ -135,7 +143,7 @@ def get_parameters(rq, endpoint):
 
     return parameters
 
-def get_enumeration(rq, v, endpoint):
+def get_enumeration(rq, v, endpoint, auth=None):
     '''
     Returns a list of enumerated values for variable 'v' in query 'rq'
     '''
@@ -156,7 +164,7 @@ def get_enumeration(rq, v, endpoint):
         else:
             codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
         glogger.debug("Codes subquery: {}".format(codes_subquery))
-        codes_json = requests.get(endpoint, params={'query' : codes_subquery}, headers={'Accept' : static.mimetypes['json'], 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}).json()
+        codes_json = requests.get(endpoint, params={'query' : codes_subquery}, headers={'Accept' : static.mimetypes['json'], 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}, auth=auth).json()
         for code in codes_json['results']['bindings']:
             vcodes.append(list(code.values())[0]["value"])
 

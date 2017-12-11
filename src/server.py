@@ -57,7 +57,7 @@ def query(user, repo, query_name, sha=None, content=None):
         raw_sparql_query = query
         raw_repo_uri = loader.getRawRepoUri()
 
-        endpoint = gquery.guess_endpoint_uri(raw_sparql_query, loader)
+        endpoint, auth = gquery.guess_endpoint_uri(raw_sparql_query, loader)
         glogger.debug("=====================================================")
         glogger.debug("Sending query to SPARQL endpoint: {}".format(endpoint))
         glogger.debug("=====================================================")
@@ -101,13 +101,13 @@ def query(user, repo, query_name, sha=None, content=None):
             resp = make_response(resp_string)
         # If there's no mime type, the endpoint is an actual SPARQL endpoint
         else:
-            # Preapre HTTP request
+            # Prepare HTTP request
             headers = { 'Accept' : request.headers['Accept'] }
             if content:
                 headers = { 'Accept' : static.mimetypes[content] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
             data = { 'query' : paginated_query }
 
-            response = requests.get(endpoint, params=data, headers=headers)
+            response = requests.get(endpoint, params=data, headers=headers, auth=auth)
             glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
 
             # Response headers
@@ -142,7 +142,7 @@ def query(user, repo, query_name, sha=None, content=None):
     # Call name implemented with TPF query
     elif q_type == qType['TPF']:
         raw_tpf_query = query
-        endpoint = gquery.guess_endpoint_uri(raw_tpf_query, raw_repo_uri)
+        endpoint, auth = gquery.guess_endpoint_uri(raw_tpf_query, raw_repo_uri)
         glogger.debug("=====================================================")
         glogger.debug("Sending query to TPF endpoint: {}".format(endpoint))
         glogger.debug("=====================================================")
@@ -161,7 +161,7 @@ def query(user, repo, query_name, sha=None, content=None):
         object = tpf_list[tpf_list.index('object') + 1]
         data = { 'subject' : subject, 'predicate' : predicate, 'object' : object}
 
-        response = requests.get(endpoint, params=data, headers=headers)
+        response = requests.get(endpoint, params=data, headers=headers, auth=auth)
         glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
 
         # Response headers
