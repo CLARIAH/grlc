@@ -1,7 +1,9 @@
 var listOfGRLCRepos = [];
 // It is possible to increase the maximum number of requests by supplying a
-// client_id and client_secret https://developer.github.com/v3/oauth_authorizations/
-var gh_auth = ''; //'?client_id=xxx&client_secret=yyy';
+// client_id and client_secret or access_token
+// See: https://developer.github.com/v3/oauth_authorizations/
+var gh_auth = ''; //'?client_id=xxx&client_secret=yyy'; or
+                  //'?access_token=xxxxxxx';
 var currRepo = '';
 
 function fetchGrlcRepos() {
