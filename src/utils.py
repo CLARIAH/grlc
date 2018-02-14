@@ -18,7 +18,7 @@ def turtleize(swag):
 
     return swag_graph.serialize(format='turtle')
 
-def build_spec(user, repo, sha, prov, extraMetadata=[]):
+def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
     '''
     Build grlc specification for the given github user / repo
     '''
