@@ -253,7 +253,8 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
         contact_url = gh_repo.owner.html_url
 
         # Add the API URI as a used entity by the activity
-        prov.add_used_entity(api_repo_uri)
+        if prov is not None:
+            prov.add_used_entity(api_repo_uri)
 
         commit_list = [ c.sha for c in gh_repo.get_commits() ]
 

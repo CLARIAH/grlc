@@ -36,8 +36,11 @@ class GithubLoader(BaseLoader):
         params = {
             'ref' : 'master' if self.sha is None else self.sha
         }
-        resp = requests.get(api_repo_content_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}, params=params).json()
-        return resp
+        resp = requests.get(api_repo_content_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}, params=params)
+        if resp.ok:
+            return resp.json()
+        else:
+            raise Exception(resp.text)
 
     def getRawRepoUri(self):
         raw_repo_uri = static.GITHUB_RAW_BASE_URL + self.user + '/' + self.repo
@@ -52,7 +55,8 @@ class GithubLoader(BaseLoader):
         resp = self._getText(raw_query_uri)
 
         # Add query URI as used entity by the logged activity
-        self.prov.add_used_entity(raw_query_uri)
+        if self.prov is not None:
+            self.prov.add_used_entity(raw_query_uri)
         return resp
 
     def _getText(self, query_name):
