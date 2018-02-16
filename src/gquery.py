@@ -4,7 +4,8 @@
 
 import yaml
 from rdflib.plugins.sparql.parser import Query, UpdateUnit
-from rdflib.plugins.sparql.processor import translateQuery, translateUpdate
+from rdflib.plugins.sparql.processor import translateQuery
+from flask import request
 from pyparsing import ParseException
 import logging
 import traceback
@@ -23,15 +24,20 @@ def guess_endpoint_uri(rq, gh_repo):
     - A endpoint.txt file in the repo
     Otherwise assigns a default one
     '''
+
     endpoint = static.DEFAULT_ENDPOINT
     auth = (static.DEFAULT_ENDPOINT_USER, static.DEFAULT_ENDPOINT_PASSWORD)
     if auth == ('none','none'):
         auth = None
 
+    if "endpoint" in request.args:
+        endpoint = request.args['endpoint']
+        glogger.info("Endpoint provided in request: " + endpoint)
+        return endpoint, auth
+
     # Decorator
     try:
         decorators = get_yaml_decorators(rq)
-        glogger.debug("{}".format(decorators['endpoint']))
         endpoint = decorators['endpoint']
         auth = None
         glogger.info("Decorator guessed endpoint: " + endpoint)

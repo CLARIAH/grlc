@@ -58,6 +58,9 @@ def query(user, repo, query_name, sha=None, content=None):
         raw_repo_uri = loader.getRawRepoUri()
 
         endpoint, auth = gquery.guess_endpoint_uri(raw_sparql_query, loader)
+        if endpoint=='':
+            return 'No SPARQL endpoint indicated', 407
+
         glogger.debug("=====================================================")
         glogger.debug("Sending query to SPARQL endpoint: {}".format(endpoint))
         glogger.debug("=====================================================")
