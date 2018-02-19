@@ -267,6 +267,10 @@ def rewrite_query(query, get_args, endpoint):
     glogger.debug("Query parameters")
     glogger.debug(parameters)
     requireXSD = False
+
+    requiredParams = set(parameters.keys())
+    providedParams = set(get_args.keys())
+    assert requiredParams == providedParams, 'Provided parameters do not match with required parameters!'
     for pname, p in list(parameters.items()):
         # Get the parameter value from the GET request
         v = get_args.get(pname, None)
