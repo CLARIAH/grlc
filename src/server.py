@@ -73,23 +73,17 @@ def query(user, repo, query_name, sha=None, content=None):
         if 'mime' in query_metadata and query_metadata['mime']:
             g = Graph()
             try:
-                query_metadata = gquery.get_metadata(raw_sparql_query)
                 g.parse(endpoint, format=query_metadata['mime'])
             except Exception as e:
                 glogger.error(e)
             results = g.query(paginated_query, result='sparql')
-            # glogger.debug("Results of SPARQL query against locally loaded dump:")
             # Prepare return format as requested
             resp_string = ""
-            # glogger.debug("Requested formats: {}".format(request.headers['Accept']))
-            # if content:
-            #     glogger.debug("Requested formats from extension: {}".format(static.mimetypes[content]))
+
             if 'application/json' in request.headers['Accept'] or (content and 'application/json' in static.mimetypes[content]):
                 resp_string = results.serialize(format='json')
             elif 'text/csv' in request.headers['Accept'] or (content and 'text/csv' in static.mimetypes[content]):
                 resp_string = results.serialize(format='csv')
-            # elif 'text/html' in request.headers['Accept']:
-            #     resp_string = results.serialize(format='html')
             else:
                 return 'Unacceptable requested format', 415
             del g
