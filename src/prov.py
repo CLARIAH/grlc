@@ -35,17 +35,17 @@ class grlcPROV():
         '''
         Initialize PROV graph with all we know at the start of the recording
         '''
-
-        # Use git2prov to get prov on the repo
-        repo_prov = check_output(['node_modules/git2prov/bin/git2prov', 'https://github.com/{}/{}/'.format(self.user, self.repo), 'PROV-O'])
-        repo_prov = repo_prov[repo_prov.find('@'):]
-        # glogger.debug('Git2PROV output: {}'.format(repo_prov))
-        glogger.debug('Ingesting Git2PROV output into RDF graph')
-        with open('temp.prov.ttl', 'w') as temp_prov:
-            temp_prov.write(repo_prov)
         try:
+            # Use git2prov to get prov on the repo
+            repo_prov = check_output(['node_modules/git2prov/bin/git2prov', 'https://github.com/{}/{}/'.format(self.user, self.repo), 'PROV-O'])
+            repo_prov = repo_prov[repo_prov.find('@'):]
+            # glogger.debug('Git2PROV output: {}'.format(repo_prov))
+            glogger.debug('Ingesting Git2PROV output into RDF graph')
+            with open('temp.prov.ttl', 'w') as temp_prov:
+                temp_prov.write(repo_prov)
             self.prov_g.parse('temp.prov.ttl', format='turtle')
-        except BadSyntax:
+        # except BadSyntax:
+        except:
             glogger.error("Couldn't parse Git2PROV graph, continuing without repo PROV")
             pass
 
