@@ -16,7 +16,7 @@ import utils as utils
 from prov import grlcPROV
 
 from fileLoaders import GithubLoader, LocalLoader
-from sparql import selectReturnFormat, executeSPARQLQuery
+import sparql as sparql
 
 # The Flask app
 app = Flask(__name__)
@@ -39,10 +39,10 @@ def query_local(query_name):
 from queryTypes import qType
 
 @app.route('/api/<user>/<repo>/<query_name>', methods=['GET'])
-@app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET'])
+@app.route('/api/<user>/<repo>/<query_name>.<extension>', methods=['GET'])
 @app.route('/api/<user>/<repo>/commit/<sha>/<query_name>', methods=['GET'])
-@app.route('/api/<user>/<repo>/commit/<sha>/<query_name>.<content>', methods=['GET'])
-def query(user, repo, query_name, sha=None, content=None):
+@app.route('/api/<user>/<repo>/commit/<sha>/<query_name>.<extension>', methods=['GET'])
+def query(user, repo, query_name, sha=None, extension=None):
     glogger.debug("-----> Executing call name at /{}/{}/{} on commit {}".format(user, repo, query_name, sha))
     glogger.debug("Request accept header: " + request.headers["Accept"])
 
@@ -92,9 +92,9 @@ def query(user, repo, query_name, sha=None, content=None):
             # glogger.debug("Requested formats: {}".format(request.headers['Accept']))
             # if content:
             #     glogger.debug("Requested formats from extension: {}".format(static.mimetypes[content]))
-            if 'application/json' in request.headers['Accept'] or (content and 'application/json' in static.mimetypes[content]):
+            if 'application/json' in request.headers['Accept'] or (extension and 'application/json' in static.mimetypes[extension]):
                 resp_string = results.serialize(format='json')
-            elif 'text/csv' in request.headers['Accept'] or (content and 'text/csv' in static.mimetypes[content]):
+            elif 'text/csv' in request.headers['Accept'] or (extension and 'text/csv' in static.mimetypes[extension]):
                 resp_string = results.serialize(format='csv')
             # elif 'text/html' in request.headers['Accept']:
             #     resp_string = results.serialize(format='html')
@@ -105,14 +105,11 @@ def query(user, repo, query_name, sha=None, content=None):
             resp = make_response(resp_string)
         # If there's no mime type, the endpoint is an actual SPARQL endpoint
         else:
-            # glogger.debug('=========================================================')
-            # I think `content` is not used and could be cleared up ? -- ask @albertmeronyo
-            # if content:
-            #     headers = { 'Accept' : static.mimetypes[content] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
-            # glogger.debug('=========================================================')
-
-            returnFormat = selectReturnFormat(request.headers['Accept'])
-            response = executeSPARQLQuery(endpoint, paginated_query, returnFormat)
+            if extension:
+                returnFormat = sparql.selectExtensionFormat(extension)
+            else:
+                returnFormat = sparql.selectReturnFormat(request.headers['Accept'])
+            response = sparql.executeSPARQLQuery(endpoint, paginated_query, returnFormat)
 
             resp = make_response(response)
             resp.headers['Server'] = 'grlc/1.0.0'

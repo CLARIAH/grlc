@@ -6,8 +6,16 @@ SPARQL_FORMATS = {
     'application/json': JSON
 }
 
+CONTENT_EXTENSIONS = {
+    'csv': CSV,
+    'json': JSON
+}
+
 def selectReturnFormat(contentType):
     return SPARQL_FORMATS[contentType] if contentType in SPARQL_FORMATS else CSV
+
+def selectExtensionFormat(fileExtension):
+    return CONTENT_EXTENSIONS[fileExtension] if fileExtension in CONTENT_EXTENSIONS else CSV
 
 def executeSPARQLQuery(endpoint, query, retformat):
     client = SPARQLWrapper(endpoint)
