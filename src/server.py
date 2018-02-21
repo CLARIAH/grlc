@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 # server.py: the grlc server
+from grlc import __version__ as grlc_version
 
 from flask import Flask, request, jsonify, render_template, make_response
 import requests
@@ -27,7 +28,7 @@ glogger = logging.getLogger(__name__)
 
 # Server routes
 @app.route('/')
-def grlc():
+def grlcIndex():
     resp = make_response(render_template('index.html'))
     return resp
 
@@ -115,7 +116,7 @@ def query(user, repo, query_name, sha=None, content=None):
 
             # Response headers
             resp = make_response(response.text)
-            resp.headers['Server'] = 'grlc/1.0.0'
+            resp.headers['Server'] = 'grlc/' + grlc_version
             resp.headers['Content-Type'] = response.headers['Content-Type']
 
         # If the query is paginated, set link HTTP headers
@@ -169,7 +170,7 @@ def query(user, repo, query_name, sha=None, content=None):
 
         # Response headers
         resp = make_response(response.text)
-        resp.headers['Server'] = 'grlc/1.0.0'
+        resp.headers['Server'] = 'grlc/' + grlc_version
         resp.headers['Content-Type'] = response.headers['Content-Type']
 
         return resp
