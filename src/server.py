@@ -16,6 +16,7 @@ import utils as utils
 from prov import grlcPROV
 
 from fileLoaders import GithubLoader, LocalLoader
+from sparql import selectReturnFormat, executeSPARQLQuery
 
 # The Flask app
 app = Flask(__name__)
@@ -104,19 +105,18 @@ def query(user, repo, query_name, sha=None, content=None):
             resp = make_response(resp_string)
         # If there's no mime type, the endpoint is an actual SPARQL endpoint
         else:
-            # Prepare HTTP request
-            headers = { 'Accept' : request.headers['Accept'] }
-            if content:
-                headers = { 'Accept' : static.mimetypes[content] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
-            data = { 'query' : paginated_query }
+            # glogger.debug('=========================================================')
+            # I think `content` is not used and could be cleared up ? -- ask @albertmeronyo
+            # if content:
+            #     headers = { 'Accept' : static.mimetypes[content] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
+            # glogger.debug('=========================================================')
 
-            response = requests.get(endpoint, params=data, headers=headers, auth=auth)
-            glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
+            returnFormat = selectReturnFormat(request.headers['Accept'])
+            response = executeSPARQLQuery(endpoint, paginated_query, returnFormat)
 
-            # Response headers
-            resp = make_response(response.text)
+            resp = make_response(response)
             resp.headers['Server'] = 'grlc/1.0.0'
-            resp.headers['Content-Type'] = response.headers['Content-Type']
+            resp.headers['Content-Type'] = request.headers['Accept']
 
         # If the query is paginated, set link HTTP headers
         if pagination:

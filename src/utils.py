@@ -7,6 +7,7 @@ import traceback
 import logging
 
 from fileLoaders import GithubLoader, LocalLoader
+from sparql import SPARQL_FORMATS
 
 glogger = logging.getLogger(__name__)
 
@@ -302,7 +303,7 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
             "tags" : item['tags'],
             "summary" : item['summary'],
             "description" : item['description'] + "\n<pre>\n{}\n</pre>".format(cgi.escape(item['query'])),
-            "produces" : ["text/csv", "application/json", "text/html"],
+            "produces" : SPARQL_FORMATS.keys(), # ["text/csv", "application/json", "text/html"],
             "parameters": item['params'] if 'params' in item else None,
             "responses": {
                 "200" : {
