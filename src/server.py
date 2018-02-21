@@ -196,10 +196,6 @@ def swagger_spec(user, repo, sha=None, content=None):
 
     resp_spec.headers['Content-Type'] = 'application/json'
 
-    if 'text/turtle' in request.headers['Accept']:
-        resp_spec = make_response(utils.turtleize(swag))
-        resp_spec.headers['Content-Type'] = 'text/turtle'
-
     resp_spec.headers['Cache-Control'] = static.CACHE_CONTROL_POLICY # Caching JSON specs for 15 minutes
 
     glogger.info("-----> API spec generation for /{}/{} on commit {} complete".format(user, repo, sha))

@@ -1,7 +1,6 @@
 import static as static
 import gquery as gquery
 import cgi
-from rdflib import Graph
 import traceback
 
 import logging
@@ -12,13 +11,6 @@ from fileLoaders import GithubLoader, LocalLoader
 
 glogger = logging.getLogger(__name__)
 
-def turtleize(swag):
-    '''
-    Transforoms a JSON swag object into a text/turtle LDA equivalent representation
-    '''
-    swag_graph = Graph()
-
-    return swag_graph.serialize(format='turtle')
 
 def getLoader(user, repo, sha=None, prov=None):
     if user is None and repo is None:
