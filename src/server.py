@@ -6,14 +6,13 @@ import requests
 import logging
 import re
 from rdflib import Graph
-from github import Github
 
 # grlc modules
 from grlc import __version__ as grlc_version
 import static as static
 import gquery as gquery
 import utils as utils
-from prov import grlcPROV
+
 from queryTypes import qType
 
 # The Flask app
@@ -191,23 +190,10 @@ def api_docs(user, repo, sha=None):
 def swagger_spec(user, repo, sha=None, content=None):
     glogger.info("-----> Generating swagger spec for /{}/{} on commit {}".format(user,repo,sha))
 
-    # Init provenance recording
-    if user is not None and repo is not None:
-        prov_g = grlcPROV(user, repo)
-        gh = Github(static.ACCESS_TOKEN)
-        gh_repo = gh.get_repo(user + '/' + repo)
-    else:
-        prov_g = None
-        gh_repo = None
-
-    swag = utils.build_swagger_spec(user, repo, sha, static.SERVER_NAME, prov_g, gh_repo)
-
-    if user is not None and repo is not None:
-        prov_g.end_prov_graph()
-        swag['prov'] = prov_g.serialize(format='turtle')
-    # prov_g.log_prov_graph()
+    swag = utils.build_swagger_spec(user, repo, sha, static.SERVER_NAME)
 
     resp_spec = make_response(jsonify(swag))
+
     resp_spec.headers['Content-Type'] = 'application/json'
 
     if 'text/turtle' in request.headers['Accept']:

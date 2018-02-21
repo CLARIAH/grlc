@@ -5,7 +5,9 @@ from rdflib import Graph
 import traceback
 
 import logging
+from github import Github
 
+from prov import grlcPROV
 from fileLoaders import GithubLoader, LocalLoader
 
 glogger = logging.getLogger(__name__)
@@ -238,27 +240,25 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
 
     return item
 
-def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
+
+def build_swagger_spec(user, repo, sha, serverName):
     '''Build grlc specification for the given github user / repo in swagger format '''
-    if user is None and repo is None:
-        user_repo = 'local/local'
-        prev_commit = []
-        next_commit = []
-        version = 'local'
-        repo_title = 'local'
-        contact_name = ''
-        contact_url = ''
-    else:
+
+    if user and repo:
         user_repo = user + '/' + repo
         api_repo_uri = static.GITHUB_API_BASE_URL + user_repo
+
+        # Init provenance recording
+        prov_g = grlcPROV(user, repo)
+        gh = Github(static.ACCESS_TOKEN)
+        gh_repo = gh.get_repo(user + '/' + repo)
 
         repo_title = gh_repo.name
         contact_name = gh_repo.owner.login
         contact_url = gh_repo.owner.html_url
 
         # Add the API URI as a used entity by the activity
-        if prov is not None:
-            prov.add_used_entity(api_repo_uri)
+        prov_g.add_used_entity(api_repo_uri)
 
         commit_list = [ c.sha for c in gh_repo.get_commits() ]
 
@@ -273,6 +273,15 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
             prev_commit = commit_list[commit_list.index(version)+1]
         if commit_list.index(version) > 0:
             next_commit = commit_list[commit_list.index(version)-1]
+    else:
+        user_repo = 'local/local'
+        prev_commit = []
+        next_commit = []
+        version = 'local'
+        repo_title = 'local'
+        contact_name = ''
+        contact_url = ''
+        prov_g = None
 
     swag = {}
     swag['prev_commit'] = prev_commit
@@ -291,15 +300,12 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
         }
     }
     swag['host'] = serverName
-    swag['basePath'] = '/api/' + user_repo + '/'
-    if sha is not None:
-        swag['basePath'] = '/api/' + user_repo + '/commit/' + sha + '/'
+    swag['basePath'] = '/api/' + user_repo + ('/commit/' + sha + '/' if sha else '/')
     swag['schemes'] = ['http']
     swag['paths'] = {}
 
-    spec = build_spec(user, repo, sha, prov)
-    # glogger.debug("Current internal spec data structure")
-    # glogger.debug(spec)
+    spec = build_spec(user, repo, sha, prov_g)
+
     for item in spec:
         swag['paths'][item['call_name']] = {}
         swag['paths'][item['call_name']][item['method']] = {
@@ -327,4 +333,9 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
                 }
             }
         }
+
+    if prov_g:
+        prov_g.end_prov_graph()
+        swag['prov'] = prov_g.serialize(format='turtle')
+
     return swag
