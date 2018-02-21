@@ -1,5 +1,6 @@
 import static as static
 import gquery as gquery
+import pagination as pageUtils
 import cgi
 import traceback
 
@@ -85,12 +86,7 @@ def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
     # If this query allows pagination, add page number as parameter
     params = []
     if pagination:
-        pagination_param = {}
-        pagination_param['name'] = "page"
-        pagination_param['type'] = "int"
-        pagination_param['in'] = "query"
-        pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
-        params.append(pagination_param)
+        params.append(pageUtils.getSwaggerPaginationDef(pagination))
 
     item = {
         'call_name': call_name,
@@ -171,12 +167,7 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
 
     # If this query allows pagination, add page number as parameter
     if pagination:
-        pagination_param = {}
-        pagination_param['name'] = "page"
-        pagination_param['type'] = "int"
-        pagination_param['in'] = "query"
-        pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
-        params.append(pagination_param)
+        params.append(pageUtils.getSwaggerPaginationDef(pagination))
 
     if query_metadata['type'] == 'SelectQuery':
         # We now know it is a SELECT query

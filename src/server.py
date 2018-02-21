@@ -12,6 +12,7 @@ from grlc import __version__ as grlc_version
 import static as static
 import gquery as gquery
 import utils as utils
+import pagination as pageUtils
 
 from queryTypes import qType
 
@@ -109,24 +110,8 @@ def query(user, repo, query_name, sha=None, content=None):
         if pagination:
             # Get number of total results
             count = gquery.count_query_results(rewritten_query, endpoint)
-            page = 1
-            if 'page' in request.args:
-                page = int(request.args['page'])
-                next_url = re.sub("page=[0-9]+", "page={}".format(page + 1), request.url)
-                prev_url = re.sub("page=[0-9]+", "page={}".format(page - 1), request.url)
-                first_url = re.sub("page=[0-9]+", "page=1", request.url)
-                last_url = re.sub("page=[0-9]+", "page={}".format(count / pagination), request.url)
-            else:
-                next_url = request.url + "?page={}".format(page + 1)
-                prev_url = request.url + "?page={}".format(page - 1)
-                first_url = request.url + "?page={}".format(page)
-                last_url = request.url + "?page={}".format(count / pagination)
-            if page == 1:
-                resp.headers['Link'] = "<{}>; rel=next, <{}>; rel=last".format(next_url, last_url)
-            elif page == count / pagination:
-                resp.headers['Link'] = "<{}>; rel=prev, <{}>; rel=first".format(prev_url, first_url)
-            else:
-                resp.headers['Link'] = "<{}>; rel=next, <{}>; rel=prev, <{}>; rel=first, <{}>; rel=last".format(next_url, prev_url, first_url, last_url)
+            headerLink =  pageUtils.buildPaginationHeader(count, pagination)
+            resp.headers['Link'] = headerLink
 
         return resp
     # Call name implemented with TPF query
