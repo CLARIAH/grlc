@@ -18,14 +18,18 @@ def turtleize(swag):
 
     return swag_graph.serialize(format='turtle')
 
-def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
-    '''
-    Build grlc specification for the given github user / repo
-    '''
+def getLoader(user, repo, sha=None, prov=None):
     if user is None and repo is None:
         loader = LocalLoader()
     else:
         loader = GithubLoader(user, repo, sha, prov)
+    return loader
+
+def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
+    '''
+    Build grlc specification for the given github user / repo
+    '''
+    loader = getLoader(user, repo, sha, prov)
 
     files = loader.fetchFiles()
     raw_repo_uri = loader.getRawRepoUri()

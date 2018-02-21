@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
 # server.py: the grlc server
-from grlc import __version__ as grlc_version
-
 from flask import Flask, request, jsonify, render_template, make_response
 import requests
 import logging
@@ -11,12 +9,12 @@ from rdflib import Graph
 from github import Github
 
 # grlc modules
+from grlc import __version__ as grlc_version
 import static as static
 import gquery as gquery
 import utils as utils
 from prov import grlcPROV
-
-from fileLoaders import GithubLoader, LocalLoader
+from queryTypes import qType
 
 # The Flask app
 app = Flask(__name__)
@@ -36,8 +34,6 @@ def grlcIndex():
 def query_local(query_name):
     return query(user=None, repo=None, query_name=query_name)
 
-from queryTypes import qType
-
 @app.route('/api/<user>/<repo>/<query_name>', methods=['GET'])
 @app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET'])
 @app.route('/api/<user>/<repo>/commit/<sha>/<query_name>', methods=['GET'])
@@ -46,10 +42,7 @@ def query(user, repo, query_name, sha=None, content=None):
     glogger.debug("-----> Executing call name at /{}/{}/{} on commit {}".format(user, repo, query_name, sha))
     glogger.debug("Request accept header: " + request.headers["Accept"])
 
-    if user is None and repo is None:
-        loader = LocalLoader()
-    else:
-        loader = GithubLoader(user, repo, sha, None)
+    loader = utils.getLoader(user, repo, sha, prov=None)
 
     query, q_type = loader.getTextForName(query_name)
 
