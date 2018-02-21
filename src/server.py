@@ -153,8 +153,8 @@ def query(user, repo, query_name, sha=None, extension=None):
 
         # Preapre HTTP request
         headers = { 'Accept' : request.headers['Accept'] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
-        if content:
-            headers = { 'Accept' : static.mimetypes[content] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
+        if extension:
+            headers = { 'Accept' : static.mimetypes[extension] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
         tpf_list = re.split('\n|=', raw_tpf_query)
         subject = tpf_list[tpf_list.index('subject') + 1]
         predicate = tpf_list[tpf_list.index('predicate') + 1]
