@@ -20,6 +20,7 @@ glogger = logging.getLogger(__name__)
 def guess_endpoint_uri(rq, gh_repo):
     '''
     Guesses the endpoint URI from (in this order):
+    - An endpoint parameter in URL
     - An #+endpoint decorator
     - A endpoint.txt file in the repo
     Otherwise assigns a default one
