@@ -215,6 +215,51 @@ def getParameterDefinition(p):
         param['enum'] = p['enum']
     return param
 
+def getInfoDefinition(version, repo_title, contact_name, contact_url, user_repo):
+    return {
+        'version': version,
+        'title': repo_title,
+        'contact': {
+            'name': contact_name,
+            'url': contact_url
+        },
+        'license': {
+            'name' : 'License',
+            'url': static.GITHUB_RAW_BASE_URL + user_repo + '/master/LICENSE'
+        }
+    }
+
+def getPathsDefFromSpec(spec):
+    swag_paths = {}
+    for item in spec:
+        swag_paths[item['call_name']] = {}
+        swag_paths[item['call_name']][item['method']] = {
+            "tags" : item['tags'],
+            "summary" : item['summary'],
+            "description" : item['description'] + "\n<pre>\n{}\n</pre>".format(cgi.escape(item['query'])),
+            "produces" : ["text/csv", "application/json", "text/html"],
+            "parameters": item['params'] if 'params' in item else None,
+            "responses": {
+                "200" : {
+                    "description" : "Query response",
+                    "schema" : {
+                        "type" : "array",
+                        "items": {
+                            "type": "object",
+                            "properties": item['item_properties'] if 'item_properties' in item else None
+                        },
+                    }
+                },
+                "default" : {
+                    "description" : "Unexpected error",
+                    "schema" : {
+                        "$ref" : "#/definitions/Message"
+                    }
+                }
+            }
+        }
+    return swag_paths
+
 def build_swagger_spec(user, repo, sha, serverName):
     '''Build grlc specification for the given github user / repo in swagger format '''
 
@@ -257,56 +302,17 @@ def build_swagger_spec(user, repo, sha, serverName):
         contact_url = ''
         prov_g = None
 
+    spec = build_spec(user, repo, sha, prov_g)
+
     swag = {}
     swag['prev_commit'] = prev_commit
     swag['next_commit'] = next_commit
     swag['swagger'] = '2.0'
-    swag['info'] = {
-        'version': version,
-        'title': repo_title,
-        'contact': {
-            'name': contact_name,
-            'url': contact_url
-        },
-        'license': {
-            'name' : 'License',
-            'url': static.GITHUB_RAW_BASE_URL + user_repo + '/master/LICENSE'
-        }
-    }
     swag['host'] = serverName
     swag['basePath'] = '/api/' + user_repo + ('/commit/' + sha + '/' if sha else '/')
     swag['schemes'] = ['http']
-    swag['paths'] = {}
-
-    spec = build_spec(user, repo, sha, prov_g)
-
-    for item in spec:
-        swag['paths'][item['call_name']] = {}
-        swag['paths'][item['call_name']][item['method']] = {
-            "tags" : item['tags'],
-            "summary" : item['summary'],
-            "description" : item['description'] + "\n<pre>\n{}\n</pre>".format(cgi.escape(item['query'])),
-            "produces" : ["text/csv", "application/json", "text/html"],
-            "parameters": item['params'] if 'params' in item else None,
-            "responses": {
-                "200" : {
-                    "description" : "Query response",
-                    "schema" : {
-                        "type" : "array",
-                        "items": {
-                            "type": "object",
-                            "properties": item['item_properties'] if 'item_properties' in item else None
-                        },
-                    }
-                },
-                "default" : {
-                    "description" : "Unexpected error",
-                    "schema" : {
-                        "$ref" : "#/definitions/Message"
-                    }
-                }
-            }
-        }
+    swag['info'] = getInfoDefinition(version, repo_title, contact_name, contact_url, user_repo)
+    swag['paths'] = getPathsDefFromSpec(spec)
 
     if prov_g:
         prov_g.end_prov_graph()
