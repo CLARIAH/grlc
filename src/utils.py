@@ -41,21 +41,21 @@ def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
             # Retrieve extra metadata from the query decorators
             query_text = loader.getTextFor(c)
 
-            item = None
             if ".rq" in c_name or ".sparql" in c_name:
                 glogger.info("===================================================================")
                 glogger.info("Processing SPARQL query: {}".format(c_name))
                 glogger.info("===================================================================")
                 item = process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata)
+                items.append(item)
             elif ".tpf" in c['name']:
                 glogger.info("===================================================================")
                 glogger.info("Processing TPF query: {}".format(c_name))
                 glogger.info("===================================================================")
                 item = process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata)
+                items.append(item)
             else:
                 glogger.info("Ignoring unsupported source call name: {}".format(c_name))
-            if item:
-                items.append(item)
+
     return items
 
 def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
@@ -77,9 +77,6 @@ def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
     pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
     glogger.debug("Read query pagination: " + str(pagination))
 
-    # enums = query_metadata['enumerate'] if 'enumerate' in query_metadata else []
-    # glogger.debug("Read query enumerates: " + ', '.join(enums))
-
     endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
     glogger.debug("Read query endpoint: " + endpoint)
 
@@ -88,15 +85,8 @@ def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
     if pagination:
         params.append(pageUtils.getSwaggerPaginationDef(pagination))
 
-    item = {
-        'call_name': call_name,
-        'method': method,
-        'tags': tags,
-        'summary': summary,
-        'description': description,
-        'params': params,
-        'query': query_metadata['query']
-    }
+    item = getItemDefinition(call_name=call_name, method=method, tags=tags,
+        summary=summary, description=description, params=params, query=query_metadata['query'])
 
     for extraField in extraMetadata:
         if extraField in query_metadata:
@@ -129,13 +119,9 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
     pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
     glogger.debug("Read query pagination: {}".format(pagination))
 
-    # enums = query_metadata['enumerate'] if 'enumerate' in query_metadata else []
-    # glogger.debug("Read query enumerates: {}".format(', '.join(enums)))
-
     mime = query_metadata['mime'] if 'mime' in query_metadata else ""
     glogger.debug("Read endpoint dump MIME type: {}".format(mime))
 
-    # endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
     endpoint = gquery.guess_endpoint_uri(query_text, raw_repo_uri)
     glogger.debug("Read query endpoint: {}".format(endpoint))
 
@@ -147,23 +133,12 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
             glogger.error("Could not parse parameters of query {}".format(call_name))
             return None
 
-        glogger.debug("Read request parameters")
-        # glogger.debug(parameters)
         # TODO: do something intelligent with the parameters!
         # As per #3, prefetching IRIs via SPARQL and filling enum
 
         params = []
         for v, p in list(parameters.items()):
-            param = {}
-            param['name'] = p['name']
-            param['type'] = p['type']
-            param['required'] = p['required']
-            param['in'] = "query"
-            param['description'] = "A value of type {} that will substitute {} in the original query".format(p['type'], p['original'])
-            if p['enum']:
-                param['enum'] = p['enum']
-
-            params.append(param)
+            params.append(getParameterDefinition(p))
 
     # If this query allows pagination, add page number as parameter
     if pagination:
@@ -175,47 +150,17 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
             method = 'get'
         item_properties = {}
         for pv in query_metadata['variables']:
-            item_properties[pv] = {
-                "name": pv,
-                "type": "object",
-                "required": ["type", "value"],
-                "properties": {
-                    "type": {
-                        "type": "string"
-                    },
-                    "value": {
-                        "type": "string"
-                    },
-                    "xml:lang": {
-                        "type": "string"
-                    },
-                    "datatype": {
-                        "type": "string"
-                    }
-                }
-            }
-        item = {
-            'call_name': call_name,
-            'method': method,
-            'tags': tags,
-            'summary': summary,
-            'description': description,
-            'params': params,
-            'item_properties': item_properties,
-            'query': query_metadata['query']
-        }
+            item_properties[pv] = getItemPropertyDef(pv)
+        item = getItemDefinition(call_name=call_name, method=method, tags=tags,
+            summary=summary, description=description, params=params,
+            item_properties=item_properties, query=query_metadata['query'])
+
     else:
         # We know it is an UPDATE; ignore params and props
         if not method:
             method = 'post'
-        item = {
-            'call_name': call_name,
-            'method': method,
-            'tags': tags,
-            'summary': summary,
-            'description': description,
-            'query': query_metadata['query']
-        }
+        item = getItemDefinition(call_name=call_name, method=method, tags=tags,
+            summary=summary, description=description, query=query_metadata['query'])
 
     for extraField in extraMetadata:
         if extraField in query_metadata:
@@ -223,6 +168,52 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
 
     return item
 
+def getItemPropertyDef(pv):
+    return {
+        "name": pv,
+        "type": "object",
+        "required": ["type", "value"],
+        "properties": {
+            "type": {
+                "type": "string"
+            },
+            "value": {
+                "type": "string"
+            },
+            "xml:lang": {
+                "type": "string"
+            },
+            "datatype": {
+                "type": "string"
+            }
+        }
+    }
+
+def getItemDefinition(call_name, method, tags, summary, description, query, params=None, item_properties=None):
+    item = {
+        'call_name': call_name,
+        'method': method,
+        'tags': tags,
+        'summary': summary,
+        'description': description,
+        'query': query
+    }
+    if params:
+        item['params'] = params
+    if params:
+        item['item_properties'] = item_properties
+    return item
+
+def getParameterDefinition(p):
+    param = {}
+    param['name'] = p['name']
+    param['type'] = p['type']
+    param['required'] = p['required']
+    param['in'] = "query"
+    param['description'] = "A value of type {} that will substitute {} in the original query".format(p['type'], p['original'])
+    if p['enum']:
+        param['enum'] = p['enum']
+    return param
 
 def build_swagger_spec(user, repo, sha, serverName):
     '''Build grlc specification for the given github user / repo in swagger format '''
