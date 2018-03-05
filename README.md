@@ -114,6 +114,7 @@ Use [this GitHub search](https://github.com/search?q=endpoint+summary+language%3
 - Compatibility with [Linked Data Fragments](http://linkeddatafragments.org/) servers, RDF dumps, and HTML+RDFa files
 - Generation of provenance in [PROV](https://www.w3.org/TR/prov-primer/) of both the repo history (via [Git2PROV](https://github.com/IDLabResearch/Git2PROV)) and grlc's activity additions
 - Commit-based API versioning that's coherent with the repo versioning with git hashes
+- SPARQL endpoint address can be set at the query level, repository level, and now also as a query **parameter**. This makes your APIs endpoint agnostic, and enables for generic and  transposable queries!
 
 ## Contribute!
 
