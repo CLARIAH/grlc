@@ -75,7 +75,14 @@ class LocalLoader(BaseLoader):
     def fetchFiles(self):
         '''Returns a list of file items contained on the local repo.'''
         files = glob(self.baseDir + '*')
-        return [ { 'download_url': f.replace(self.baseDir, '') } for f in files ]
+        filesDef = []
+        for f in files:
+            relative = f.replace(self.baseDir, '')
+            filesDef.append({
+                    'download_url': relative,
+                    'name': path.splitext(relative)[0]
+                })
+        return filesDef
 
     def getRawRepoUri(self):
         '''Returns the root url of the local repo.'''
