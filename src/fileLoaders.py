@@ -80,7 +80,7 @@ class LocalLoader(BaseLoader):
             relative = f.replace(self.baseDir, '')
             filesDef.append({
                     'download_url': relative,
-                    'name': path.splitext(relative)[0]
+                    'name': relative
                 })
         return filesDef
 
