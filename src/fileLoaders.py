@@ -1,6 +1,7 @@
 import static as static
 import requests
 
+from os import path
 from glob import glob
 
 from queryTypes import qType
@@ -68,21 +69,35 @@ class GithubLoader(BaseLoader):
             return None
 
 class LocalLoader(BaseLoader):
-    def __init__(self):
-        self.baseDir = static.LOCAL_SPARQL_DIR
+    def __init__(self, baseDir=static.LOCAL_SPARQL_DIR):
+        self.baseDir = baseDir
 
     def fetchFiles(self):
+        '''Returns a list of file items contained on the local repo.'''
         files = glob(self.baseDir + '*')
-        return [ { 'name': f.replace(self.baseDir, '') } for f in files ]
+        filesDef = []
+        for f in files:
+            relative = f.replace(self.baseDir, '')
+            filesDef.append({
+                    'download_url': relative,
+                    'name': relative
+                })
+        return filesDef
 
     def getRawRepoUri(self):
+        '''Returns the root url of the local repo.'''
         return ''
 
-    def _getText(self, query_name):
-        f = open(self.baseDir + query_name, 'r')
-        lines = f.readlines()
-        text = ''.join(lines)
-        return text
-
     def getTextFor(self, fileItem):
-        return self._getText(fileItem['name'])
+        '''Returns the contents of the given file item on the local repo.'''
+        return self._getText(fileItem['download_url'])
+
+    def _getText(self, filename):
+        targetFile = self.baseDir + filename
+        if path.exists(targetFile):
+            f = open(targetFile, 'r')
+            lines = f.readlines()
+            text = ''.join(lines)
+            return text
+        else:
+            return None
