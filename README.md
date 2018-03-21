@@ -3,6 +3,9 @@
 [![Join the chat at https://gitter.im/grlc](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/grlc/Lobby#)
 [![DOI](https://zenodo.org/badge/46131212.svg)](https://zenodo.org/badge/latestdoi/46131212)
 
+[![Build Status](https://travis-ci.org/c-martinez/grlc.svg?branch=cuttingEdge)](https://travis-ci.org/c-martinez/grlc)
+** UPDATE build status for master branch when merged **
+
 
 grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor, automatically builds Web APIs using SPARQL queries stored in git repositories. http://grlc.io/
 
