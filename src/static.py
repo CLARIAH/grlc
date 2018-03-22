@@ -30,7 +30,19 @@ GITHUB_API_BASE_URL = 'https://api.github.com/repos/'
 CACHE_CONTROL_POLICY = 'public, max-age=86400' # 24 hours
 
 # Setting headers to use access_token for the GitHub API
-config = SafeConfigParser()
+config_fallbacks = {
+    'github_access_token': '',
+    'sparql_endpoint': '',
+    'user': '',
+    'password': '',
+    'server_name': '',
+    'local_sparql_dir': ''
+}
+config = SafeConfigParser(config_fallbacks)
+config.add_section('auth')
+config.add_section('defaults')
+config.add_section('local')
+
 config.read('config.ini')
 ACCESS_TOKEN = config.get('auth', 'github_access_token')
 
