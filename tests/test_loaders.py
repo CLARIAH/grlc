@@ -1,16 +1,24 @@
 import unittest
 import six
-# from mock import patch
+from mock import patch
 
 from grlc.fileLoaders import LocalLoader, GithubLoader
 from grlc.queryTypes import qType
 
+from tests.mock_data import mock_requestsGithub
 
 class TestGithubLoader(unittest.TestCase):
+    def setUp(self):
+        self.patcher = patch('requests.get', side_effect=mock_requestsGithub)
+        self.patcher.start()
+
+    def tearDown(self):
+        self.patcher.stop()
+
     @classmethod
     def setUpClass(self):
-        self.user = 'diveplus'
-        self.repo = 'queries'
+        self.user = 'fakeuser'
+        self.repo = 'fakerepo'
         self.loader = GithubLoader(self.user, self.repo, None, None)
 
     def test_fetchFiles(self):
@@ -19,8 +27,8 @@ class TestGithubLoader(unittest.TestCase):
         # Should return a list of file items
         self.assertIsInstance(files, list, "Should return a list of file items")
 
-        # Should have N files (where N=15)
-        self.assertEquals(len(files), 15, "Should return correct number of files")
+        # Should have N files (where N=4)
+        self.assertEquals(len(files), 4, "Should return correct number of files")
 
         # File items should have a download_url
         for fItem in files:
@@ -55,9 +63,9 @@ class TestGithubLoader(unittest.TestCase):
 
     def test_getTextForName(self):
         testableNames = [
-            ('detailsAction', qType['SPARQL']),
-            ('getCollections', qType['SPARQL']),
-            ('getSearchQuery', qType['SPARQL']),
+            ('test-rq', qType['SPARQL']),
+            ('test-sparql', qType['SPARQL']),
+            ('test-tpf', qType['TPF'])
         ]
         for name, expectedType in testableNames:
             text, actualType = self.loader.getTextForName(name)
@@ -116,6 +124,17 @@ class TestLocalLoader(unittest.TestCase):
         for name, expectedType in testableNames:
             text, actualType = self.loader.getTextForName(name)
             self.assertEqual(expectedType, actualType, "Query type should match %s != %s"%(expectedType, actualType))
+
+def common_getTextForName(tester):
+    testableNames = [
+        ('test-rq', qType['SPARQL']),
+        ('test-sparql', qType['SPARQL']),
+        ('test-tpf', qType['TPF'])
+    ]
+    for name, expectedType in testableNames:
+        text, actualType = tester.loader.getTextForName(name)
+        tester.assertEqual(expectedType, actualType, "Query type should match %s != %s"%(expectedType, actualType))
+
 
 if __name__ == '__main__':
     unittest.main()
