@@ -61,14 +61,14 @@ class TestGithubLoader(unittest.TestCase):
         with self.assertRaises(Exception, message="Should raise exception for invalid file items"):
             text = self.loader.getTextFor( { } )
 
-    def test_getTextForName(self):
+    def test_getTextForQueryName(self):
         testableNames = [
             ('test-rq', qType['SPARQL']),
             ('test-sparql', qType['SPARQL']),
             ('test-tpf', qType['TPF'])
         ]
         for name, expectedType in testableNames:
-            text, actualType = self.loader.getTextForName(name)
+            text, actualType = self.loader.getTextForQueryName(name)
             self.assertEqual(expectedType, actualType, "Query type should match %s != %s"%(expectedType, actualType))
 
 class TestLocalLoader(unittest.TestCase):
@@ -115,14 +115,14 @@ class TestLocalLoader(unittest.TestCase):
         with self.assertRaises(Exception, message="Should raise exception for invalid file items"):
             text = self.loader.getTextFor( { } )
 
-    def test_getTextForName(self):
+    def test_getTextForQueryName(self):
         testableNames = [
             ('test-rq', qType['SPARQL']),
             ('test-sparql', qType['SPARQL']),
             ('test-tpf', qType['TPF'])
         ]
         for name, expectedType in testableNames:
-            text, actualType = self.loader.getTextForName(name)
+            text, actualType = self.loader.getTextForQueryName(name)
             self.assertEqual(expectedType, actualType, "Query type should match %s != %s"%(expectedType, actualType))
 
 def common_getTextForName(tester):
