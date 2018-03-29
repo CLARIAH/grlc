@@ -1,24 +1,28 @@
 # YAML 1.2
 # Metadata for citation of this software according to the CFF format (https://citation-file-format.github.io/)
-cff-version: 1.0.3
-message: If you use this software, please cite it as below.
-# FIXME title as repository name might no be best name, please make human readable
-title: grlc
-doi: 10.5281/zenodo.1064392
-# FIXME splitting of full names is error prone, please check if given/family name are correct
+---
 authors:
-- given-names: Albert
-  family-names: Meroño-Peñuela
-  affiliation: Vrije Universiteit Amsterdam
-- given-names: Rinke
-  family-names: Hoekstra
-- given-names: Carlos
-  family-names: Martinez
-  affiliation: Netherlands eScience Center
-- given-names: Richard
-  family-names: Zijdeman
-  affiliation: International Institute of Social History
-version: '1.1'
-date-released: '2017-11-22'
-repository-code: https://github.com/CLARIAH/grlc
+  -
+    affiliation: "Vrije Universiteit Amsterdam"
+    family-names: Meroño-Peñuela
+    given-names: Albert
+  -
+    family-names: Hoekstra
+    given-names: Rinke
+  -
+    affiliation: "Netherlands eScience Center"
+    family-names: Martinez
+    given-names: Carlos
+  -
+    affiliation: "International Institute of Social History"
+    family-names: Zijdeman
+    given-names: Richard
+cff-version: "1.0.3"
+date-released: 2017-11-22
+doi: 10.5281/zenodo.1064392
 license: MIT
+message: "If you use this software, please cite it as below."
+repository-code: "https://github.com/CLARIAH/grlc"
+title: grlc
+version: "1.1"
+
