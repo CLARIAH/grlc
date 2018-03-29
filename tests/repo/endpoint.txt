@@ -1,1 +1,1 @@
-http://test-endpoint/sparql
+http://test-endpoint/from-file/sparql

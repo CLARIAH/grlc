@@ -125,16 +125,5 @@ class TestLocalLoader(unittest.TestCase):
             text, actualType = self.loader.getTextForQueryName(name)
             self.assertEqual(expectedType, actualType, "Query type should match %s != %s"%(expectedType, actualType))
 
-def common_getTextForName(tester):
-    testableNames = [
-        ('test-rq', qType['SPARQL']),
-        ('test-sparql', qType['SPARQL']),
-        ('test-tpf', qType['TPF'])
-    ]
-    for name, expectedType in testableNames:
-        text, actualType = tester.loader.getTextForName(name)
-        tester.assertEqual(expectedType, actualType, "Query type should match %s != %s"%(expectedType, actualType))
-
-
 if __name__ == '__main__':
     unittest.main()

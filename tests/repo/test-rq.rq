@@ -1,1 +1,13 @@
-# Should add some text to make testable
+#+ summary: This test query contains and endpoint decorator and a query with
+#+    some variables with different types using BASIL syntax.
+#+ endpoint: http://test-endpoint/from-decorator/sparql
+
+SELECT * WHERE {
+ ?s ?p ?_o1 .
+ ?s ?p ?_o2_iri .
+ ?s ?p ?_o3_number .
+ ?s ?p ?_o4_literal .
+ ?s ?p ?_o5_en .
+ ?s ?p ?_o6_integer .
+ ?s ?p ?_o7_xsd_date .
+}
