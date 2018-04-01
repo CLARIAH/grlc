@@ -1,7 +1,7 @@
 import unittest
 import six
 import rdflib
-# from mock import patch
+from mock import patch, Mock
 
 from grlc.fileLoaders import LocalLoader
 from grlc import gquery
@@ -60,9 +60,22 @@ class TestGQuery(unittest.TestCase):
                 self.assertEqual(param['datatype'],
                                  'xsd:date', 'Should be type xsd:date')
 
-    def test_get_enumeration(self):
-        # Might need to mock requests.get(endpoint) for this one.
-        self.skipTest('Not implemented')
+    @patch('requests.get')
+    def test_get_enumeration(self, mock_get):
+        mock_get.return_value = Mock(ok=True)
+        mock_get.return_value.json.return_value = {
+            'results': {
+                'bindings': [
+                    { 'o1': { 'value': 'v1'} },
+                    { 'o1': { 'value': 'v2'} }
+                ]
+            }
+        }
+
+        rq, _ = self.loader.getTextForQueryName('test-rq')
+        enumeration = gquery.get_enumeration(rq, 'o1', 'http://mock-endpoint/sparql')
+        self.assertIsInstance(enumeration, list, 'Should return a list of values')
+        self.assertEquals(len(enumeration), 2, 'Should have two elements')
 
     def test_get_yaml_decorators(self):
         rq, _ = self.loader.getTextForQueryName('test-sparql')
