@@ -26,13 +26,13 @@ class TestGQuery(unittest.TestCase):
             self.assertIn('from-file', endpoint,
                           'Should match endpoint in endpoint.txt')
 
-            rq, _ = self.loader.getTextForQueryName('test-rq')
+            rq, _ = self.loader.getTextForName('test-rq')
             endpoint, _ = gquery.guess_endpoint_uri(rq, self.loader)
             self.assertIn('from-decorator', endpoint,
                           'Should match endpoint in test-rq.rq')
 
     def test_get_parameters(self):
-        rq, _ = self.loader.getTextForQueryName('test-rq')
+        rq, _ = self.loader.getTextForName('test-rq')
 
         params = gquery.get_parameters(rq, '')
         for paramName, param in params.iteritems():
@@ -72,13 +72,13 @@ class TestGQuery(unittest.TestCase):
             }
         }
 
-        rq, _ = self.loader.getTextForQueryName('test-rq')
+        rq, _ = self.loader.getTextForName('test-rq')
         enumeration = gquery.get_enumeration(rq, 'o1', 'http://mock-endpoint/sparql')
         self.assertIsInstance(enumeration, list, 'Should return a list of values')
         self.assertEquals(len(enumeration), 2, 'Should have two elements')
 
     def test_get_yaml_decorators(self):
-        rq, _ = self.loader.getTextForQueryName('test-sparql')
+        rq, _ = self.loader.getTextForName('test-sparql')
 
         decorators = gquery.get_yaml_decorators(rq)
 
@@ -97,7 +97,7 @@ class TestGQuery(unittest.TestCase):
             decorators['enumerate'], list, 'Enumerate should be a list')
 
     def test_get_metadata(self):
-        rq, _ = self.loader.getTextForQueryName('test-sparql')
+        rq, _ = self.loader.getTextForName('test-sparql')
 
         metadata = gquery.get_metadata(rq)
         self.assertIn('type', metadata, 'Should have a type field')
@@ -111,7 +111,7 @@ class TestGQuery(unittest.TestCase):
                                   'Should be of type Variable')
 
     def test_paginate_query(self):
-        rq, _ = self.loader.getTextForQueryName('test-sparql')
+        rq, _ = self.loader.getTextForName('test-sparql')
 
         rq_pag = gquery.paginate_query(rq, {})
 
@@ -125,7 +125,7 @@ class TestGQuery(unittest.TestCase):
                       'Paginated query should contain OFFSET keyword')
 
     def test_rewrite_query(self):
-        rq, _ = self.loader.getTextForQueryName('test-rq')
+        rq, _ = self.loader.getTextForName('test-rq')
         parameters = {
             'o1': 'x1',
             'o2': 'x2',

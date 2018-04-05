@@ -44,7 +44,7 @@ def guess_endpoint_uri(rq, gh_repo):
     except (TypeError, KeyError):
         # File
         try:
-            endpoint_content = gh_repo.getTextFor('endpoint.txt')
+            endpoint_content = gh_repo.getTextFor({'download_url': 'endpoint.txt'})
             endpoint = endpoint_content.strip().splitlines()[0]
             auth = None
             glogger.debug("File guessed endpoint: " + endpoint)
