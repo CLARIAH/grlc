@@ -1,4 +1,4 @@
-workers = 20
+workers = 100
 worker_class = 'gevent'
 bind = '0.0.0.0:8088'
 #pidfile = '/tmp/gunicorn-grlc.pid'
