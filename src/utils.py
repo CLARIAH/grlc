@@ -141,7 +141,9 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
     mime = query_metadata['mime'] if 'mime' in query_metadata else ""
     glogger.debug("Read endpoint dump MIME type: {}".format(mime))
 
-    # endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
+    endpoint_in_url = query_metadata['endpoint_in_url'] if 'endpoint_in_url' in query_metadata else True
+    glogger.debug("Read endpoint in url: {}".format(endpoint_in_url))
+
     endpoint = gquery.guess_endpoint_uri(query_text, raw_repo_uri)
     glogger.debug("Read query endpoint: {}".format(endpoint))
 
@@ -179,6 +181,14 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
         pagination_param['in'] = "query"
         pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
         params.append(pagination_param)
+
+    if endpoint_in_url:
+        endpoint_param = {}
+        endpoint_param['name'] = "endpoint"
+        endpoint_param['type'] = "string"
+        endpoint_param['in'] = "query"
+        endpoint_param['description'] = "Alternative endpoint for SPARQL query"
+        params.append(endpoint_param)
 
     if query_metadata['type'] == 'SelectQuery':
         # We now know it is a SELECT query
