@@ -8,6 +8,7 @@ from rdflib.plugins.sparql.processor import translateQuery
 from flask import request
 from pyparsing import ParseException
 import logging
+from pprint import pprint, pformat
 import traceback
 import re
 import requests
@@ -87,7 +88,7 @@ def count_query_results(query, endpoint):
 
     return 1000
 
-def get_parameters(rq, endpoint, auth=None):
+def get_parameters(variables, endpoint, query_metadata, auth=None):
     """
         ?_name The variable specifies the API mandatory parameter name. The value is incorporated in the query as plain literal.
         ?__name The parameter name is optional.
@@ -97,7 +98,7 @@ def get_parameters(rq, endpoint, auth=None):
         ?_name_prefix_datatype The parameter value is considered as literal and the datatype 'prefix:datatype' is added during substitution. The prefix must be specified according to the SPARQL syntax.
     """
 
-    variables = translateQuery(Query.parseString(rq, parseAll=True)).algebra['_vars']
+    # variables = translateQuery(Query.parseString(rq, parseAll=True)).algebra['_vars']
 
     ## Aggregates
     internal_matcher = re.compile("__agg_\d+__")
@@ -114,8 +115,8 @@ def get_parameters(rq, endpoint, auth=None):
         if match :
             vname = match.group('name')
             # We only fire the enum filling queries if indicated by the query metadata
-            metadata = get_metadata(rq)
-            vcodes = get_enumeration(rq, v, endpoint, auth) if 'enumerate' in metadata and vname in metadata['enumerate'] else []
+            # metadata = get_metadata(rq)
+            vcodes = get_enumeration(rq, v, endpoint, auth) if 'enumerate' in query_metadata and vname in query_metadata['enumerate'] else []
             vrequired = True if match.group('required') == '_' else False
             vtype = 'literal'
             vlang = None
@@ -146,6 +147,8 @@ def get_parameters(rq, endpoint, auth=None):
                 'datatype': vdatatype,
                 'lang': vlang
             }
+
+            glogger.info('Finished parsing the following parameters: {}'.format(parameters))
 
     return parameters
 
@@ -180,7 +183,7 @@ def get_yaml_decorators(rq):
     '''
     Returns the yaml decorator metadata only (this is needed by triple pattern fragments)
     '''
-    glogger.debug('Guessing decorators for query {}'.format(rq))
+    #glogger.debug('Guessing decorators for query {}'.format(rq))
     if not rq:
         return None
 
@@ -191,7 +194,7 @@ def get_yaml_decorators(rq):
     try: # Invalid YAMLs will produce empty metadata
         query_metadata = yaml.load(yaml_string)
     except yaml.scanner.ScannerError:
-        glogger.warning("Query metadata could not be parsed; check your YAML syntax")
+        glogger.warning("Query decorators could not be parsed; check your YAML syntax")
         pass
 
     # If there is no YAML string
@@ -199,11 +202,11 @@ def get_yaml_decorators(rq):
         query_metadata = {}
     query_metadata['query'] = query_string
 
-    glogger.debug("Parsed query metadata: {}".format(query_metadata))
+    #glogger.debug("Parsed query decorators: {}".format(query_metadata))
 
     return query_metadata
 
-def get_metadata(rq):
+def get_metadata(rq, endpoint):
     '''
     Returns the metadata 'exp' parsed from the raw query file 'rq'
     'exp' is one of: 'endpoint', 'tags', 'summary', 'request', 'pagination', 'enumerate'
@@ -211,13 +214,22 @@ def get_metadata(rq):
     query_metadata = get_yaml_decorators(rq)
 
     try:
+        # THE PARSING
         # select, describe, construct, ask
         parsed_query = translateQuery(Query.parseString(rq, parseAll=True))
         query_metadata['type'] = parsed_query.algebra.name
         if query_metadata['type'] == 'SelectQuery':
+            # Projection variables
             query_metadata['variables'] = parsed_query.algebra['PV']
+            # Parameters
+            query_metadata['parameters'] = get_parameters(parsed_query.algebra['_vars'], endpoint, query_metadata)
+        elif query_metadata['type'] == 'ConstructQuery':
+            # Parameters
+            query_metadata['parameters'] = get_parameters(parsed_query.algebra['_vars'], endpoint, query_metadata)
+        else:
+            glogger.warning("Query type {} is currently unsupported and no metadata was parsed!".format(query_metadata['type']))
     except ParseException:
-        glogger.warning("Could not parse SELECT, DESCRIBE, CONSTRUCT, ASK query")
+        glogger.error("Could not parse query; check syntax!")
         # glogger.warning(traceback.print_exc())
         pass
 
@@ -237,6 +249,8 @@ def get_metadata(rq):
             pass
 
     glogger.info("Finished parsing query of type {}".format(query_metadata['type']))
+    glogger.info("All parsed query metadata (from decorators and content): ")
+    glogger.info(pformat(query_metadata, indent=32))
 
     return query_metadata
 

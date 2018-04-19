@@ -111,54 +111,72 @@ def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
     return item
 
 def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
+    # We get the endpoint name first, since some query metadata fields (eg enums) require it
+    endpoint = gquery.guess_endpoint_uri(query_text, raw_repo_uri)
+    glogger.debug("Read query endpoint: {}".format(endpoint))
+
     try:
-        query_metadata = gquery.get_metadata(query_text)
+        query_metadata = gquery.get_metadata(query_text, endpoint)
     except Exception as e:
         raw_query_uri = raw_repo_uri + ' / ' + call_name
         glogger.error("Could not parse query at {}".format(raw_query_uri))
         glogger.error(traceback.print_exc())
         return None
 
+    #glogger.debug("Query metadata: {}".format(query_metadata))
+
     tags = query_metadata['tags'] if 'tags' in query_metadata else []
-    glogger.debug("Read query tags: {}".format(', '.join(tags)))
+    #glogger.debug("Read query tags: {}".format(', '.join(tags)))
 
     summary = query_metadata['summary'] if 'summary' in query_metadata else ""
-    glogger.debug("Read query summary: {}".format(summary))
+    #glogger.debug("Read query summary: {}".format(summary))
 
     description = query_metadata['description'] if 'description' in query_metadata else ""
-    glogger.debug("Read query description: {}".format(description))
+    #glogger.debug("Read query description: {}".format(description))
 
     method = query_metadata['method'].lower() if 'method' in query_metadata else ""
     if method not in ['get', 'post', 'head', 'put', 'delete', 'options', 'connect']:
         method = ""
 
     pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
-    glogger.debug("Read query pagination: {}".format(pagination))
+    #glogger.debug("Read query pagination: {}".format(pagination))
 
     # enums = query_metadata['enumerate'] if 'enumerate' in query_metadata else []
     # glogger.debug("Read query enumerates: {}".format(', '.join(enums)))
 
     mime = query_metadata['mime'] if 'mime' in query_metadata else ""
-    glogger.debug("Read endpoint dump MIME type: {}".format(mime))
+    #glogger.debug("Read endpoint dump MIME type: {}".format(mime))
 
-    # endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
-    endpoint = gquery.guess_endpoint_uri(query_text, raw_repo_uri)
-    glogger.debug("Read query endpoint: {}".format(endpoint))
 
-    if query_metadata['type'] == 'SelectQuery':
-        try:
-            parameters = gquery.get_parameters(query_text, endpoint)
-        except Exception as e:
-            glogger.error(e)
-            glogger.error("Could not parse parameters of query {}".format(call_name))
-            return None
+    # Processing of the parameters
+    params = []
 
-        glogger.debug("Read request parameters")
+    # PV properties
+    item_properties = {}
+
+    # If this query allows pagination, add page number as parameter
+    if pagination:
+        pagination_param = {}
+        pagination_param['name'] = "page"
+        pagination_param['type'] = "int"
+        pagination_param['in'] = "query"
+        pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
+        params.append(pagination_param)
+
+    if query_metadata['type'] == 'SelectQuery' or query_metadata['type'] == 'ConstructQuery':
+        # try:
+        #     parameters = gquery.get_parameters(query_text, endpoint)
+        # except Exception as e:
+        #     glogger.error(e)
+        #     glogger.error("Could not parse parameters of query {}".format(call_name))
+        #     return None
+
+        # glogger.debug("Read request parameters")
         # glogger.debug(parameters)
         # TODO: do something intelligent with the parameters!
         # As per #3, prefetching IRIs via SPARQL and filling enum
+        parameters = query_metadata['parameters']
 
-        params = []
         for v, p in list(parameters.items()):
             param = {}
             param['name'] = p['name']
@@ -171,20 +189,11 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
 
             params.append(param)
 
-    # If this query allows pagination, add page number as parameter
-    if pagination:
-        pagination_param = {}
-        pagination_param['name'] = "page"
-        pagination_param['type'] = "int"
-        pagination_param['in'] = "query"
-        pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
-        params.append(pagination_param)
-
     if query_metadata['type'] == 'SelectQuery':
-        # We now know it is a SELECT query
+        # Fill in the spec for SELECT
         if not method:
             method = 'get'
-        item_properties = {}
+        # item['item_properties'] = {}
         for pv in query_metadata['variables']:
             item_properties[pv] = {
                 "name": pv,
@@ -205,28 +214,37 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
                     }
                 }
             }
-        item = {
-            'call_name': call_name,
-            'method': method,
-            'tags': tags,
-            'summary': summary,
-            'description': description,
-            'params': params,
-            'item_properties': item_properties,
-            'query': query_metadata['query']
-        }
-    else:
-        # We know it is an UPDATE; ignore params and props
+
+    elif query_metadata['type'] == 'ConstructQuery':
         if not method:
             method = 'post'
-        item = {
-            'call_name': call_name,
-            'method': method,
-            'tags': tags,
-            'summary': summary,
-            'description': description,
-            'query': query_metadata['query']
-        }
+    else:
+        glogger.warning("Query of type {} is currently unsupported! Skipping".format(query_metadata['type']))
+
+    # Finally: main structure of the callname spec
+    item = {
+        'call_name': call_name,
+        'method': method,
+        'tags': tags,
+        'summary': summary,
+        'description': description,
+        'params': params,
+        'item_properties': None, # From projection variables, only SelectQuery
+        'query': query_metadata['query']
+    }
+
+    # else:
+        # TODO: process all other kinds of queries
+        # if not method:
+        #     method = 'post'
+        # item = {
+        #     'call_name': call_name,
+        #     'method': method,
+        #     'tags': tags,
+        #     'summary': summary,
+        #     'description': description,
+        #     'query': query_metadata['query']
+        # }
 
     for extraField in extraMetadata:
         if extraField in query_metadata:
