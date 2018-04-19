@@ -65,26 +65,27 @@ def query(user, repo, query_name, sha=None, content=None):
         glogger.debug("Sending query to SPARQL endpoint: {}".format(endpoint))
         glogger.debug("=====================================================")
 
-        query_metadata = gquery.get_metadata(raw_sparql_query)
+        query_metadata = gquery.get_metadata(raw_sparql_query, endpoint)
 
         pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
 
         # Rewrite query using parameter values
-        rewritten_query = gquery.rewrite_query(raw_sparql_query, request.args, endpoint)
+        rewritten_query = gquery.rewrite_query(query_metadata, request.args)
 
         # Rewrite query using pagination
-        paginated_query = gquery.paginate_query(rewritten_query, request.args)
+        if query_metadata['type'] == 'SelectQuery' and 'pagination' in query_metadata:
+            rewritten_query = gquery.paginate_query(rewritten_query, request.args)
 
         resp = None
         # If we have a mime field, we load the remote dump and query it locally
         if 'mime' in query_metadata and query_metadata['mime']:
             g = Graph()
             try:
-                query_metadata = gquery.get_metadata(raw_sparql_query)
+                query_metadata = gquery.get_metadata(raw_sparql_query, endpoint)
                 g.parse(endpoint, format=query_metadata['mime'])
             except Exception as e:
                 glogger.error(e)
-            results = g.query(paginated_query, result='sparql')
+            results = g.query(rewritten_query, result='sparql')
             # glogger.debug("Results of SPARQL query against locally loaded dump:")
             # Prepare return format as requested
             resp_string = ""
@@ -108,7 +109,7 @@ def query(user, repo, query_name, sha=None, content=None):
             headers = { 'Accept' : request.headers['Accept'] }
             if content:
                 headers = { 'Accept' : static.mimetypes[content] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
-            data = { 'query' : paginated_query }
+            data = { 'query' : rewritten_query }
 
             response = requests.get(endpoint, params=data, headers=headers, auth=auth)
             glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])

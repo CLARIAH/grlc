@@ -217,7 +217,7 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
 
     elif query_metadata['type'] == 'ConstructQuery':
         if not method:
-            method = 'post'
+            method = 'get'
     else:
         glogger.warning("Query of type {} is currently unsupported! Skipping".format(query_metadata['type']))
 

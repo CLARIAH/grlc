@@ -255,10 +255,6 @@ def get_metadata(rq, endpoint):
     return query_metadata
 
 def paginate_query(query, get_args):
-    query_metadata = get_metadata(query)
-    if 'pagination' not in query_metadata:
-        return query
-
     results_per_page = query_metadata['pagination']
     page = get_args.get('page', 1)
 
@@ -275,8 +271,9 @@ def paginate_query(query, get_args):
 
     return paginated_query
 
-def rewrite_query(query, get_args, endpoint):
-    parameters = get_parameters(query, endpoint)
+def rewrite_query(query_metadata, get_args):
+    parameters = query_metadata['parameters']
+    query = query_metadata['query']
 
     glogger.debug("Query parameters")
     glogger.debug(parameters)
@@ -311,5 +308,7 @@ def rewrite_query(query, get_args, endpoint):
     xsdPrefix = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
     if requireXSD and xsdPrefix not in query:
             query = query.replace('SELECT', xsdPrefix + '\n\nSELECT')
+
     glogger.debug("Query rewritten as: " + query)
+
     return query
