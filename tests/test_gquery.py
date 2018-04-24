@@ -135,7 +135,7 @@ class TestGQuery(unittest.TestCase):
             'o6': 'x6',
             'o7': 'x7'
         }
-        rq_rw = gquery.rewrite_query(rq, parameters, '')
+        rq_rw = gquery.rewrite_query(rq, parameters, {})
 
         for pName, pValue in parameters.iteritems():
             self.assertIn(
