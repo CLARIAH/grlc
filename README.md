@@ -25,8 +25,8 @@ grlc is a lightweight server that takes SPARQL queries curated in GitHub reposit
 - Compatibility with [Linked Data Fragments](http://linkeddatafragments.org/) servers, RDF dumps, and HTML+RDFa files
 - Generation of provenance in [PROV](https://www.w3.org/TR/prov-primer/) of both the repo history (via [Git2PROV](https://github.com/IDLabResearch/Git2PROV)) and grlc's activity additions
 - Commit-based API versioning that's coherent with the repo versioning with git hashes
-- **NEW** SPARQL endpoint address can be set at the query level, repository level, and now also as a query **parameter**. This makes your APIs endpoint agnostic, and enables for generic and  transposable queries!
-- **NEW** CONSTRUCT queries are now mapped automatically to GET requests, accept parameters in the WHERE clause, and return content in ``text/turtle`` or ``application/ld+json``
+- **[NEW]** SPARQL endpoint address can be set at the query level, repository level, and now also as a query **parameter**. This makes your APIs endpoint agnostic, and enables for generic and  transposable queries!
+- **[NEW]** CONSTRUCT queries are now mapped automatically to GET requests, accept parameters in the WHERE clause, and return content in ``text/turtle`` or ``application/ld+json``
 
 ## Install and run
 
