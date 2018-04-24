@@ -70,11 +70,11 @@ def query(user, repo, query_name, sha=None, content=None):
         pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
 
         # Rewrite query using parameter values
-        rewritten_query = gquery.rewrite_query(query_metadata, request.args)
+        rewritten_query = gquery.rewrite_query(query_metadata['query'], query_metadata['parameters'], request.args)
 
         # Rewrite query using pagination
         if query_metadata['type'] == 'SelectQuery' and 'pagination' in query_metadata:
-            rewritten_query = gquery.paginate_query(rewritten_query, request.args)
+            rewritten_query = gquery.paginate_query(rewritten_query, query_metadata['pagination'], request.args)
 
         resp = None
         # If we have a mime field, we load the remote dump and query it locally

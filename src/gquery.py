@@ -254,8 +254,7 @@ def get_metadata(rq, endpoint):
 
     return query_metadata
 
-def paginate_query(query, get_args):
-    results_per_page = query_metadata['pagination']
+def paginate_query(query, results_per_page, get_args):
     page = get_args.get('page', 1)
 
     glogger.info("Paginating query for page {}, {} results per page".format(page, results_per_page))
@@ -271,10 +270,7 @@ def paginate_query(query, get_args):
 
     return paginated_query
 
-def rewrite_query(query_metadata, get_args):
-    parameters = query_metadata['parameters']
-    query = query_metadata['query']
-
+def rewrite_query(query, parameters, get_args):
     glogger.debug("Query parameters")
     glogger.debug(parameters)
     requireXSD = False

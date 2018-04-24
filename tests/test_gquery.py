@@ -34,7 +34,7 @@ class TestGQuery(unittest.TestCase):
     def test_get_parameters(self):
         rq, _ = self.loader.getTextForName('test-rq')
 
-        params = gquery.get_parameters(rq, '')
+        params = gquery.get_parameters(rq, '', '')
         for paramName, param in params.iteritems():
             self.assertIn('name', param, 'Should have a name')
             self.assertIn('type', param, 'Should have a type')
@@ -99,7 +99,7 @@ class TestGQuery(unittest.TestCase):
     def test_get_metadata(self):
         rq, _ = self.loader.getTextForName('test-sparql')
 
-        metadata = gquery.get_metadata(rq)
+        metadata = gquery.get_metadata(rq, '')
         self.assertIn('type', metadata, 'Should have a type field')
         self.assertIn('variables', metadata, 'Should have a variables field')
         self.assertEqual(metadata['type'], 'SelectQuery',
@@ -113,7 +113,7 @@ class TestGQuery(unittest.TestCase):
     def test_paginate_query(self):
         rq, _ = self.loader.getTextForName('test-sparql')
 
-        rq_pag = gquery.paginate_query(rq, {})
+        rq_pag = gquery.paginate_query(rq, 100, {})
 
         self.assertNotIn(
             'LIMIT', rq, 'Original query should not contain LIMIT keyword')
