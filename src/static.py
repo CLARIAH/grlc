@@ -56,3 +56,6 @@ LOCAL_SPARQL_DIR = config.get('local', 'local_sparql_dir')
 
 # server name, used by the Flask app and in the swagger spec
 SERVER_NAME = config.get('defaults', 'server_name')
+
+# Pattern for INSERT query call names
+INSERT_PATTERN = "INSERT DATA { GRAPH ?_g_iri { <s> <p> <o> }}"

@@ -229,13 +229,18 @@ def get_metadata(rq, endpoint):
         else:
             glogger.warning("Query type {} is currently unsupported and no metadata was parsed!".format(query_metadata['type']))
     except ParseException:
-        glogger.error("Could not parse query; check syntax!")
+        glogger.error("Could not parse regular SELECT, CONSTRUCT, DESCRIBE or ASK query")
         # glogger.warning(traceback.print_exc())
-        pass
+
+        # insert queries won't parse, so we regex
+        glogger.info("Trying to parse INSERT query")
+        if static.INSERT_PATTERN in rq:
+            query_metadata['type'] = 'InsertQuery'
+            query_metadata['parameters'] = [rdflib.term.Variable(u'_g_iri')]
 
         try:
-            # insert, update query
-            glogger.info("Trying to parse update query")
+            # update query
+            glogger.info("Trying to parse UPDATE query")
             parsed_query = UpdateUnit.parseString(rq, parseAll=True)
             glogger.info(parsed_query)
             query_metadata['type'] = parsed_query[0]['request'][0].name
@@ -243,7 +248,7 @@ def get_metadata(rq, endpoint):
             # if query_metadata['type'] == 'InsertData':
             #     query_metadata['variables'] = parsed_query.algebra['PV']
         except:
-            glogger.error("Could not parse UPDATE query")
+            glogger.error("Could not parse query")
             glogger.error(query_metadata['query'])
             glogger.error(traceback.print_exc())
             pass
