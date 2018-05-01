@@ -27,6 +27,7 @@ grlc is a lightweight server that takes SPARQL queries curated in GitHub reposit
 - Commit-based API versioning that's coherent with the repo versioning with git hashes
 - **[NEW]** SPARQL endpoint address can be set at the query level, repository level, and now also as a query **parameter**. This makes your APIs endpoint agnostic, and enables for generic and  transposable queries!
 - **[NEW]** CONSTRUCT queries are now mapped automatically to GET requests, accept parameters in the WHERE clause, and return content in ``text/turtle`` or ``application/ld+json``
+- **[NEW]** INSERT DATA queries are now mapped automatically to POST requests. Support is limited to queries with no WHERE clause, and parameters are always expected to be values for ``g`` (named graph where to insert the data) and ``data`` (with the triples to insert, in ``ntriples`` format). The INSERT query pattern is so far static, as defined in [static.py](https://github.com/CLARIAH/grlc/blob/master/src/static.py#L61). Only tested with Virtuoso.
 
 ## Install and run
 
