@@ -163,7 +163,7 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
         pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
         params.append(pagination_param)
 
-    if query_metadata['type'] == 'SelectQuery' or query_metadata['type'] == 'ConstructQuery':
+    if query_metadata['type'] == 'SelectQuery' or query_metadata['type'] == 'ConstructQuery' or query_metadata['type'] == 'InsertData':
         # try:
         #     parameters = gquery.get_parameters(query_text, endpoint)
         # except Exception as e:

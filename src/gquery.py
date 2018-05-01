@@ -229,14 +229,14 @@ def get_metadata(rq, endpoint):
         else:
             glogger.warning("Query type {} is currently unsupported and no metadata was parsed!".format(query_metadata['type']))
     except ParseException:
-        glogger.error("Could not parse regular SELECT, CONSTRUCT, DESCRIBE or ASK query")
+        glogger.warning("Could not parse regular SELECT, CONSTRUCT, DESCRIBE or ASK query")
         # glogger.warning(traceback.print_exc())
 
         # insert queries won't parse, so we regex
-        glogger.info("Trying to parse INSERT query")
-        if static.INSERT_PATTERN in rq:
-            query_metadata['type'] = 'InsertQuery'
-            query_metadata['parameters'] = [rdflib.term.Variable(u'_g_iri')]
+        # glogger.info("Trying to parse INSERT query")
+        # if static.INSERT_PATTERN in rq:
+        #     query_metadata['type'] = 'InsertQuery'
+        #     query_metadata['parameters'] = [u'_g_iri']
 
         try:
             # update query
@@ -244,6 +244,10 @@ def get_metadata(rq, endpoint):
             parsed_query = UpdateUnit.parseString(rq, parseAll=True)
             glogger.info(parsed_query)
             query_metadata['type'] = parsed_query[0]['request'][0].name
+            if query_metadata['type'] == 'InsertData':
+                query_metadata['parameters'] = {'g': {'datatype': None, 'enum': [], 'lang': None, 'name': 'g', 'original': '?_g_iri', 'required': True, 'type': 'iri'},
+                                                'data': {'datatype': None, 'enum': [], 'lang': None, 'name': 'data', 'original': '?_data', 'required': True, 'type': 'literal'}}
+
             glogger.info("Update query parsed with {}".format(query_metadata['type']))
             # if query_metadata['type'] == 'InsertData':
             #     query_metadata['variables'] = parsed_query.algebra['PV']
@@ -280,9 +284,11 @@ def rewrite_query(query, parameters, get_args):
     glogger.debug(parameters)
     requireXSD = False
 
+    glogger.debug("Parameters: {} Request args: {}".format(requiredParams, providedParams))
     requiredParams = set(parameters.keys())
     providedParams = set(get_args.keys())
     assert requiredParams == providedParams, 'Provided parameters do not match with required parameters!'
+
     for pname, p in list(parameters.items()):
         # Get the parameter value from the GET request
         v = get_args.get(pname, None)

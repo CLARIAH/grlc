@@ -37,10 +37,10 @@ def query_local(query_name):
 
 from queryTypes import qType
 
-@app.route('/api/<user>/<repo>/<query_name>', methods=['GET'])
-@app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET'])
-@app.route('/api/<user>/<repo>/commit/<sha>/<query_name>', methods=['GET'])
-@app.route('/api/<user>/<repo>/commit/<sha>/<query_name>.<content>', methods=['GET'])
+@app.route('/api/<user>/<repo>/<query_name>', methods=['GET', 'POST'])
+@app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET', 'POST'])
+@app.route('/api/<user>/<repo>/commit/<sha>/<query_name>', methods=['GET', 'POST'])
+@app.route('/api/<user>/<repo>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
 def query(user, repo, query_name, sha=None, content=None):
     glogger.debug("-----> Executing call name at /{}/{}/{} on commit {}".format(user, repo, query_name, sha))
     glogger.debug("Request accept header: " + request.headers["Accept"])
@@ -69,8 +69,11 @@ def query(user, repo, query_name, sha=None, content=None):
 
         pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
 
+        rewritten_query = query_metadata['query']
+
         # Rewrite query using parameter values
-        rewritten_query = gquery.rewrite_query(query_metadata['query'], query_metadata['parameters'], request.args)
+        if query_metadata['type'] == 'SelectQuery':
+            rewritten_query = gquery.rewrite_query(query_metadata['query'], query_metadata['parameters'], request.args)
 
         # Rewrite query using pagination
         if query_metadata['type'] == 'SelectQuery' and 'pagination' in query_metadata:
@@ -103,6 +106,26 @@ def query(user, repo, query_name, sha=None, content=None):
             del g
 
             resp = make_response(resp_string)
+        # Check for INSERT/POST
+        if query_metadata['type'] == 'InsertData':
+            glogger.info("Processing INSERT query")
+            # Rewrite INSERT
+            rewritten_query = rewritten_query.replace("?_g_iri", "{}".format(request.form.get('g')))
+            rewritten_query = rewritten_query.replace("<s> <p> <o>", request.form.get('data'))
+            glogger.info("INSERT query rewritten as {}".format(rewritten_query))
+
+            # Prepare HTTP POST request
+            headers = { 'Accept' : request.headers['Accept'], 'Content-Type' : 'application/sparql-update' }
+            # data = { 'query' : rewritten_query }
+
+            response = requests.post(endpoint, params=rewritten_query, headers=headers, auth=auth)
+            glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
+
+            # Response headers
+            resp = make_response(response.text)
+            resp.headers['Server'] = 'grlc/1.0.0'
+            resp.headers['Content-Type'] = response.headers['Content-Type']
+
         # If there's no mime type, the endpoint is an actual SPARQL endpoint
         else:
             # Prepare HTTP request
