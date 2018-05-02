@@ -118,7 +118,7 @@ def query(user, repo, query_name, sha=None, content=None):
             headers = { 'Accept' : request.headers['Accept'], 'Content-Type' : 'application/sparql-update' }
             # data = { 'query' : rewritten_query }
 
-            response = requests.post(endpoint, params=rewritten_query, headers=headers, auth=auth)
+            response = requests.post(endpoint, data=rewritten_query, headers=headers, auth=auth)
             glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
 
             # Response headers
