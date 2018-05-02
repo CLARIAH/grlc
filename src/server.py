@@ -72,7 +72,7 @@ def query(user, repo, query_name, sha=None, content=None):
         rewritten_query = query_metadata['query']
 
         # Rewrite query using parameter values
-        if query_metadata['type'] == 'SelectQuery':
+        if query_metadata['type'] == 'SelectQuery' or query_metadata['type'] == 'ConstructQuery':
             rewritten_query = gquery.rewrite_query(query_metadata['query'], query_metadata['parameters'], request.args)
 
         # Rewrite query using pagination

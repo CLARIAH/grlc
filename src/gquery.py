@@ -284,9 +284,9 @@ def rewrite_query(query, parameters, get_args):
     glogger.debug(parameters)
     requireXSD = False
 
-    glogger.debug("Parameters: {} Request args: {}".format(requiredParams, providedParams))
     requiredParams = set(parameters.keys())
     providedParams = set(get_args.keys())
+    glogger.debug("Parameters: {} Request args: {}".format(requiredParams, providedParams))
     assert requiredParams == providedParams, 'Provided parameters do not match with required parameters!'
 
     for pname, p in list(parameters.items()):
