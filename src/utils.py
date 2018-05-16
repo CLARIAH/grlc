@@ -112,7 +112,7 @@ def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
 
 def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
     # We get the endpoint name first, since some query metadata fields (eg enums) require it
-    endpoint = gquery.guess_endpoint_uri(query_text, raw_repo_uri)
+    endpoint, auth = gquery.guess_endpoint_uri(query_text, raw_repo_uri)
     glogger.debug("Read query endpoint: {}".format(endpoint))
 
     try:
