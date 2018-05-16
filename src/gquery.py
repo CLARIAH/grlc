@@ -159,8 +159,13 @@ def get_enumeration(rq, v, endpoint, auth=None):
     glogger.info('Retrieving enumeration for variable {}'.format(v))
     vcodes = []
     # tpattern_matcher = re.compile(".*(FROM\s+)?(?P<gnames>.*)\s+WHERE.*[\.\{][\n\t\s]*(?P<tpattern>.*\?" + re.escape(v) + ".*?\.).*", flags=re.DOTALL)
-    tpattern_matcher = re.compile(".*?((FROM\s*)(?P<gnames>(\<.*\>)+))?\s*WHERE\s*\{(?P<tpattern>.*)\}.*", flags=re.DOTALL)
+    # tpattern_matcher = re.compile(".*?((FROM\s*)(?P<gnames>(\<.*\>)+))?\s*WHERE\s*\{(?P<tpattern>.*)\}.*", flags=re.DOTALL)
 
+    # WHERE is optional too!!
+    tpattern_matcher = re.compile(".*?(FROM\s*(?P<gnames>\<.*\>+))?\s*(WHERE\s*)?\{(?P<tpattern>.*)\}.*", flags=re.DOTALL)
+
+
+    glogger.debug(rq)
     tp_match = tpattern_matcher.match(rq)
     if tp_match:
         vtpattern = tp_match.group('tpattern')
