@@ -88,7 +88,7 @@ def count_query_results(query, endpoint):
 
     return 1000
 
-def get_parameters(variables, endpoint, query_metadata, auth=None):
+def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
     """
         ?_name The variable specifies the API mandatory parameter name. The value is incorporated in the query as plain literal.
         ?__name The parameter name is optional.
@@ -159,8 +159,13 @@ def get_enumeration(rq, v, endpoint, auth=None):
     glogger.info('Retrieving enumeration for variable {}'.format(v))
     vcodes = []
     # tpattern_matcher = re.compile(".*(FROM\s+)?(?P<gnames>.*)\s+WHERE.*[\.\{][\n\t\s]*(?P<tpattern>.*\?" + re.escape(v) + ".*?\.).*", flags=re.DOTALL)
-    tpattern_matcher = re.compile(".*?((FROM\s*)(?P<gnames>(\<.*\>)+))?\s*WHERE\s*\{(?P<tpattern>.*)\}.*", flags=re.DOTALL)
+    # tpattern_matcher = re.compile(".*?((FROM\s*)(?P<gnames>(\<.*\>)+))?\s*WHERE\s*\{(?P<tpattern>.*)\}.*", flags=re.DOTALL)
 
+    # WHERE is optional too!!
+    tpattern_matcher = re.compile(".*?(FROM\s*(?P<gnames>\<.*\>+))?\s*(WHERE\s*)?\{(?P<tpattern>.*)\}.*", flags=re.DOTALL)
+
+
+    glogger.debug(rq)
     tp_match = tpattern_matcher.match(rq)
     if tp_match:
         vtpattern = tp_match.group('tpattern')
@@ -173,9 +178,12 @@ def get_enumeration(rq, v, endpoint, auth=None):
         else:
             codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
         glogger.debug("Codes subquery: {}".format(codes_subquery))
+        glogger.debug(endpoint)
         codes_json = requests.get(endpoint, params={'query' : codes_subquery}, headers={'Accept' : static.mimetypes['json'], 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}, auth=auth).json()
         for code in codes_json['results']['bindings']:
             vcodes.append(list(code.values())[0]["value"])
+    else:
+        glogger.debug("No match between variable name and query.")
 
     return vcodes
 
@@ -222,10 +230,10 @@ def get_metadata(rq, endpoint):
             # Projection variables
             query_metadata['variables'] = parsed_query.algebra['PV']
             # Parameters
-            query_metadata['parameters'] = get_parameters(parsed_query.algebra['_vars'], endpoint, query_metadata)
+            query_metadata['parameters'] = get_parameters(rq, parsed_query.algebra['_vars'], endpoint, query_metadata)
         elif query_metadata['type'] == 'ConstructQuery':
             # Parameters
-            query_metadata['parameters'] = get_parameters(parsed_query.algebra['_vars'], endpoint, query_metadata)
+            query_metadata['parameters'] = get_parameters(rq, parsed_query.algebra['_vars'], endpoint, query_metadata)
         else:
             glogger.warning("Query type {} is currently unsupported and no metadata was parsed!".format(query_metadata['type']))
     except ParseException:
