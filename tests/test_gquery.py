@@ -34,7 +34,7 @@ class TestGQuery(unittest.TestCase):
     def test_get_parameters(self):
         rq, _ = self.loader.getTextForName('test-rq')
 
-        params = gquery.get_parameters(rq, '', '')
+        params = gquery.get_parameters(rq, '', '', {})
         for paramName, param in params.iteritems():
             self.assertIn('name', param, 'Should have a name')
             self.assertIn('type', param, 'Should have a type')
@@ -124,16 +124,29 @@ class TestGQuery(unittest.TestCase):
         self.assertIn('OFFSET', rq_pag,
                       'Paginated query should contain OFFSET keyword')
 
+    def build_get_parameter(self, origName, rwName):
+        '''Builds parameter description in the format returned by gquery.get_parameters'''
+        return {
+            'original': '?_{}'.format(origName),
+            'name': rwName,
+            'required': False,
+            'enum': [],
+            'type': 'literal',
+            'datatype': 'xsd:string',
+            'lang': 'en'
+        }
+
     def test_rewrite_query(self):
         rq, _ = self.loader.getTextForName('test-rq')
+        # Parameters on the format returned by gquery.get_parameters
         parameters = {
-            'o1': 'x1',
-            'o2': 'x2',
-            'o3': 'x3',
-            'o4': 'x4',
-            'o5': 'x5',
-            'o6': 'x6',
-            'o7': 'x7'
+            'o1': self.build_get_parameter('o1', 'x1'),
+            'o2': self.build_get_parameter('o2', 'x2'),
+            'o3': self.build_get_parameter('o3', 'x3'),
+            'o4': self.build_get_parameter('o4', 'x4'),
+            'o5': self.build_get_parameter('o5', 'x5'),
+            'o6': self.build_get_parameter('o6', 'x6'),
+            'o7': self.build_get_parameter('o7', 'x7')
         }
         args = {
             'o1': 'x1',
@@ -144,17 +157,23 @@ class TestGQuery(unittest.TestCase):
             'o6': 'x6',
             'o7': 'x7'
         }
+        # Rewriten query will probably be incorrect because parameters are not
+        # carefully constructed, but that is not the scope of this test
         rq_rw = gquery.rewrite_query(rq, parameters, args)
 
         for pName, pValue in parameters.iteritems():
+            print 'pName : ',pName
+            print 'pValue: ',pValue
+            print 'rq    : ',rq
+            print 'rq_rw  : ',rq_rw
             self.assertIn(
                 pName, rq, 'Original query should contain original parameter name')
             self.assertNotIn(
                 pName, rq_rw, 'Rewritten query should not contain original parameter name')
             self.assertNotIn(
-                pValue, rq, 'Original query should not contain replacement parameter value')
+                pValue['name'], rq, 'Original query should not contain replacement parameter value')
             self.assertIn(
-                pValue, rq_rw, 'Rewritten query should contain replacement parameter value')
+                pValue['name'], rq_rw, 'Rewritten query should contain replacement parameter value')
 
 
 if __name__ == '__main__':
