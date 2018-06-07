@@ -48,7 +48,7 @@ class GithubLoader(BaseLoader):
         if self.sha is None:
             raw_repo_uri += '/master/'
         else:
-            raw_repo_uri += '/blob/{}/'.format(self.sha)
+            raw_repo_uri += '/{}/'.format(self.sha)
         return raw_repo_uri
 
     def getTextFor(self, fileItem):
