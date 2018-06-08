@@ -218,6 +218,10 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
     elif query_metadata['type'] == 'ConstructQuery':
         if not method:
             method = 'get'
+    elif query_metadata['type'] == 'UNKNOWN':
+        glogger.warning("grlc could not parse this query; assuming a plain, non-parametric SELECT in the API spec")
+        if not method:
+            method = 'get'
     else:
         glogger.warning("Query of type {} is currently unsupported! Skipping".format(query_metadata['type']))
 

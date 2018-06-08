@@ -220,6 +220,7 @@ def get_metadata(rq, endpoint):
     'exp' is one of: 'endpoint', 'tags', 'summary', 'request', 'pagination', 'enumerate'
     '''
     query_metadata = get_yaml_decorators(rq)
+    query_metadata['type'] = 'UNKNOWN'
 
     try:
         # THE PARSING
