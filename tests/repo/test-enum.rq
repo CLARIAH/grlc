@@ -1,5 +1,4 @@
-#+ summary: xxxxx
-#+ endpoint: http://test-endpoint/from-decorator/sparql
+#+ summary: Test query for containing pre-defined enumeration.
 #+ enumerate:
 #+   - o:
 #+     - v1
