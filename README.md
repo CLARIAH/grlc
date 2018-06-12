@@ -19,6 +19,7 @@ grlc is a lightweight server that takes SPARQL queries curated in GitHub reposit
 
 - Request parameter mappings into SPARQL: grlc is compliant with [BASIL's convention](https://github.com/the-open-university/basil/wiki/SPARQL-variable-name-convention-for-WEB-API-parameters-mapping) on how to map GET/POST request parameters into SPARQL
 - Automatic, user customizable population of parameter values in swagger-ui's dropdown menus via SPARQL triple pattern querying
+- **[NEW]** Parameter values can now also be specified in the query decorators to save endpiont requests
 - URL-based content negotiation: you can request for specific content types by attaching them to the operation request URL, e.g. [http://localhost:8088/CEDAR-project/Queries/residenceStatus_all.csv](http://localhost:8088/CEDAR-project/Queries/residenceStatus_all.csv) will request for results in CSV
 - Pagination of API results, as per the `pagination` decorator and [GitHub's API Pagination Traversal](https://developer.github.com/guides/traversing-with-pagination/)
 - Docker images in Docker Hub for easy deployment
@@ -108,10 +109,15 @@ A couple of SPARQL comment embedded decorators are available to make your swagge
     <pre>&#35;+ tags:
   &#35;+   - firstTag
   &#35;+   - secondTag</pre>
-- To indicate which parameters of your query/operation should get enumerations (and get dropdown menus in the swagger-ui),
+- To indicate which parameters of your query/operation should get enumerations (and get dropdown menus in the swagger-ui) using values from the SPARQL endpoint,
     <pre>&#35;+ enumerate:
   &#35;+   - var1
   &#35;+   - var2</pre>
+- These parameters can also be hard-coded into the query decorators to save endpoint requests and speed up the API generation:
+<pre>&#35;+ enumerate:
+&#35;+   - var1:
+&#35;+     - value1
+&#35;+     - value2</pre>
 
   Notice that these should be plain variable names without SPARQL/BASIL conventions (so `var1` instead of `?_var1_iri`)
 
