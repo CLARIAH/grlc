@@ -8,7 +8,7 @@ from rdflib.plugins.sparql.processor import translateQuery
 from flask import request
 from pyparsing import ParseException
 import logging
-from pprint import pprint, pformat
+from pprint import pformat
 import traceback
 import re
 import requests
@@ -88,6 +88,13 @@ def count_query_results(query, endpoint):
 
     return 1000
 
+def _getDictWithKey(key, dict_list):
+    '''Return the first dictionary in dict_list which contains the given key'''
+    for d in dict_list:
+        if key in d:
+            return d
+    return None
+
 def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
     """
         ?_name The variable specifies the API mandatory parameter name. The value is incorporated in the query as plain literal.
@@ -114,9 +121,7 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
         # TODO: currently only one parameter per triple pattern is supported
         if match :
             vname = match.group('name')
-            # We only fire the enum filling queries if indicated by the query metadata
-            # metadata = get_metadata(rq)
-            vcodes = get_enumeration(rq, v, endpoint, auth) if 'enumerate' in query_metadata and vname in query_metadata['enumerate'] else []
+            vcodes = get_enumeration(rq, v, endpoint, query_metadata, auth)
             vrequired = True if match.group('required') == '_' else False
             vtype = 'literal'
             vlang = None
@@ -152,7 +157,21 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
 
     return parameters
 
-def get_enumeration(rq, v, endpoint, auth=None):
+def get_enumeration(rq, v, endpoint, metadata={}, auth=None):
+    '''
+    Returns a list of enumerated values for variable 'v' in query 'rq'
+    '''
+    # We only fire the enum filling queries if indicated by the query metadata
+    if 'enumerate' not in metadata:
+        return []
+    if v in metadata['enumerate']:
+        return get_enumeration_sparql(rq, v, endpoint, auth)
+    enumDict = _getDictWithKey(v, metadata['enumerate'])
+    if enumDict:
+        return enumDict[v]
+    return []
+
+def get_enumeration_sparql(rq, v, endpoint, auth=None):
     '''
     Returns a list of enumerated values for variable 'v' in query 'rq'
     '''
@@ -163,7 +182,6 @@ def get_enumeration(rq, v, endpoint, auth=None):
 
     # WHERE is optional too!!
     tpattern_matcher = re.compile(".*?(FROM\s*(?P<gnames>\<.*\>+))?\s*(WHERE\s*)?\{(?P<tpattern>.*)\}.*", flags=re.DOTALL)
-
 
     glogger.debug(rq)
     tp_match = tpattern_matcher.match(rq)
