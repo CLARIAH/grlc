@@ -27,8 +27,8 @@ class TestGithubLoader(unittest.TestCase):
         # Should return a list of file items
         self.assertIsInstance(files, list, "Should return a list of file items")
 
-        # Should have N files (where N=4)
-        self.assertEquals(len(files), 4, "Should return correct number of files")
+        # Should have N files (where N=5)
+        self.assertEquals(len(files), 5, "Should return correct number of files")
 
         # File items should have a download_url
         for fItem in files:
@@ -82,8 +82,8 @@ class TestLocalLoader(unittest.TestCase):
         # Should return a list of file items
         self.assertIsInstance(files, list, "Should return a list of file items")
 
-        # Should have N files (where N=4)
-        self.assertEquals(len(files), 4, "Should return correct number of files")
+        # Should have N files (where N=5)
+        self.assertEquals(len(files), 5, "Should return correct number of files")
 
         # File items should have a download_url
         for fItem in files:

@@ -1,0 +1,10 @@
+#+ summary: xxxxx
+#+ endpoint: http://test-endpoint/from-decorator/sparql
+#+ enumerate:
+#+   - o:
+#+     - v1
+#+     - v2
+
+SELECT * WHERE {
+ ?s ?p ?_o .
+}
