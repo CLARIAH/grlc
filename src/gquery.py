@@ -318,7 +318,7 @@ def rewrite_query(query, parameters, get_args):
     requiredParams = set(required_params.keys())
     providedParams = set(get_args.keys())
     glogger.debug("Required parameters: {} Request args: {}".format(requiredParams, providedParams))
-    assert requiredParams == providedParams, 'Provided parameters do not match with required parameters!'
+    assert requiredParams.issubset(providedParams), 'Provided parameters do not cover the required parameters!'
 
     for pname, p in list(parameters.items()):
         # Get the parameter value from the GET request
