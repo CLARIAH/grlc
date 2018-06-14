@@ -197,6 +197,7 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
         endpoint_param['type'] = "string"
         endpoint_param['in'] = "query"
         endpoint_param['description'] = "Alternative endpoint for SPARQL query"
+        endpoint_param['default'] = endpoint
         params.append(endpoint_param)
 
     if query_metadata['type'] == 'SelectQuery':
