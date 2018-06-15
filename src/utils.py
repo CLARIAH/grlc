@@ -147,6 +147,8 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
     mime = query_metadata['mime'] if 'mime' in query_metadata else ""
     #glogger.debug("Read endpoint dump MIME type: {}".format(mime))
 
+    endpoint_in_url = query_metadata['endpoint_in_url'] if 'endpoint_in_url' in query_metadata else True
+    #glogger.debug("Read endpoint in url: {}".format(endpoint_in_url))
 
     # Processing of the parameters
     params = []
@@ -188,6 +190,15 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
                 param['enum'] = p['enum']
 
             params.append(param)
+
+    if endpoint_in_url:
+        endpoint_param = {}
+        endpoint_param['name'] = "endpoint"
+        endpoint_param['type'] = "string"
+        endpoint_param['in'] = "query"
+        endpoint_param['description'] = "Alternative endpoint for SPARQL query"
+        endpoint_param['default'] = endpoint
+        params.append(endpoint_param)
 
     if query_metadata['type'] == 'SelectQuery':
         # Fill in the spec for SELECT

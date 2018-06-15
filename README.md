@@ -81,8 +81,8 @@ If you're seeing this, your grlc instance is up and running, and ready to build 
 - To request the api-docs of your API swagger-ui style, <code>http://localhost:8088/api/username/repo/api-docs</code>, e.g. [http://localhost:8088/api/CEDAR-project/Queries/api-docs](http://localhost:8088/api/CEDAR-project/Queries/api-docs) or [http://localhost:8088/api/CLARIAH/wp4-queries/api-docs](http://localhost:8088/api/CLARIAH/wp4-queries/api-docs)
 
 By default grlc will direct your queries to the DBPedia SPARQL endpoint. To change this either:
-
-* Add a `endpoint:` decorator in the first comment block of the query text (preferred, see below)
+* Add a `endpoint` parameter to your request: 'http://grlc.io/user/repo/query?endpoint=http://sparql-endpoint/'. You can add a `#+ endpoint_in_url: False` decorator if you DO NOT want to see the `endpoint` parameter in the swagger-ui of your API.
+* Add a `#+ endpoint:` decorator in the first comment block of the query text (preferred, see below)
 * Add the URL of the endpoint on a single line in an `endpoint.txt` file within the GitHub repository that contains the queries.
 * Or you can directly modify the grlc source code (but it's nicer if the queries are self-contained)
 
