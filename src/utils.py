@@ -356,4 +356,7 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
                 }
             }
         }
+    swag['definitions'] = {
+        'Message': {'type': 'string'}
+    }
     return swag
