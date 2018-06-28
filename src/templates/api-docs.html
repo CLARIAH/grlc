@@ -68,8 +68,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.17.1/swagger-ui-standalone-preset.js"> </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.0/jquery-1.8.0.min.js" type='text/javascript'></script>
-<!--    <script src="{{url_for('.static', filename='swagger-ui/dist/lib/jquery.slideto.min.js')}}" type='text/javascript'></script>
-    <script src="{{url_for('.static', filename='swagger-ui/dist/lib/jquery.wiggle.min.js')}}" type='text/javascript'></script>-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.ba-bbq/1.2.1/jquery.ba-bbq.min.js" type='text/javascript'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/2.0.0/handlebars.js" type='text/javascript'></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.9.1/underscore-min.js" type='text/javascript'></script>
@@ -80,156 +78,16 @@
 
     <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
 
+    <script src="{{url_for('.static', filename='js/grlc-layout.js')}}"></script>
+    <script src="{{url_for('.static', filename='js/grlc-api.js')}}"></script>
+
     <script>
-    // Create the layout component
-    class OperationsLayout extends React.Component {
-      render() {
-        const {
-          getComponent
-        } = this.props
+      window.onload = grlcOnLoad;
 
-        const Operations = getComponent("operations", true)
-        const BaseLayout = getComponent("BaseLayout", true)
+      // Initialize Clipboard for copying provenance trace to clipboard
+      new Clipboard('.btn');
 
-        // operationsJSX is the compiled version of JSX code:
-        // (<div><BaseLayout /></div>)
-        // Compiled using babeljs.io as suggested by https://reactjs.org/docs/react-without-jsx.html
-        const operationsJSX = React.createElement(
-          "div", null,
-          React.createElement(BaseLayout, null)
-        );
-        return operationsJSX;
-      }
-    }
-
-    // Create the plugin that provides our layout component
-    const OperationsLayoutPlugin = () => {
-      return {
-        components: {
-          OperationsLayout: OperationsLayout
-        }
-      }
-    }
-
-    window.onload = function() {
-      url = "{{url_for('swagger_spec', user=user, repo=repo, sha=sha)}}";
-      console.log('URL: ' + url);
-
-      // Build a system
-      const ui = SwaggerUIBundle({
-        url: url,
-        dom_id: '#swagger-ui',
-        deepLinking: true,
-        presets: [
-          SwaggerUIBundle.presets.apis,
-          SwaggerUIStandalonePreset
-        ],
-        plugins: [
-          SwaggerUIBundle.plugins.DownloadUrl,
-          OperationsLayoutPlugin
-        ],
-        layout: "OperationsLayout",
-        validatorUrl: undefined, // required ??
-        supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
-        onComplete: function(){
-          if(typeof ui.initOAuth == "function") {
-            ui.initOAuth({
-              clientId: "your-client-id",
-              clientSecret: "your-client-secret-if-required",
-              realm: "your-realms",
-              appName: "your-app-name",
-              scopeSeparator: ","
-            });
-          }
-          // Extract JSON representation of spec
-          const spec = ui.spec();
-          const swaggerApi = JSON.parse(spec.toObject()['spec'])
-          get_prov(swaggerApi);
-          set_commit_links(swaggerApi);
-
-          if(window.SwaggerTranslator) {
-            window.SwaggerTranslator.translate();
-          }
-
-          $('pre code').each(function(i, e) {
-            hljs.highlightBlock(e)
-          });
-
-          addApiKeyAuthorization();
-        },
-        onFailure: function(data) {
-          log("Unable to Load SwaggerUI");
-        },
-        docExpansion: "list",
-        apisSorter: "alpha",
-        showRequestHeaders: true
-      });
-
-      function addApiKeyAuthorization(){
-        /*var key = encodeURIComponent($('#input_apiKey')[0].value);
-        if(key && key.trim() != "") {
-            var apiKeyAuth = new SwaggerClient.ApiKeyAuthorization("api_key", key, "query");
-            window.swaggerUi.api.clientAuthorizations.add("api_key", apiKeyAuth);
-            log("added key " + key);
-        }*/
-      }
-
-      // $('#input_apiKey').change(addApiKeyAuthorization);
-
-      // if you have an apiKey you would like to pre-populate on the page for demonstration purposes...
-      /*
-        var apiKey = "myApiKeyXXXX123456789";
-        $('#input_apiKey').val(apiKey);
-      */
-
-      window.ui = ui
-
-      function log() {
-        if ('console' in window) {
-          console.log.apply(console, arguments);
-        }
-      }
-    };
-
-    new Clipboard('.btn');
-
-    function set_commit_links(api) {
-      if (api['prev_commit']) {
-        if (window.location.href.includes('commit')) {
-          $('#prev-commit').attr('href', api['prev_commit']);
-        } else {
-          $('#prev-commit').attr('href', 'commit/' + api['prev_commit']);
-        }
-      }
-      if (api['next_commit']) {
-        if (window.location.href.includes('commit')) {
-          $('#next-commit').attr('href', api['next_commit']);
-        } else {
-          $('#next-commit').attr('href', 'commit/' + api['next_commit']);
-        }
-      }
-    }
-
-    $('#ohyeah').click(function(e){
-      var prov = $('#prov');
-      if (prov.is(":visible")) {
-        prov.hide();
-      } else {
-        prov.show();
-      }
-    });
-
-    function get_prov(api) {
-      $('#ohyeahdiv').show();
-      data = api['prov'].split("\n");
-      var html = '<button class="btn" data-clipboard-target="#provdump">Copy</button><br><br><div id="provdump">';
-      for (var i=0; i < data.length; i++) {
-        html += '<div class="swagger-ui-wrap">' + data[i].replace("<", "&lt;").replace(">", "&gt;") + '</div>';
-      }
-      html += '</div>';
-      $('#prov').html(html).linkify({target: "_blank"}).hide();
-    }
-
-  </script>
+      $('#ohyeah').click(grlcProvToggle);
+    </script>
   </body>
 </html>
