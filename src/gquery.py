@@ -124,7 +124,7 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
             vname = match.group('name')
             vcodes = get_enumeration(rq, v, endpoint, query_metadata, auth)
             vrequired = True if match.group('required') == '_' else False
-            vtype = 'literal'
+            vtype = 'string'
             vlang = None
             vdatatype = None
 

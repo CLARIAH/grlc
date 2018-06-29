@@ -82,7 +82,9 @@
     <script src="{{url_for('.static', filename='js/grlc-api.js')}}"></script>
 
     <script>
-      window.onload = grlcOnLoad;
+      url = "{{url_for('swagger_spec', user=user, repo=repo, sha=sha)}}";
+      console.log('URL: ' + url);
+      window.onload = grlcOnLoad(url);
 
       // Initialize Clipboard for copying provenance trace to clipboard
       new Clipboard('.btn');

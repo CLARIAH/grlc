@@ -87,9 +87,7 @@ function grlcProvToggle(e){
  * Called when window is fully loaded. It then triggers creation of SwaggerUIBundle.
  *
  */
-function grlcOnLoad() {
-  url = "{{url_for('swagger_spec', user=user, repo=repo, sha=sha)}}";
-
+function grlcOnLoad(url) {
   // Build a system
   const ui = SwaggerUIBundle({
     url: url,
