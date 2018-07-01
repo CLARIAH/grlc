@@ -238,7 +238,7 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
 
     # Finally: main structure of the callname spec
     item = {
-        'call_name': call_name,
+        'call_name': '/' + call_name,
         'method': method,
         'tags': tags,
         'summary': summary,
