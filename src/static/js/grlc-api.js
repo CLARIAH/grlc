@@ -9,20 +9,28 @@ function log() {
  * respectively.
  */
 function set_commit_links(api) {
+  let base = api['basePath'];
+  if(base.includes('commit')) {
+    base = base.split('commit')[0];
+  }
   if (api['prev_commit']) {
-    if (window.location.href.includes('commit')) {
-      $('#prev-commit').attr('href', api['prev_commit']);
-    } else {
-      $('#prev-commit').attr('href', 'commit/' + api['prev_commit']);
-    }
+    const prev_target = base + 'commit/' + api['prev_commit'];
+    $('#prev-commit').attr('onclick', 'redirectTo(" ' + prev_target + '")');
+    $('#prev-commit').show();
+  } else {
+    $('#prev-commit').hide();
   }
   if (api['next_commit']) {
-    if (window.location.href.includes('commit')) {
-      $('#next-commit').attr('href', api['next_commit']);
-    } else {
-      $('#next-commit').attr('href', 'commit/' + api['next_commit']);
-    }
+    const next_target = base + 'commit/' + api['next_commit'];
+    $('#next-commit').attr('onclick', 'redirectTo(" ' + next_target + '")');
+    $('#next-commit').show();
+  } else {
+    $('#next-commit').hide();
   }
+}
+
+function redirectTo(url) {
+  location.href= url;
 }
 
 /**
