@@ -323,7 +323,7 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
     swag['basePath'] = '/api/' + user_repo + '/'
     if sha is not None:
         swag['basePath'] = '/api/' + user_repo + '/commit/' + sha + '/'
-    swag['schemes'] = ['http']
+    swag['schemes'] = [] # 'http' or 'https' -- leave blank to make it dependent on how UI is loaded
     swag['paths'] = {}
 
     spec = build_spec(user, repo, sha, prov)
