@@ -55,7 +55,6 @@ def query(user, repo, query_name, sha=None, content=None):
     # Call name implemented with SPARQL query
     if q_type == qType['SPARQL']:
         raw_sparql_query = query
-        raw_repo_uri = loader.getRawRepoUri()
 
         endpoint, auth = gquery.guess_endpoint_uri(raw_sparql_query, loader)
         if endpoint=='':
@@ -169,7 +168,7 @@ def query(user, repo, query_name, sha=None, content=None):
     # Call name implemented with TPF query
     elif q_type == qType['TPF']:
         raw_tpf_query = query
-        endpoint, auth = gquery.guess_endpoint_uri(raw_tpf_query, raw_repo_uri)
+        endpoint, auth = gquery.guess_endpoint_uri(raw_tpf_query, loader)
         glogger.debug("=====================================================")
         glogger.debug("Sending query to TPF endpoint: {}".format(endpoint))
         glogger.debug("=====================================================")

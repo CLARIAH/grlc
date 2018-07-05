@@ -26,7 +26,6 @@ def guess_endpoint_uri(rq, gh_repo):
     - A endpoint.txt file in the repo
     Otherwise assigns a default one
     '''
-
     endpoint = static.DEFAULT_ENDPOINT
     auth = (static.DEFAULT_ENDPOINT_USER, static.DEFAULT_ENDPOINT_PASSWORD)
     if auth == ('none','none'):
