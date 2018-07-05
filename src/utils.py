@@ -334,7 +334,7 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
         swag['paths'][item['call_name']][item['method']] = {
             "tags" : item['tags'],
             "summary" : item['summary'],
-            "description" : item['description'] + "\n<pre>\n{}\n</pre>".format(cgi.escape(item['query'])),
+            "description" : item['description'] + "\n\n```{}```".format(item['query']),
             "produces" : ["text/csv", "application/json", "text/html"],
             "parameters": item['params'] if 'params' in item else None,
             "responses": {
