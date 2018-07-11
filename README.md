@@ -69,7 +69,12 @@ More details can be found at [grlc's PyPi page](https://pypi.python.org/pypi/grl
 
 #### Flask application
 
- you can find an example of how to run grlc natively [here](https://github.com/CLARIAH/grlc/blob/master/docker-build/entrypoint.sh#L20)
+You can run grlc natively as follows:
+```
+gunicorn -c gunicorn_config.py src.server:app
+```
+
+You can also find an example [here](https://github.com/CLARIAH/grlc/blob/master/docker-assets/entrypoint.sh#L24)
 
 ## Usage
 
