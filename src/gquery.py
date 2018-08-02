@@ -332,7 +332,7 @@ def rewrite_query(query, parameters, get_args):
             elif p['type'] == 'number':
                 query = query.replace(p['original'], v)
             # Literals
-            elif p['type'] == 'literal':
+            elif p['type'] == 'literal' or p['type'] == 'string':
                 # If there is a language tag
                 if p['lang']:
                     query = query.replace(p['original'], "\"{}\"@{}".format(v, p['lang']))
