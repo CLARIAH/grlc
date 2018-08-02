@@ -47,7 +47,7 @@ def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
                 glogger.info("===================================================================")
                 glogger.info("Processing SPARQL query: {}".format(c_name))
                 glogger.info("===================================================================")
-                item = process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata)
+                item = process_sparql_query_text(query_text, loader, call_name, extraMetadata)
             elif ".tpf" in c['name']:
                 glogger.info("===================================================================")
                 glogger.info("Processing TPF query: {}".format(c_name))
@@ -110,14 +110,16 @@ def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
 
     return item
 
-def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
+def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
     # We get the endpoint name first, since some query metadata fields (eg enums) require it
-    endpoint, auth = gquery.guess_endpoint_uri(query_text, raw_repo_uri)
+
+    endpoint, auth = gquery.guess_endpoint_uri(query_text, loader)
     glogger.debug("Read query endpoint: {}".format(endpoint))
 
     try:
         query_metadata = gquery.get_metadata(query_text, endpoint)
-    except Exception as e:
+    except Exception:
+        raw_repo_uri = loader.getRawRepoUri()
         raw_query_uri = raw_repo_uri + ' / ' + call_name
         glogger.error("Could not parse query at {}".format(raw_query_uri))
         glogger.error(traceback.print_exc())
@@ -144,7 +146,7 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
     # enums = query_metadata['enumerate'] if 'enumerate' in query_metadata else []
     # glogger.debug("Read query enumerates: {}".format(', '.join(enums)))
 
-    mime = query_metadata['mime'] if 'mime' in query_metadata else ""
+    #mime = query_metadata['mime'] if 'mime' in query_metadata else ""
     #glogger.debug("Read endpoint dump MIME type: {}".format(mime))
 
     endpoint_in_url = query_metadata['endpoint_in_url'] if 'endpoint_in_url' in query_metadata else True
@@ -238,7 +240,7 @@ def process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata
 
     # Finally: main structure of the callname spec
     item = {
-        'call_name': call_name,
+        'call_name': '/' + call_name,
         'method': method,
         'tags': tags,
         'summary': summary,
@@ -323,7 +325,7 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
     swag['basePath'] = '/api/' + user_repo + '/'
     if sha is not None:
         swag['basePath'] = '/api/' + user_repo + '/commit/' + sha + '/'
-    swag['schemes'] = ['http']
+    swag['schemes'] = [] # 'http' or 'https' -- leave blank to make it dependent on how UI is loaded
     swag['paths'] = {}
 
     spec = build_spec(user, repo, sha, prov)
@@ -334,7 +336,7 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
         swag['paths'][item['call_name']][item['method']] = {
             "tags" : item['tags'],
             "summary" : item['summary'],
-            "description" : item['description'] + "\n<pre>\n{}\n</pre>".format(cgi.escape(item['query'])),
+            "description" : item['description'] + "\n\n```{}```".format(item['query']),
             "produces" : ["text/csv", "application/json", "text/html"],
             "parameters": item['params'] if 'params' in item else None,
             "responses": {

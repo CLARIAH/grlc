@@ -44,6 +44,8 @@ docker-compose -f docker-compose.default.yml up
 (You can omit the first two commands if you just copy [this file](docker-compose.default.yml) somehwere in your filesystem)
 If you use the supplied `docker-compose.default.yml` your grlc instance will be available at http://localhost:8001
 
+If you want your grlc instance to forward queries to a different service than `grlc.io`, edit the `GRLC_SERVER_NAME` variable in your `docker-compose.yml` or `docker-compose.default.yml` file.
+
 In order for grlc to communicate with GitHub, you'll need to tell grlc what your access token is:
 
 1. Get a GitHub personal access token. In your GitHub's profile page, go to _Settings_, then _Developer settings_, _Personal access tokens_, and _Generate new token_

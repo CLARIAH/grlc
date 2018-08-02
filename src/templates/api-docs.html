@@ -54,14 +54,22 @@
 
     <div id="swagger-ui"></div>
 
-    <div id="ohyeahdiv" class="swagger-ui-wrap" style="margin-top: 20px; display: none;">
-      <p style="text-align:left;">
-      <a href='#' id="ohyeah">Oh, yeah?</a>
-      <span style="float:right;">&lt; <a id="prev-commit">Prev</a> | <a id="next-commit">Next</a> &gt;</span>
-      </p>
-    </div>
-
-    <div id="prov" class="swagger-ui-wrap" style="margin-top: 20px; display: none;">
+    <div class="swagger-ui">
+      <div class="wrapper">
+        <section class="block col-12 block-desktop col-12-desktop">
+          <div id="ohyeahdiv" class="block col-12 block-desktop col-12-desktop" style="margin-top: 20px;">
+            <p style="text-align:left;">
+              <button class="btn" id="ohyeah" onclick="grlcProvToggle()">Oh, yeah?</button>
+              <span style="float:right;">
+                <button class="btn" id="prev-commit" onclick="">&lt; Prev</button>
+                 |
+                <button class="btn" id="next-commit" onclick="">Next &gt;</button>
+              </span>
+            </p>
+          </div>
+          <div id="prov" class="swagger-ui-wrap" style="margin-top: 20px; display: none;"></div>
+        </section>
+      </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.17.1/swagger-ui-bundle.js"> </script>
@@ -82,12 +90,15 @@
     <script src="{{url_for('.static', filename='js/grlc-api.js')}}"></script>
 
     <script>
-      window.onload = grlcOnLoad;
+      url = "{{url_for('swagger_spec', user=user, repo=repo, sha=sha)}}";
+      window.onload = grlcOnLoad(url);
+      $('#prev-commit').hide();
+      $('#next-commit').hide();
+      $('#ohyeahdiv').hide();
+
 
       // Initialize Clipboard for copying provenance trace to clipboard
       new Clipboard('.btn');
-
-      $('#ohyeah').click(grlcProvToggle);
     </script>
   </body>
 </html>

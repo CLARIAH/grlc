@@ -26,7 +26,6 @@ def guess_endpoint_uri(rq, gh_repo):
     - A endpoint.txt file in the repo
     Otherwise assigns a default one
     '''
-
     endpoint = static.DEFAULT_ENDPOINT
     auth = (static.DEFAULT_ENDPOINT_USER, static.DEFAULT_ENDPOINT_PASSWORD)
     if auth == ('none','none'):
@@ -124,7 +123,7 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
             vname = match.group('name')
             vcodes = get_enumeration(rq, v, endpoint, query_metadata, auth)
             vrequired = True if match.group('required') == '_' else False
-            vtype = 'literal'
+            vtype = 'string'
             vlang = None
             vdatatype = None
 
