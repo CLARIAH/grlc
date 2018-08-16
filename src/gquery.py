@@ -161,14 +161,16 @@ def get_enumeration(rq, v, endpoint, metadata={}, auth=None):
     '''
     Returns a list of enumerated values for variable 'v' in query 'rq'
     '''
+    v = v.replace('_', '')
+
     # We only fire the enum filling queries if indicated by the query metadata
     if 'enumerate' not in metadata:
         return []
-    if v in metadata['enumerate']:
-        return get_enumeration_sparql(rq, v, endpoint, auth)
     enumDict = _getDictWithKey(v, metadata['enumerate'])
     if enumDict:
         return enumDict[v]
+    if v in metadata['enumerate']:
+        return get_enumeration_sparql(rq, v, endpoint, auth)
     return []
 
 def get_enumeration_sparql(rq, v, endpoint, auth=None):
