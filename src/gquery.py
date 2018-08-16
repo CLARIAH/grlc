@@ -130,18 +130,17 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
             mtype = match.group('type')
             muserdefined = match.group('userdefined')
 
-            if mtype in ['iri','number','literal']:
+            if mtype in ['iri','number','literal','string']:
                 vtype = mtype
             elif mtype:
-                vtype = 'literal'
+                vtype = 'string'
 
-                if mtype:
-                    if mtype in static.XSD_DATATYPES:
-                        vdatatype = 'xsd:{}'.format(mtype)
-                    elif len(mtype) == 2 :
-                        vlang = mtype
-                    elif muserdefined :
-                        vdatatype = '{}:{}'.format(mtype, muserdefined)
+                if mtype in static.XSD_DATATYPES:
+                    vdatatype = 'xsd:{}'.format(mtype)
+                elif len(mtype) == 2 :
+                    vlang = mtype
+                elif muserdefined :
+                    vdatatype = '{}:{}'.format(mtype, muserdefined)
 
             parameters[vname] = {
                 'original': '?{}'.format(v),
