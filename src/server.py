@@ -13,6 +13,7 @@ from github import Github
 import static as static
 import gquery as gquery
 import utils as utils
+import sparql as sparql
 from prov import grlcPROV
 
 from fileLoaders import GithubLoader, LocalLoader
@@ -127,19 +128,13 @@ def query(user, repo, query_name, sha=None, content=None):
 
         # If there's no mime type, the endpoint is an actual SPARQL endpoint
         else:
-            # Prepare HTTP request
-            headers = { 'Accept' : request.headers['Accept'] }
-            if content:
-                headers = { 'Accept' : static.mimetypes[content] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
-            data = { 'query' : rewritten_query }
-
-            response = requests.get(endpoint, params=data, headers=headers, auth=auth)
-            glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
+            requestedMimeType = static.mimetypes[content] if content else request.headers['Accept']
+            result, contentType = sparql.getResponseText(endpoint, query, requestedMimeType)
 
             # Response headers
-            resp = make_response(response.text)
+            resp = make_response(result)
             resp.headers['Server'] = 'grlc/1.0.0'
-            resp.headers['Content-Type'] = response.headers['Content-Type']
+            resp.headers['Content-Type'] = contentType
 
         # If the query is paginated, set link HTTP headers
         if pagination:
