@@ -27,7 +27,8 @@ GITHUB_API_BASE_URL = 'https://api.github.com/repos/'
 
 # Cache control
 # CACHE_CONTROL_POLICY = 'public, max-age=60'
-CACHE_CONTROL_POLICY = 'public, max-age=86400' # 24 hours
+# With the new hash retrieveal and redirect caching becomes obsolete
+CACHE_CONTROL_POLICY = 'no-cache'
 
 # Setting headers to use access_token for the GitHub API
 config_fallbacks = {
