@@ -13,6 +13,7 @@ from github import Github
 import static as static
 import gquery as gquery
 import utils as utils
+import sparql as sparql
 from prov import grlcPROV
 
 from fileLoaders import GithubLoader, LocalLoader
@@ -81,14 +82,15 @@ def query(user, repo, query_name, sha=None, content=None):
         resp = None
         # If we have a mime field, we load the remote dump and query it locally
         if 'mime' in query_metadata and query_metadata['mime']:
+            glogger.debug("Detected {} MIME type, proceeding with locally loading remote dump".format(query_metadata['mime']))
             g = Graph()
             try:
                 query_metadata = gquery.get_metadata(raw_sparql_query, endpoint)
                 g.parse(endpoint, format=query_metadata['mime'])
+                glogger.debug("Local RDF graph loaded successfully with {} triples".format(len(g)))
             except Exception as e:
                 glogger.error(e)
             results = g.query(rewritten_query, result='sparql')
-            # glogger.debug("Results of SPARQL query against locally loaded dump:")
             # Prepare return format as requested
             resp_string = ""
             # glogger.debug("Requested formats: {}".format(request.headers['Accept']))
@@ -96,15 +98,18 @@ def query(user, repo, query_name, sha=None, content=None):
             #     glogger.debug("Requested formats from extension: {}".format(static.mimetypes[content]))
             if 'application/json' in request.headers['Accept'] or (content and 'application/json' in static.mimetypes[content]):
                 resp_string = results.serialize(format='json')
+                glogger.debug("Results of SPARQL query against locally loaded dump: {}".format(resp_string))
             elif 'text/csv' in request.headers['Accept'] or (content and 'text/csv' in static.mimetypes[content]):
                 resp_string = results.serialize(format='csv')
+                glogger.debug("Results of SPARQL query against locally loaded dump: {}".format(resp_string))
             # elif 'text/html' in request.headers['Accept']:
             #     resp_string = results.serialize(format='html')
             else:
                 return 'Unacceptable requested format', 415
+            glogger.debug("Finished processing query against RDF dump, end of use case")
             del g
 
-            resp = make_response(resp_string)
+            return make_response(resp_string)
         # Check for INSERT/POST
         if query_metadata['type'] == 'InsertData':
             glogger.info("Processing INSERT query")
@@ -127,12 +132,25 @@ def query(user, repo, query_name, sha=None, content=None):
 
         # If there's no mime type, the endpoint is an actual SPARQL endpoint
         else:
+            # requestedMimeType = static.mimetypes[content] if content else request.headers['Accept']
+            # glogger.debug('Requested MIME type: {}'.format(requestedMimeType))
+            # result, contentType = sparql.getResponseText(endpoint, query, requestedMimeType)
+            #
+            # Response headers
+            # resp = make_response(result)
+            # resp.headers['Server'] = 'grlc/1.0.0'
+            # resp.headers['Content-Type'] = contentType
+
             # Prepare HTTP request
             headers = { 'Accept' : request.headers['Accept'] }
             if content:
-                headers = { 'Accept' : static.mimetypes[content] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
+                # headers = { 'Accept' : static.mimetypes[content] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
+                headers = { 'Accept' : static.mimetypes[content]}
             data = { 'query' : rewritten_query }
 
+            glogger.debug('Sending HTTP request to SPARQL endpoint with params: {}'.format(data))
+            glogger.debug('Sending HTTP request to SPARQL endpoint with headers: {}'.format(headers))
+            glogger.debug('Sending HTTP request to SPARQL endpoint with auth: {}'.format(auth))
             response = requests.get(endpoint, params=data, headers=headers, auth=auth)
             glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
 
@@ -140,6 +158,7 @@ def query(user, repo, query_name, sha=None, content=None):
             resp = make_response(response.text)
             resp.headers['Server'] = 'grlc/1.0.0'
             resp.headers['Content-Type'] = response.headers['Content-Type']
+
 
         # If the query is paginated, set link HTTP headers
         if pagination:

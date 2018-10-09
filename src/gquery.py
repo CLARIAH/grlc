@@ -130,18 +130,17 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
             mtype = match.group('type')
             muserdefined = match.group('userdefined')
 
-            if mtype in ['iri','number','literal']:
+            if mtype in ['iri','number','literal','string']:
                 vtype = mtype
             elif mtype:
-                vtype = 'literal'
+                vtype = 'string'
 
-                if mtype:
-                    if mtype in static.XSD_DATATYPES:
-                        vdatatype = 'xsd:{}'.format(mtype)
-                    elif len(mtype) == 2 :
-                        vlang = mtype
-                    elif muserdefined :
-                        vdatatype = '{}:{}'.format(mtype, muserdefined)
+                if mtype in static.XSD_DATATYPES:
+                    vdatatype = 'xsd:{}'.format(mtype)
+                elif len(mtype) == 2 :
+                    vlang = mtype
+                elif muserdefined :
+                    vdatatype = '{}:{}'.format(mtype, muserdefined)
 
             parameters[vname] = {
                 'original': '?{}'.format(v),
@@ -161,14 +160,16 @@ def get_enumeration(rq, v, endpoint, metadata={}, auth=None):
     '''
     Returns a list of enumerated values for variable 'v' in query 'rq'
     '''
+    v = v.replace('_', '')
+
     # We only fire the enum filling queries if indicated by the query metadata
     if 'enumerate' not in metadata:
         return []
-    if v in metadata['enumerate']:
-        return get_enumeration_sparql(rq, v, endpoint, auth)
     enumDict = _getDictWithKey(v, metadata['enumerate'])
     if enumDict:
         return enumDict[v]
+    if v in metadata['enumerate']:
+        return get_enumeration_sparql(rq, v, endpoint, auth)
     return []
 
 def get_enumeration_sparql(rq, v, endpoint, auth=None):
