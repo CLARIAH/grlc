@@ -9,7 +9,7 @@ with open('requirements.txt') as f:
 
 grlc_base = 'src/'
 grlc_data = [ root.replace(grlc_base, '') + '/*' for root,dirs,files in os.walk(grlc_base) if root !=grlc_base ]
-grlc_version = '1.0'
+grlc_version = '1.2'
 
 setup(name='grlc',
       version=grlc_version,
