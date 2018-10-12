@@ -29,6 +29,9 @@ jobs:
       env: PYENV_VERSION=3.5.2
       # command to install dependencies
     - stage: deploy
+      # deploy automatically to pypi
+      before_deploy:
+        - source .travis/before_deploy.sh
       script: skip
       # deploy automatically to pypi
       deploy:
