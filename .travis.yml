@@ -1,8 +1,7 @@
-cache:
-  directories:
-  - "$HOME/.cache/pip"
-  - "$HOME/.pyenv"
-
+sudo: false
+language: python
+cache: pip
+python: 3.5
 matrix:
   include:
   - os: linux
@@ -23,3 +22,16 @@ install:
 # command to run tests
 script:
   - source .travis/run.sh
+# deploy automatically to pypi
+before_deploy:
+  - source .travis/before_deploy.sh
+deploy:
+  provider: pypi
+  server: https://test.pypi.org/legacy/
+  user: nlesc
+  distributions: sdist bdist_wheel
+  password:
+    secure: h3xI8W2eEa2QpmyGdc5uT4sS+pPVqEGArKFAOhbEbVjAtPoQJ2cIn8KsdsiA4goPdnBjkn1lzMuWvC1Rppgb+MkfbjzeghGySH61PEj01J+yJ4gZtQE12TS9Wrwtm/+SBKHOR5CGVlpVMr31O2kH09pFQpVKqmOYZLVDaKJJLs0+c/snhHllg0v0g6YhAsnL3w6uS3lfWQ3rPSR3OXbkdctGAjId6n8gnmvrgSBY/SBjA2a+iNcCke9AuzovBBPOozkPq4yBe9uhP8a1GpsF1VGqU0II0YSEz70IUDI+QPVAaoSFtr8xdxrqv+7BDRF6ZIYVrufQzJ0a9U7SHzB+WcTVN/D47Zg7XNslgSByi4ULr4GPUPB+DUjxICgrjHxOEDX8kx8cw+tTUSKqcThHNUK2p958YeAaUfEtr9vNj828o7/xp9DkYMCsnVSDROguMj/stXJOC7gn1WK8D96IentZiGmhIGfEmz8jSrOyqxzn2omkzfjdjaXduPVG+0BaaWQgOzAns+y8Opl4Q3qmTSxIt17QAO0COFFY5aa1qjQVXS1WBO72vrrAbSFKND9JiEG2HuX3DUb6mGH7raZhR5TUc4xOnlNIpndW2+W95DtkUrzJvJk3nTYFA96dNlWad2pBHp6wH8rxfvb8AGCLgBF1Sm6SDkXob5VLBMD3jTE=
+  on:
+    tags: true
+    branch: master

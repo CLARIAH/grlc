@@ -1,26 +1,44 @@
 #!/usr/bin/env python
 # -*- coding: iso-8859-15 -*-
 
-from distutils.core import setup
+import codecs
 import os
-
-with open('requirements.txt') as f:
-    required = f.read().splitlines()
+from setuptools import setup
 
 grlc_base = 'src/'
 grlc_data = [ root.replace(grlc_base, '') + '/*' for root,dirs,files in os.walk(grlc_base) if root !=grlc_base ]
 grlc_version = '1.0'
 
-setup(name='grlc',
-      version=grlc_version,
-      description='grlc, the git repository linked data API constructor',
-      author='Albert Meroño',
-      author_email='albert.merono@vu.nl',
-      url='https://github.com/CLARIAH/grlc',
-      download_url='https://github.com/CLARIAH/grlc/tarball/' + grlc_version,
-      packages=['grlc'],
-      package_dir = {'grlc': 'src'},
-      package_data = {'grlc': grlc_data},
-      scripts=['bin/grlc-server'],
-      install_requires=required
-     )
+with codecs.open('requirements.txt', mode='r') as f:
+    install_requires = f.read().splitlines()
+
+with codecs.open('requirements-test.txt', mode='r') as f:
+    tests_require = f.read().splitlines()
+
+with codecs.open('README.md', mode='r') as f:
+    long_description = f.read()
+
+setup(
+    name="grlc",
+    description='grlc, the git repository linked data API constructor',
+    long_description=long_description,
+    license="Copyright 2017 Albert Meroño",
+    author='Albert Meroño',
+    author_email='albert.merono@vu.nl',
+    url='https://github.com/CLARIAH/grlc',
+    version=grlc_version,
+    py_modules=['grlc'],
+    packages=['grlc'],
+    package_dir = {'grlc': grlc_base},
+    scripts=['bin/grlc-server'],
+    install_requires=install_requires,
+    setup_requires=[
+        # dependency for `python setup.py test`
+        'pytest-runner',
+        # dependencies for `python setup.py build_sphinx`
+        'sphinx',
+        'recommonmark'
+    ],
+    tests_require=tests_require,
+    package_data = {'grlc': grlc_data},
+)
