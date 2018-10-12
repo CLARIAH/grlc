@@ -7,7 +7,7 @@ from setuptools import setup
 
 grlc_base = 'src/'
 grlc_data = [ root.replace(grlc_base, '') + '/*' for root,dirs,files in os.walk(grlc_base) if root !=grlc_base ]
-grlc_version = '1.0'
+grlc_version = '1.2'
 
 with codecs.open('requirements.txt', mode='r') as f:
     install_requires = f.read().splitlines()
