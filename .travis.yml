@@ -36,11 +36,11 @@ jobs:
       # deploy automatically to pypi
       deploy:
         provider: pypi
-        server: https://test.pypi.org/legacy/
+        server: https://pypi.org/legacy/
         user: nlesc
         distributions: sdist bdist_wheel
         password:
-          secure: h3xI8W2eEa2QpmyGdc5uT4sS+pPVqEGArKFAOhbEbVjAtPoQJ2cIn8KsdsiA4goPdnBjkn1lzMuWvC1Rppgb+MkfbjzeghGySH61PEj01J+yJ4gZtQE12TS9Wrwtm/+SBKHOR5CGVlpVMr31O2kH09pFQpVKqmOYZLVDaKJJLs0+c/snhHllg0v0g6YhAsnL3w6uS3lfWQ3rPSR3OXbkdctGAjId6n8gnmvrgSBY/SBjA2a+iNcCke9AuzovBBPOozkPq4yBe9uhP8a1GpsF1VGqU0II0YSEz70IUDI+QPVAaoSFtr8xdxrqv+7BDRF6ZIYVrufQzJ0a9U7SHzB+WcTVN/D47Zg7XNslgSByi4ULr4GPUPB+DUjxICgrjHxOEDX8kx8cw+tTUSKqcThHNUK2p958YeAaUfEtr9vNj828o7/xp9DkYMCsnVSDROguMj/stXJOC7gn1WK8D96IentZiGmhIGfEmz8jSrOyqxzn2omkzfjdjaXduPVG+0BaaWQgOzAns+y8Opl4Q3qmTSxIt17QAO0COFFY5aa1qjQVXS1WBO72vrrAbSFKND9JiEG2HuX3DUb6mGH7raZhR5TUc4xOnlNIpndW2+W95DtkUrzJvJk3nTYFA96dNlWad2pBHp6wH8rxfvb8AGCLgBF1Sm6SDkXob5VLBMD3jTE=
+          secure: IDakMHNli6Ir+GFzCOxcxBc4c/UdP6il9ICzuiAvzxRa5+k2uxUtPwdXVXTq7dOrLSi4lNO3m16ipnJiDxVpM6BbnsLzbQgeGoHFdOUsNMSldt1A9syag+rplNtfyHoqwBb+ogwGDyZ1bjZMllnJfNoUFPJe2TwIQlQ+aHNiVwUEIHWZQBH+AfRNu+eeTArOu3Ln/E8IY8NJazt8UUF+Rwhl45GWGIRWCL6cV0YVdYpikUdAs+Ier+UO6wvRQ+G9/qik26+w2cXeej6HwSk4vl0DKhsxj6POYMwHeGc2wGMlJPn9hCgcBMU3Hgh4+CGXVQ36SiY3XCClUws9MAyrrbIXVGwt1QuuStjqQH77+kABGlGpnz0hfN+J8hLvzdF95316+eRezQ/5kilNqRAPb8+hbANqrev17N8bAQ+gQDBGjqZ2B6cr15YogvJHtunWkiuP44FJeQweTAiOjl/LHmWxc2b6o0Fs3ZYltWUHI4QTK01YIM73zp4dkr6gzfrGBH22Ut0zDpMTqGN+M8gxs/q8pRwvvd7XkuLSaWxrnS07W0rLsRaJHjbaclh1NifuNS3dNEgVxI8vNNKJUYNUELsk9RxCkn+CyBk5AzJa52PrPeCHcHD8YJAV2aT0etndyZvnnSRB7SqulItoZR1sE9JFe1srQ6etl4y+c6IBsbw=
         on:
           tags: true
           branch: master
