@@ -6,7 +6,6 @@ gunicorn==19.6.0
 html5lib==0.9999999
 isodate==0.5.4
 itsdangerous==0.24
-Jinja2==2.8
 keepalive==0.5
 MarkupSafe==0.23
 pyaml==15.8.2
@@ -18,5 +17,4 @@ requests==2.11.1
 six==1.10.0
 SPARQLWrapper==1.8.2
 Werkzeug==0.14.1
-wheel==0.24.0
 PyGithub==1.35
