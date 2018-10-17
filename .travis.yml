@@ -36,7 +36,8 @@ jobs:
       # deploy automatically to pypi
       deploy:
         provider: pypi
-        server: https://pypi.org/legacy/
+        # server: https://pypi.org/legacy/
+        server: https://pypi.python.org/pypi
         user: nlesc
         distributions: sdist bdist_wheel
         password:
