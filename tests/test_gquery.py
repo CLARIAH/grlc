@@ -42,7 +42,8 @@ class TestGQuery(unittest.TestCase):
 
             orig = param['original']
             if '_iri' in orig:
-                self.assertEqual(param['type'], 'iri', 'Should be type iri')
+                self.assertEqual(param['type'], 'string', 'Should be type string')
+                self.assertEqual(param['format'], 'iri', 'Should be format iri')
             if '_number' in orig:
                 self.assertEqual(param['type'], 'number',
                                  'Should be type number')
@@ -145,7 +146,8 @@ class TestGQuery(unittest.TestCase):
             'enum': [],
             'type': 'literal',
             'datatype': 'xsd:string',
-            'lang': 'en'
+            'lang': 'en',
+            'format': None
         }
 
     def test_rewrite_query(self):

@@ -188,6 +188,11 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
             param['required'] = p['required']
             param['in'] = "query"
             param['description'] = "A value of type {} that will substitute {} in the original query".format(p['type'], p['original'])
+            if p['lang']:
+                param['description'] = "A value of type {}@{} that will substitute {} in the original query".format(p['type'], p['lang'], p['original'])
+            if p['format']:
+                param['format'] = p['format']
+                param['description'] = "A value of type {} ({}) that will substitute {} in the original query".format(p['type'], p['format'], p['original'])
             if p['enum']:
                 param['enum'] = p['enum']
 
