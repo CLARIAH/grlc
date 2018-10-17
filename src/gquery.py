@@ -126,12 +126,16 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
             vtype = 'string'
             vlang = None
             vdatatype = None
+            vformat = None
 
             mtype = match.group('type')
             muserdefined = match.group('userdefined')
 
-            if mtype in ['iri','number','literal','string']:
+            if mtype in ['number','literal','string']:
                 vtype = mtype
+            if mtype in ['iri']: #TODO: proper form validation of input parameter uris
+                vtype = 'string'
+                vformat = 'iri'
             elif mtype:
                 vtype = 'string'
 
@@ -149,7 +153,8 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
                 'enum': sorted(vcodes),
                 'type': vtype,
                 'datatype': vdatatype,
-                'lang': vlang
+                'lang': vlang,
+                'format': vformat
             }
 
             glogger.info('Finished parsing the following parameters: {}'.format(parameters))
@@ -327,13 +332,16 @@ def rewrite_query(query, parameters, get_args):
         # If the parameter has a value
         if v:
             # IRI
-            if p['type'] == 'iri':
+            if p['type'] == 'iri': # TODO: never reached anymore, since iris are now type=string with format=iri
                 query = query.replace(p['original'], "{}{}{}".format('<',v,'>'))
             # A number (without a datatype)
             elif p['type'] == 'number':
                 query = query.replace(p['original'], v)
             # Literals
             elif p['type'] == 'literal' or p['type'] == 'string':
+                # If it's a iri
+                if p['format'] == 'iri':
+                    query = query.replace(p['original'], "{}{}{}".format('<',v,'>'))
                 # If there is a language tag
                 if p['lang']:
                     query = query.replace(p['original'], "\"{}\"@{}".format(v, p['lang']))
