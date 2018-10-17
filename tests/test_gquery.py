@@ -146,7 +146,8 @@ class TestGQuery(unittest.TestCase):
             'enum': [],
             'type': 'literal',
             'datatype': 'xsd:string',
-            'lang': 'en'
+            'lang': 'en',
+            'format': None
         }
 
     def test_rewrite_query(self):
