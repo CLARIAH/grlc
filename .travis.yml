@@ -1,21 +1,8 @@
-cache:
-  directories:
-  - "$HOME/.cache/pip"
-  - "$HOME/.pyenv"
+sudo: false
+language: python
+cache: pip
+python: 3.5
 
-matrix:
-  include:
-  - os: linux
-    python: '2.7'
-  - os: linux
-    python: '3.6'
-  - os: osx
-    language: objective-c
-    env: PYENV_VERSION=2.7.12
-  - os: osx
-    language: objective-c
-    env: PYENV_VERSION=3.5.2
-# command to install dependencies
 before_install:
   - source .travis/before_install.sh
 install:
@@ -23,3 +10,36 @@ install:
 # command to run tests
 script:
   - source .travis/run.sh
+
+jobs:
+  include:
+    - stage: Tests
+      os: linux
+      python: '2.7'
+    - stage: Tests
+      os: linux
+      python: '3.6'
+    - stage: Tests
+      os: osx
+      language: objective-c
+      env: PYENV_VERSION=2.7.12
+    - stage: Tests
+      os: osx
+      language: objective-c
+      env: PYENV_VERSION=3.5.2
+      # command to install dependencies
+    - stage: deploy
+      # deploy automatically to pypi
+      before_deploy:
+        - source .travis/before_deploy.sh
+      script: skip
+      # deploy automatically to pypi
+      deploy:
+        provider: pypi
+        user: nlesc
+        distributions: sdist bdist_wheel
+        password:
+          secure: IDakMHNli6Ir+GFzCOxcxBc4c/UdP6il9ICzuiAvzxRa5+k2uxUtPwdXVXTq7dOrLSi4lNO3m16ipnJiDxVpM6BbnsLzbQgeGoHFdOUsNMSldt1A9syag+rplNtfyHoqwBb+ogwGDyZ1bjZMllnJfNoUFPJe2TwIQlQ+aHNiVwUEIHWZQBH+AfRNu+eeTArOu3Ln/E8IY8NJazt8UUF+Rwhl45GWGIRWCL6cV0YVdYpikUdAs+Ier+UO6wvRQ+G9/qik26+w2cXeej6HwSk4vl0DKhsxj6POYMwHeGc2wGMlJPn9hCgcBMU3Hgh4+CGXVQ36SiY3XCClUws9MAyrrbIXVGwt1QuuStjqQH77+kABGlGpnz0hfN+J8hLvzdF95316+eRezQ/5kilNqRAPb8+hbANqrev17N8bAQ+gQDBGjqZ2B6cr15YogvJHtunWkiuP44FJeQweTAiOjl/LHmWxc2b6o0Fs3ZYltWUHI4QTK01YIM73zp4dkr6gzfrGBH22Ut0zDpMTqGN+M8gxs/q8pRwvvd7XkuLSaWxrnS07W0rLsRaJHjbaclh1NifuNS3dNEgVxI8vNNKJUYNUELsk9RxCkn+CyBk5AzJa52PrPeCHcHD8YJAV2aT0etndyZvnnSRB7SqulItoZR1sE9JFe1srQ6etl4y+c6IBsbw=
+        on:
+          tags: true
+          branch: master
