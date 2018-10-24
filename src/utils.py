@@ -1,8 +1,10 @@
 import static as static
 import gquery as gquery
-import cgi
 from rdflib import Graph
 import traceback
+from prov import grlcPROV
+from github import Github
+import pagination as pageUtils
 
 import logging
 
@@ -18,14 +20,18 @@ def turtleize(swag):
 
     return swag_graph.serialize(format='turtle')
 
-def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
-    '''
-    Build grlc specification for the given github user / repo
-    '''
+def getLoader(user, repo, sha=None, prov=None):
     if user is None and repo is None:
         loader = LocalLoader()
     else:
         loader = GithubLoader(user, repo, sha, prov)
+    return loader
+
+def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
+    '''
+    Build grlc specification for the given github user / repo
+    '''
+    loader = getLoader(user, repo, sha=sha, prov=prov)
 
     files = loader.fetchFiles()
     raw_repo_uri = loader.getRawRepoUri()
@@ -35,7 +41,6 @@ def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
 
     for c in files:
         c_name = c['name']
-        print '>>>>>>>>>>>>>>>>>>>>>>>>>c_name: ', c_name
         if ".rq" in c['name'] or ".tpf" in c['name'] or ".sparql" in c['name']:
             call_name = c['name'].split('.')[0]
 
@@ -87,12 +92,7 @@ def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
     # If this query allows pagination, add page number as parameter
     params = []
     if pagination:
-        pagination_param = {}
-        pagination_param['name'] = "page"
-        pagination_param['type'] = "int"
-        pagination_param['in'] = "query"
-        pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
-        params.append(pagination_param)
+        params.append(pageUtils.getSwaggerPaginationDef(pagination))
 
     item = {
         'call_name': call_name,
@@ -160,12 +160,7 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
 
     # If this query allows pagination, add page number as parameter
     if pagination:
-        pagination_param = {}
-        pagination_param['name'] = "page"
-        pagination_param['type'] = "int"
-        pagination_param['in'] = "query"
-        pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
-        params.append(pagination_param)
+        params.append(pageUtils.getSwaggerPaginationDef(pagination))
 
     if query_metadata['type'] == 'SelectQuery' or query_metadata['type'] == 'ConstructQuery' or query_metadata['type'] == 'InsertData':
         # try:
@@ -274,27 +269,24 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
 
     return item
 
-def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
+def build_swagger_spec(user, repo, sha, serverName):
     '''Build grlc specification for the given github user / repo in swagger format '''
-    if user is None and repo is None:
-        user_repo = 'local/local'
-        prev_commit = []
-        next_commit = []
-        version = 'local'
-        repo_title = 'local'
-        contact_name = ''
-        contact_url = ''
-    else:
+    if user and repo:
         user_repo = user + '/' + repo
         api_repo_uri = static.GITHUB_API_BASE_URL + user_repo
+
+        # Init provenance recording
+        prov_g = grlcPROV(user, repo)
+        gh = Github(static.ACCESS_TOKEN)
+        gh_repo = gh.get_repo(user + '/' + repo)
 
         repo_title = gh_repo.name
         contact_name = gh_repo.owner.login
         contact_url = gh_repo.owner.html_url
 
         # Add the API URI as a used entity by the activity
-        if prov is not None:
-            prov.add_used_entity(api_repo_uri)
+        if prov_g:
+            prov_g.add_used_entity(api_repo_uri)
 
         commit_list = [ c.sha for c in gh_repo.get_commits() ]
 
@@ -309,6 +301,15 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
             prev_commit = commit_list[commit_list.index(version)+1]
         if commit_list.index(version) > 0:
             next_commit = commit_list[commit_list.index(version)-1]
+    else:
+        user_repo = 'local/local'
+        prev_commit = []
+        next_commit = []
+        version = 'local'
+        repo_title = 'local'
+        contact_name = ''
+        contact_url = ''
+        prov_g = None
 
     swag = {}
     swag['prev_commit'] = prev_commit
@@ -333,7 +334,7 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
     swag['schemes'] = [] # 'http' or 'https' -- leave blank to make it dependent on how UI is loaded
     swag['paths'] = {}
 
-    spec = build_spec(user, repo, sha, prov)
+    spec = build_spec(user, repo, sha, prov_g)
     # glogger.debug("Current internal spec data structure")
     # glogger.debug(spec)
     for item in spec:
@@ -366,4 +367,8 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
     swag['definitions'] = {
         'Message': {'type': 'string'}
     }
+    if prov_g:
+        prov_g.end_prov_graph()
+        swag['prov'] = prov_g.serialize(format='turtle')
+
     return swag

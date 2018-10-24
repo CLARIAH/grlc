@@ -7,16 +7,15 @@ import requests
 import logging
 import re
 from rdflib import Graph
-from github import Github
+
 
 # grlc modules
 import static as static
 import gquery as gquery
 import utils as utils
-import sparql as sparql
-from prov import grlcPROV
-
-from fileLoaders import GithubLoader, LocalLoader
+from queryTypes import qType
+import pagination as pageUtils
+from grlc import __version__ as grlc_version
 
 # The Flask app
 app = Flask(__name__)
@@ -36,8 +35,6 @@ def grlc():
 def query_local(query_name):
     return query(user=None, repo=None, query_name=query_name)
 
-from queryTypes import qType
-
 @app.route('/api/<user>/<repo>/<query_name>', methods=['GET', 'POST'])
 @app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET', 'POST'])
 @app.route('/api/<user>/<repo>/commit/<sha>/<query_name>', methods=['GET', 'POST'])
@@ -46,10 +43,7 @@ def query(user, repo, query_name, sha=None, content=None):
     glogger.debug("-----> Executing call name at /{}/{}/{} on commit {}".format(user, repo, query_name, sha))
     glogger.debug("Request accept header: " + request.headers["Accept"])
 
-    if user is None and repo is None:
-        loader = LocalLoader()
-    else:
-        loader = GithubLoader(user, repo, sha, None)
+    loader = utils.getLoader(user, repo, sha=sha, prov=None)
 
     query, q_type = loader.getTextForName(query_name)
 
@@ -127,7 +121,7 @@ def query(user, repo, query_name, sha=None, content=None):
 
             # Response headers
             resp = make_response(response.text)
-            resp.headers['Server'] = 'grlc/1.0.0'
+            resp.headers['Server'] = 'grlc/' + grlc_version
             resp.headers['Content-Type'] = response.headers['Content-Type']
 
         # If there's no mime type, the endpoint is an actual SPARQL endpoint
@@ -156,7 +150,7 @@ def query(user, repo, query_name, sha=None, content=None):
 
             # Response headers
             resp = make_response(response.text)
-            resp.headers['Server'] = 'grlc/1.0.0'
+            resp.headers['Server'] = 'grlc/' + grlc_version
             resp.headers['Content-Type'] = response.headers['Content-Type']
 
 
@@ -164,24 +158,9 @@ def query(user, repo, query_name, sha=None, content=None):
         if pagination:
             # Get number of total results
             count = gquery.count_query_results(rewritten_query, endpoint)
-            page = 1
-            if 'page' in request.args:
-                page = int(request.args['page'])
-                next_url = re.sub("page=[0-9]+", "page={}".format(page + 1), request.url)
-                prev_url = re.sub("page=[0-9]+", "page={}".format(page - 1), request.url)
-                first_url = re.sub("page=[0-9]+", "page=1", request.url)
-                last_url = re.sub("page=[0-9]+", "page={}".format(count / pagination), request.url)
-            else:
-                next_url = request.url + "?page={}".format(page + 1)
-                prev_url = request.url + "?page={}".format(page - 1)
-                first_url = request.url + "?page={}".format(page)
-                last_url = request.url + "?page={}".format(count / pagination)
-            if page == 1:
-                resp.headers['Link'] = "<{}>; rel=next, <{}>; rel=last".format(next_url, last_url)
-            elif page == count / pagination:
-                resp.headers['Link'] = "<{}>; rel=prev, <{}>; rel=first".format(prev_url, first_url)
-            else:
-                resp.headers['Link'] = "<{}>; rel=next, <{}>; rel=prev, <{}>; rel=first, <{}>; rel=last".format(next_url, prev_url, first_url, last_url)
+            pageArg = request.args.get('page', None)
+            headerLink =  pageUtils.buildPaginationHeader(count, pagination, pageArg, request.url)
+            resp.headers['Link'] = headerLink
 
         return resp
     # Call name implemented with TPF query
@@ -211,7 +190,7 @@ def query(user, repo, query_name, sha=None, content=None):
 
         # Response headers
         resp = make_response(response.text)
-        resp.headers['Server'] = 'grlc/1.0.0'
+        resp.headers['Server'] = 'grlc/' + grlc_version
         resp.headers['Content-Type'] = response.headers['Content-Type']
 
         return resp
@@ -239,33 +218,18 @@ def api_docs(user, repo, sha=None):
 def swagger_spec(user, repo, sha=None, content=None):
     glogger.info("-----> Generating swagger spec for /{}/{} on commit {}".format(user,repo,sha))
 
-    # Init provenance recording
-    if user is not None and repo is not None:
-        prov_g = grlcPROV(user, repo)
-        gh = Github(static.ACCESS_TOKEN)
-        gh_repo = gh.get_repo(user + '/' + repo)
-    else:
-        prov_g = None
-        gh_repo = None
-
-    swag = utils.build_swagger_spec(user, repo, sha, static.SERVER_NAME, prov_g, gh_repo)
-
-    if user is not None and repo is not None:
-        prov_g.end_prov_graph()
-        swag['prov'] = prov_g.serialize(format='turtle')
-    # prov_g.log_prov_graph()
-
-    resp_spec = make_response(jsonify(swag))
-    resp_spec.headers['Content-Type'] = 'application/json'
+    swag = utils.build_swagger_spec(user, repo, sha, static.SERVER_NAME)
 
     if 'text/turtle' in request.headers['Accept']:
         resp_spec = make_response(utils.turtleize(swag))
         resp_spec.headers['Content-Type'] = 'text/turtle'
+    else:
+        resp_spec = make_response(jsonify(swag))
+        resp_spec.headers['Content-Type'] = 'application/json'
 
     resp_spec.headers['Cache-Control'] = static.CACHE_CONTROL_POLICY # Caching JSON specs for 15 minutes
 
     glogger.info("-----> API spec generation for /{}/{} on commit {} complete".format(user, repo, sha))
-
     return resp_spec
 
 if __name__ == '__main__':
