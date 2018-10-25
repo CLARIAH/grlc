@@ -35,7 +35,7 @@ def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
 
     for c in files:
         c_name = c['name']
-        print '>>>>>>>>>>>>>>>>>>>>>>>>>c_name: ', c_name
+        glogger.info('>>>>>>>>>>>>>>>>>>>>>>>>>c_name: {}'.format(c_name))
         if ".rq" in c['name'] or ".tpf" in c['name'] or ".sparql" in c['name']:
             call_name = c['name'].split('.')[0]
 
