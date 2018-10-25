@@ -13,7 +13,8 @@ import utils as utils
 app = Flask(__name__)
 
 # Set logging format
-logging.basicConfig(level=logging.DEBUG, format=static.LOG_FORMAT)
+log_level = logging.DEBUG if static.LOG_DEBUG_MODE else logging.INFO
+logging.basicConfig(level=log_level, format=static.LOG_FORMAT)
 app.debug_log_format = static.LOG_FORMAT
 glogger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ def query_local(query_name):
 @app.route('/api/<user>/<repo>/commit/<sha>/<query_name>', methods=['GET', 'POST'])
 @app.route('/api/<user>/<repo>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
 def query(user, repo, query_name, sha=None, content=None):
-    glogger.debug("-----> Executing call name at /{}/{}/{} on commit {}".format(user, repo, query_name, sha))
+    glogger.info("-----> Executing call name at /{}/{}/{} on commit {}".format(user, repo, query_name, sha))
     glogger.debug("Request accept header: " + request.headers["Accept"])
 
     requestArgs = request.args
@@ -79,4 +80,4 @@ def swagger_spec(user, repo, sha=None, content=None):
     return resp_spec
 
 if __name__ == '__main__':
-    app.run(host=static.DEFAULT_HOST, port=static.DEFAULT_PORT, debug=True)
+    app.run(host=static.DEFAULT_HOST, port=static.DEFAULT_PORT, debug=static.LOG_DEBUG_MODE)

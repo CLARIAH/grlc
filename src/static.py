@@ -20,6 +20,7 @@ mimetypes = {
 
 # Logging format (prettier than the ugly standard in Flask)
 LOG_FORMAT = '%(asctime)-15s [%(levelname)s] (%(module)s.%(funcName)s) %(message)s'
+LOG_DEBUG_MODE = True
 
 # GitHub base URLS
 GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/'
