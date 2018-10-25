@@ -1,12 +1,18 @@
 import static as static
 import gquery as gquery
-import cgi
-from rdflib import Graph
+import pagination as pageUtils
+from prov import grlcPROV
+from fileLoaders import GithubLoader, LocalLoader
+from queryTypes import qType
+from grlc import __version__ as grlc_version
+
+import re
+import requests
+import logging
 import traceback
 
-import logging
-
-from fileLoaders import GithubLoader, LocalLoader
+from rdflib import Graph
+from github import Github
 
 glogger = logging.getLogger(__name__)
 
@@ -18,14 +24,18 @@ def turtleize(swag):
 
     return swag_graph.serialize(format='turtle')
 
-def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
-    '''
-    Build grlc specification for the given github user / repo
-    '''
+def getLoader(user, repo, sha=None, prov=None):
     if user is None and repo is None:
         loader = LocalLoader()
     else:
         loader = GithubLoader(user, repo, sha, prov)
+    return loader
+
+def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
+    '''
+    Build grlc specification for the given github user / repo
+    '''
+    loader = getLoader(user, repo, sha=sha, prov=prov)
 
     files = loader.fetchFiles()
     raw_repo_uri = loader.getRawRepoUri()
@@ -35,7 +45,6 @@ def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
 
     for c in files:
         c_name = c['name']
-        print '>>>>>>>>>>>>>>>>>>>>>>>>>c_name: ', c_name
         if ".rq" in c['name'] or ".tpf" in c['name'] or ".sparql" in c['name']:
             call_name = c['name'].split('.')[0]
 
@@ -87,12 +96,7 @@ def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
     # If this query allows pagination, add page number as parameter
     params = []
     if pagination:
-        pagination_param = {}
-        pagination_param['name'] = "page"
-        pagination_param['type'] = "int"
-        pagination_param['in'] = "query"
-        pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
-        params.append(pagination_param)
+        params.append(pageUtils.getSwaggerPaginationDef(pagination))
 
     item = {
         'call_name': call_name,
@@ -160,12 +164,7 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
 
     # If this query allows pagination, add page number as parameter
     if pagination:
-        pagination_param = {}
-        pagination_param['name'] = "page"
-        pagination_param['type'] = "int"
-        pagination_param['in'] = "query"
-        pagination_param['description'] = "The page number for this paginated query ({} results per page)".format(pagination)
-        params.append(pagination_param)
+        params.append(pageUtils.getSwaggerPaginationDef(pagination))
 
     if query_metadata['type'] == 'SelectQuery' or query_metadata['type'] == 'ConstructQuery' or query_metadata['type'] == 'InsertData':
         # try:
@@ -274,27 +273,24 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
 
     return item
 
-def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
+def build_swagger_spec(user, repo, sha, serverName):
     '''Build grlc specification for the given github user / repo in swagger format '''
-    if user is None and repo is None:
-        user_repo = 'local/local'
-        prev_commit = []
-        next_commit = []
-        version = 'local'
-        repo_title = 'local'
-        contact_name = ''
-        contact_url = ''
-    else:
+    if user and repo:
         user_repo = user + '/' + repo
         api_repo_uri = static.GITHUB_API_BASE_URL + user_repo
+
+        # Init provenance recording
+        prov_g = grlcPROV(user, repo)
+        gh = Github(static.ACCESS_TOKEN)
+        gh_repo = gh.get_repo(user + '/' + repo)
 
         repo_title = gh_repo.name
         contact_name = gh_repo.owner.login
         contact_url = gh_repo.owner.html_url
 
         # Add the API URI as a used entity by the activity
-        if prov is not None:
-            prov.add_used_entity(api_repo_uri)
+        if prov_g:
+            prov_g.add_used_entity(api_repo_uri)
 
         commit_list = [ c.sha for c in gh_repo.get_commits() ]
 
@@ -309,6 +305,15 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
             prev_commit = commit_list[commit_list.index(version)+1]
         if commit_list.index(version) > 0:
             next_commit = commit_list[commit_list.index(version)-1]
+    else:
+        user_repo = 'local/local'
+        prev_commit = []
+        next_commit = []
+        version = 'local'
+        repo_title = 'local'
+        contact_name = ''
+        contact_url = ''
+        prov_g = None
 
     swag = {}
     swag['prev_commit'] = prev_commit
@@ -333,7 +338,7 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
     swag['schemes'] = [] # 'http' or 'https' -- leave blank to make it dependent on how UI is loaded
     swag['paths'] = {}
 
-    spec = build_spec(user, repo, sha, prov)
+    spec = build_spec(user, repo, sha, prov_g)
     # glogger.debug("Current internal spec data structure")
     # glogger.debug(spec)
     for item in spec:
@@ -366,4 +371,150 @@ def build_swagger_spec(user, repo, sha, serverName, prov, gh_repo):
     swag['definitions'] = {
         'Message': {'type': 'string'}
     }
+    if prov_g:
+        prov_g.end_prov_graph()
+        swag['prov'] = prov_g.serialize(format='turtle')
+
     return swag
+
+def dispatch_query(user, repo, query_name, sha, content, requestArgs, acceptHeader, requestUrl, formData):
+    loader = getLoader(user, repo, sha=sha, prov=None)
+    query, q_type = loader.getTextForName(query_name)
+
+    # Call name implemented with SPARQL query
+    if q_type == qType['SPARQL']:
+        resp, status, headers = dispatchSPARQLQuery(query, loader, requestArgs, acceptHeader, content, formData, requestUrl)
+        return resp, status, headers
+    # Call name implemented with TPF query
+    elif q_type == qType['TPF']:
+        response, headers = dispatchTPFQuery(query, loader, acceptHeader, content)
+        return response, 200, headers
+    else:
+        return "Couldn't find a SPARQL, RDF dump, or TPF query with the requested name", 404, {}
+
+def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, content, formData, requestUrl):
+    endpoint, auth = gquery.guess_endpoint_uri(raw_sparql_query, loader)
+    if endpoint=='':
+        return 'No SPARQL endpoint indicated', 407, {}
+
+    glogger.debug("=====================================================")
+    glogger.debug("Sending query to SPARQL endpoint: {}".format(endpoint))
+    glogger.debug("=====================================================")
+
+    query_metadata = gquery.get_metadata(raw_sparql_query, endpoint)
+
+    pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
+
+    rewritten_query = query_metadata['query']
+
+    # Rewrite query using parameter values
+    if query_metadata['type'] == 'SelectQuery' or query_metadata['type'] == 'ConstructQuery':
+        rewritten_query = gquery.rewrite_query(query_metadata['query'], query_metadata['parameters'], requestArgs)
+
+    # Rewrite query using pagination
+    if query_metadata['type'] == 'SelectQuery' and 'pagination' in query_metadata:
+        rewritten_query = gquery.paginate_query(rewritten_query, query_metadata['pagination'], requestArgs)
+
+    resp = None
+    # If we have a mime field, we load the remote dump and query it locally
+    if 'mime' in query_metadata and query_metadata['mime']:
+        glogger.debug("Detected {} MIME type, proceeding with locally loading remote dump".format(query_metadata['mime']))
+        g = Graph()
+        try:
+            query_metadata = gquery.get_metadata(raw_sparql_query, endpoint)
+            g.parse(endpoint, format=query_metadata['mime'])
+            glogger.debug("Local RDF graph loaded successfully with {} triples".format(len(g)))
+        except Exception as e:
+            glogger.error(e)
+        results = g.query(rewritten_query, result='sparql')
+        # Prepare return format as requested
+        resp_string = ""
+        if 'application/json' in acceptHeader or (content and 'application/json' in static.mimetypes[content]):
+            resp_string = results.serialize(format='json')
+            glogger.debug("Results of SPARQL query against locally loaded dump: {}".format(resp_string))
+        elif 'text/csv' in acceptHeader or (content and 'text/csv' in static.mimetypes[content]):
+            resp_string = results.serialize(format='csv')
+            glogger.debug("Results of SPARQL query against locally loaded dump: {}".format(resp_string))
+        else:
+            return 'Unacceptable requested format', 415, {}
+        glogger.debug("Finished processing query against RDF dump, end of use case")
+        del g
+
+        return resp_string, 200, {}
+
+    headers = {
+    }
+    # Check for INSERT/POST
+    if query_metadata['type'] == 'InsertData':
+        glogger.info("Processing INSERT query")
+        # Rewrite INSERT
+        rewritten_query = rewritten_query.replace("?_g_iri", "{}".format(formData.get('g')))
+        rewritten_query = rewritten_query.replace("<s> <p> <o>", formData.get('data'))
+        glogger.info("INSERT query rewritten as {}".format(rewritten_query))
+
+        # Prepare HTTP POST request
+        reqHeaders = { 'Accept' : acceptHeader, 'Content-Type' : 'application/sparql-update' }
+        response = requests.post(endpoint, data=rewritten_query, headers=reqHeaders, auth=auth)
+        glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
+
+        # Response headers
+        resp = response.text
+        headers['Content-Type'] = response.headers['Content-Type']
+
+    # If there's no mime type, the endpoint is an actual SPARQL endpoint
+    else:
+        # requestedMimeType = static.mimetypes[content] if content else acceptHeader
+        # result, contentType = sparql.getResponseText(endpoint, query, requestedMimeType)
+        reqHeaders = { 'Accept' : acceptHeader }
+        if content:
+            reqHeaders = { 'Accept' : static.mimetypes[content]}
+        data = { 'query' : rewritten_query }
+
+        glogger.debug('Sending HTTP request to SPARQL endpoint with params: {}'.format(data))
+        glogger.debug('Sending HTTP request to SPARQL endpoint with headers: {}'.format(reqHeaders))
+        glogger.debug('Sending HTTP request to SPARQL endpoint with auth: {}'.format(auth))
+        response = requests.get(endpoint, params=data, headers=reqHeaders, auth=auth)
+        glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
+
+        # Response headers
+        resp = response.text
+        headers['Content-Type'] = response.headers['Content-Type']
+
+    # If the query is paginated, set link HTTP headers
+    if pagination:
+        # Get number of total results
+        count = gquery.count_query_results(rewritten_query, endpoint)
+        pageArg = requestArgs.get('page', None)
+        headerLink =  pageUtils.buildPaginationHeader(count, pagination, pageArg, requestUrl)
+        headers['Link'] = headerLink
+
+    headers['Server'] = 'grlc/' + grlc_version
+    return resp, 200, headers
+
+def dispatchTPFQuery(raw_tpf_query, loader, acceptHeader, content):
+    endpoint, auth = gquery.guess_endpoint_uri(raw_tpf_query, loader)
+    glogger.debug("=====================================================")
+    glogger.debug("Sending query to TPF endpoint: {}".format(endpoint))
+    glogger.debug("=====================================================")
+
+    # TODO: pagination for TPF
+
+    # Preapre HTTP request
+    reqHeaders = { 'Accept' : acceptHeader , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
+    if content:
+        reqHeaders = { 'Accept' : static.mimetypes[content] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
+    tpf_list = re.split('\n|=', raw_tpf_query)
+    subject = tpf_list[tpf_list.index('subject') + 1]
+    predicate = tpf_list[tpf_list.index('predicate') + 1]
+    object = tpf_list[tpf_list.index('object') + 1]
+    data = { 'subject' : subject, 'predicate' : predicate, 'object' : object}
+
+    response = requests.get(endpoint, params=data, headers=reqHeaders, auth=auth)
+    glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
+
+    # Response headers
+    resp = response.text
+    headers = {}
+    headers['Content-Type'] = response.headers['Content-Type']
+    headers['Server'] = 'grlc/' + grlc_version
+    return resp, 200, headers
