@@ -14,26 +14,26 @@ def get_blank_spec():
 def get_path_for_item(item):
     item_path = {
         item['method']: {
-            "tags" : item['tags'],
-            "summary" : item['summary'],
-            "description" : item['description'] + "\n\n```{}```".format(item['query']),
-            "produces" : ["text/csv", "application/json", "text/html"],
-            "parameters": item['params'] if 'params' in item else None,
-            "responses": {
-                "200" : {
-                    "description" : "Query response",
-                    "schema" : {
-                        "type" : "array",
-                        "items": {
-                            "type": "object",
-                            "properties": item['item_properties'] if 'item_properties' in item else None
+            'tags' : item['tags'],
+            'summary' : item['summary'],
+            'description' : item['description'] + '\n\n```{}```'.format(item['query']),
+            'produces' : ['text/csv', 'application/json', 'text/html'],
+            'parameters': item['params'] if 'params' in item else None,
+            'responses': {
+                '200' : {
+                    'description' : 'Query response',
+                    'schema' : {
+                        'type' : 'array',
+                        'items': {
+                            'type': 'object',
+                            'properties': item['item_properties'] if 'item_properties' in item else None
                         },
                     }
                 },
-                "default" : {
-                    "description" : "Unexpected error",
-                    "schema" : {
-                        "$ref" : "#/definitions/Message"
+                'default' : {
+                    'description' : 'Unexpected error',
+                    'schema' : {
+                        '$ref' : '#/definitions/Message'
                     }
                 }
             }
@@ -98,6 +98,4 @@ def get_repo_info(user, repo, sha, prov_g):
     if sha is not None:
         basePath = '/api/' + user_repo + '/commit/' + sha + '/'
 
-
-    prev_commit, next_commit, info, basePath = 1,2,3,4
     return prev_commit, next_commit, info, basePath
