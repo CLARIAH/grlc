@@ -15,6 +15,9 @@ grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor
 ## What is grlc ?
 grlc is a lightweight server that takes SPARQL queries curated in GitHub repositories, and translates them to Linked Data Web APIs. This enables universal access to Linked Data. Users are not required to know SPARQL to query their data, but instead can access a web API.
 
+## Quick tutorial
+For a quick usage tutorial check out our wiki walkthrough [here](https://github.com/CLARIAH/grlc/wiki/Quick-tutorial)
+
 ## Features
 
 - Request parameter mappings into SPARQL: grlc is compliant with [BASIL's convention](https://github.com/the-open-university/basil/wiki/SPARQL-variable-name-convention-for-WEB-API-parameters-mapping) on how to map GET/POST request parameters into SPARQL
