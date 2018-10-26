@@ -1,5 +1,4 @@
-import static
-from github import Github
+import utils
 
 def get_blank_spec():
     swag = {}
@@ -42,44 +41,26 @@ def get_path_for_item(item):
     return item_path
 
 def get_repo_info(user, repo, sha, prov_g):
-    if user and repo:
-        user_repo = user + '/' + repo
-        api_repo_uri = static.GITHUB_API_BASE_URL + user_repo
+    loader = utils.getLoader(user, repo, sha, prov_g)
 
-        # Init provenance recording
-        gh = Github(static.ACCESS_TOKEN)
-        gh_repo = gh.get_repo(user + '/' + repo)
+    user_repo = loader.getFullName()
+    repo_title = loader.getRepoTitle()
+    contact_name = loader.getContactName()
+    contact_url = loader.getContactUrl()
+    commit_list = loader.getCommitList()
+    licence_url = loader.getLicenceURL()
 
-        repo_title = gh_repo.name
-        contact_name = gh_repo.owner.login
-        contact_url = gh_repo.owner.html_url
+    # Add the API URI as a used entity by the activity
+    if prov_g:
+        prov_g.add_used_entity(loader.getRepoURI())
 
-        # Add the API URI as a used entity by the activity
-        if prov_g:
-            prov_g.add_used_entity(api_repo_uri)
-
-        commit_list = [ c.sha for c in gh_repo.get_commits() ]
-
-        prev_commit = None
-        next_commit = None
-
-        version = sha
-        if sha is None:
-            version = commit_list[0]
-
-        if commit_list.index(version) < len(commit_list) - 1:
-            prev_commit = commit_list[commit_list.index(version)+1]
-        if commit_list.index(version) > 0:
-            next_commit = commit_list[commit_list.index(version)-1]
-    else:
-        user_repo = 'local/local'
-        prev_commit = []
-        next_commit = []
-        version = 'local'
-        repo_title = 'local'
-        contact_name = ''
-        contact_url = ''
-        prov_g = None
+    prev_commit = None
+    next_commit = None
+    version = sha if sha else commit_list[0]
+    if commit_list.index(version) < len(commit_list) - 1:
+        prev_commit = commit_list[commit_list.index(version)+1]
+    if commit_list.index(version) > 0:
+        next_commit = commit_list[commit_list.index(version)-1]
 
     info = {
         'version': version,
@@ -90,12 +71,11 @@ def get_repo_info(user, repo, sha, prov_g):
         },
         'license': {
             'name' : 'License',
-            'url': static.GITHUB_RAW_BASE_URL + user_repo + '/master/LICENSE'
+            'url': licence_url
         }
     }
 
     basePath = '/api/' + user_repo + '/'
-    if sha is not None:
-        basePath = '/api/' + user_repo + '/commit/' + sha + '/'
+    basePath += ('commit/' + sha + '/') if sha else ''
 
     return prev_commit, next_commit, info, basePath
