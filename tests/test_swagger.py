@@ -3,7 +3,7 @@
 import unittest
 from mock import patch
 
-from grlc.utils import build_spec
+from grlc.swagger import build_spec
 
 def mock_process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
     mockItem = {
@@ -21,7 +21,7 @@ filesInRepo = [
 
 class TestUtils(unittest.TestCase):
     @patch('grlc.utils.GithubLoader.fetchFiles')
-    @patch('grlc.utils.process_sparql_query_text', side_effect=mock_process_sparql_query_text)
+    @patch('grlc.swagger.process_sparql_query_text', side_effect=mock_process_sparql_query_text)
     def test_github(self, mockQueryText, mockLoaderFiles):
         mockLoaderFiles.return_value = filesInRepo
 

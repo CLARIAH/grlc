@@ -3,6 +3,7 @@ import requests
 
 from os import path
 from glob import glob
+from github import Github
 
 from queryTypes import qType
 
@@ -31,12 +32,15 @@ class GithubLoader(BaseLoader):
         self.repo = repo
         self.sha = sha
         self.prov = prov
+        gh = Github(static.ACCESS_TOKEN)
+        self.gh_repo = gh.get_repo(user + '/' + repo)
 
     def fetchFiles(self):
         api_repo_content_uri = static.GITHUB_API_BASE_URL + self.user + '/' + self.repo + '/contents'
         params = {
             'ref' : 'master' if self.sha is None else self.sha
         }
+        # TODO: use Github instead of requests ?
         resp = requests.get(api_repo_content_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}, params=params)
         if resp.ok:
             return resp.json()
@@ -67,6 +71,28 @@ class GithubLoader(BaseLoader):
             return req.text
         else:
             return None
+
+    def getRepoTitle(self):
+        return self.gh_repo.name
+
+    def getContactName(self):
+        return self.gh_repo.owner.login
+
+    def getContactUrl(self):
+        return self.gh_repo.owner.html_url
+
+    def getCommitList(self):
+        return [ c.sha for c in self.gh_repo.get_commits() ]
+
+    def getFullName(self):
+        return self.gh_repo.full_name
+
+    def getRepoURI(self):
+        return static.GITHUB_API_BASE_URL + self.gh_repo.full_name
+
+    def getLicenceURL(self):
+        # TODO: Does it make sense to actually search for License file?
+        return static.GITHUB_RAW_BASE_URL + self.gh_repo.full_name + '/master/LICENSE'
 
 class LocalLoader(BaseLoader):
     def __init__(self, baseDir=static.LOCAL_SPARQL_DIR):
@@ -103,3 +129,24 @@ class LocalLoader(BaseLoader):
             return text
         else:
             return None
+
+    def getRepoTitle(self):
+        return 'local'
+
+    def getContactName(self):
+        return ''
+
+    def getContactUrl(self):
+        return ''
+
+    def getCommitList(self):
+        return [ 'local' ]
+
+    def getFullName(self):
+        return 'local/local'
+
+    def getRepoURI(self):
+        return 'local-file-system'
+
+    def getLicenceURL(self):
+        return 'no-licence-on-local-files'
