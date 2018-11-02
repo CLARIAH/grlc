@@ -10,7 +10,6 @@ from grlc import __version__ as grlc_version
 import re
 import requests
 import logging
-import traceback
 
 from rdflib import Graph
 
@@ -25,6 +24,7 @@ def turtleize(swag):
     return swag_graph.serialize(format='turtle')
 
 def getLoader(user, repo, sha=None, prov=None):
+    '''Build a fileLoader (LocalLoader or GithubLoader) for the given repository.'''
     if user is None and repo is None:
         loader = LocalLoader()
     else:
@@ -32,208 +32,9 @@ def getLoader(user, repo, sha=None, prov=None):
     return loader
 
 def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
-    '''
-    Build grlc specification for the given github user / repo
-    '''
-    loader = getLoader(user, repo, sha=sha, prov=prov)
-
-    files = loader.fetchFiles()
-    raw_repo_uri = loader.getRawRepoUri()
-
-    # Fetch all .rq files
-    items = []
-
-    for c in files:
-        glogger.debug('>>>>>>>>>>>>>>>>>>>>>>>>>c_name: {}'.format(c['name']))
-        if ".rq" in c['name'] or ".tpf" in c['name'] or ".sparql" in c['name']:
-            call_name = c['name'].split('.')[0]
-
-            # Retrieve extra metadata from the query decorators
-            query_text = loader.getTextFor(c)
-
-            item = None
-            if ".rq" in c['name'] or ".sparql" in c['name']:
-                glogger.debug("===================================================================")
-                glogger.debug("Processing SPARQL query: {}".format(c['name']))
-                glogger.debug("===================================================================")
-                item = process_sparql_query_text(query_text, loader, call_name, extraMetadata)
-            elif ".tpf" in c['name']:
-                glogger.debug("===================================================================")
-                glogger.debug("Processing TPF query: {}".format(c['name']))
-                glogger.debug("===================================================================")
-                item = process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata)
-            else:
-                glogger.info("Ignoring unsupported source call name: {}".format(c['name']))
-            if item:
-                items.append(item)
-    return items
-
-def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
-    query_metadata = gquery.get_yaml_decorators(query_text)
-
-    tags = query_metadata['tags'] if 'tags' in query_metadata else []
-    glogger.debug("Read query tags: " + ', '.join(tags))
-
-    summary = query_metadata['summary'] if 'summary' in query_metadata else ""
-    glogger.debug("Read query summary: " + summary)
-
-    description = query_metadata['description'] if 'description' in query_metadata else ""
-    glogger.debug("Read query description: " + description)
-
-    method = query_metadata['method'].lower() if 'method' in query_metadata else "get"
-    if method not in ['get', 'post', 'head', 'put', 'delete', 'options', 'connect']:
-        method = "get"
-
-    pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
-    glogger.debug("Read query pagination: " + str(pagination))
-
-    endpoint = query_metadata['endpoint'] if 'endpoint' in query_metadata else ""
-    glogger.debug("Read query endpoint: " + endpoint)
-
-    # If this query allows pagination, add page number as parameter
-    params = []
-    if pagination:
-        params.append(pageUtils.getSwaggerPaginationDef(pagination))
-
-    item = {
-        'call_name': call_name,
-        'method': method,
-        'tags': tags,
-        'summary': summary,
-        'description': description,
-        'params': params,
-        'query': query_metadata['query']
-    }
-
-    for extraField in extraMetadata:
-        if extraField in query_metadata:
-            item[extraField] = query_metadata[extraField]
-
-    return item
-
-def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
-    # We get the endpoint name first, since some query metadata fields (eg enums) require it
-
-    endpoint, auth = gquery.guess_endpoint_uri(query_text, loader)
-    glogger.debug("Read query endpoint: {}".format(endpoint))
-
-    try:
-        query_metadata = gquery.get_metadata(query_text, endpoint)
-    except Exception:
-        raw_repo_uri = loader.getRawRepoUri()
-        raw_query_uri = raw_repo_uri + ' / ' + call_name
-        glogger.error("Could not parse query at {}".format(raw_query_uri))
-        glogger.error(traceback.print_exc())
-        return None
-
-    tags = query_metadata['tags'] if 'tags' in query_metadata else []
-
-    summary = query_metadata['summary'] if 'summary' in query_metadata else ""
-
-    description = query_metadata['description'] if 'description' in query_metadata else ""
-
-    method = query_metadata['method'].lower() if 'method' in query_metadata else ""
-    if method not in ['get', 'post', 'head', 'put', 'delete', 'options', 'connect']:
-        method = ""
-
-    pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
-
-    endpoint_in_url = query_metadata['endpoint_in_url'] if 'endpoint_in_url' in query_metadata else True
-
-    # Processing of the parameters
-    params = []
-
-    # PV properties
-    item_properties = {}
-
-    # If this query allows pagination, add page number as parameter
-    if pagination:
-        params.append(pageUtils.getSwaggerPaginationDef(pagination))
-
-    if query_metadata['type'] == 'SelectQuery' or query_metadata['type'] == 'ConstructQuery' or query_metadata['type'] == 'InsertData':
-        # TODO: do something intelligent with the parameters!
-        # As per #3, prefetching IRIs via SPARQL and filling enum
-        parameters = query_metadata['parameters']
-
-        for v, p in list(parameters.items()):
-            param = {}
-            param['name'] = p['name']
-            param['type'] = p['type']
-            param['required'] = p['required']
-            param['in'] = "query"
-            param['description'] = "A value of type {} that will substitute {} in the original query".format(p['type'], p['original'])
-            if p['lang']:
-                param['description'] = "A value of type {}@{} that will substitute {} in the original query".format(p['type'], p['lang'], p['original'])
-            if p['format']:
-                param['format'] = p['format']
-                param['description'] = "A value of type {} ({}) that will substitute {} in the original query".format(p['type'], p['format'], p['original'])
-            if p['enum']:
-                param['enum'] = p['enum']
-
-            params.append(param)
-
-    if endpoint_in_url:
-        endpoint_param = {}
-        endpoint_param['name'] = "endpoint"
-        endpoint_param['type'] = "string"
-        endpoint_param['in'] = "query"
-        endpoint_param['description'] = "Alternative endpoint for SPARQL query"
-        endpoint_param['default'] = endpoint
-        params.append(endpoint_param)
-
-    if query_metadata['type'] == 'SelectQuery':
-        # Fill in the spec for SELECT
-        if not method:
-            method = 'get'
-        for pv in query_metadata['variables']:
-            item_properties[pv] = {
-                "name": pv,
-                "type": "object",
-                "required": ["type", "value"],
-                "properties": {
-                    "type": {
-                        "type": "string"
-                    },
-                    "value": {
-                        "type": "string"
-                    },
-                    "xml:lang": {
-                        "type": "string"
-                    },
-                    "datatype": {
-                        "type": "string"
-                    }
-                }
-            }
-
-    elif query_metadata['type'] == 'ConstructQuery':
-        if not method:
-            method = 'get'
-    elif query_metadata['type'] == 'UNKNOWN':
-        glogger.warning("grlc could not parse this query; assuming a plain, non-parametric SELECT in the API spec")
-        if not method:
-            method = 'get'
-    else:
-        # TODO: process all other kinds of queries
-        glogger.warning("Query of type {} is currently unsupported! Skipping".format(query_metadata['type']))
-
-    # Finally: main structure of the callname spec
-    item = {
-        'call_name': '/' + call_name,
-        'method': method,
-        'tags': tags,
-        'summary': summary,
-        'description': description,
-        'params': params,
-        'item_properties': None, # From projection variables, only SelectQuery
-        'query': query_metadata['query']
-    }
-
-    for extraField in extraMetadata:
-        if extraField in query_metadata:
-            item[extraField] = query_metadata[extraField]
-
-    return item
+    glogger.warning("grlc.utils.build_spec is deprecated and will " \
+        "be removed in the future. Use grlc.swagger.build_spec instead.")
+    return swagger.build_spec(user, repo, sha, prov, extraMetadata)
 
 def build_swagger_spec(user, repo, sha, serverName):
     '''Build grlc specification for the given github user / repo in swagger format '''
@@ -244,15 +45,15 @@ def build_swagger_spec(user, repo, sha, serverName):
         prov_g = None
 
     swag = swagger.get_blank_spec()
+    swag['host'] = serverName
     prev_commit, next_commit, info, basePath = \
         swagger.get_repo_info(user, repo, sha, prov_g)
-    swag['host'] = serverName
     swag['prev_commit'] = prev_commit
     swag['next_commit'] = next_commit
     swag['info'] = info
     swag['basePath'] = basePath
 
-    spec = build_spec(user, repo, sha, prov_g)
+    spec = swagger.build_spec(user, repo, sha, prov_g)
     for item in spec:
         swag['paths'][item['call_name']] = swagger.get_path_for_item(item)
 
