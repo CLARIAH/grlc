@@ -22,6 +22,7 @@ setup(
     name="grlc",
     description='grlc, the git repository linked data API constructor',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     license="Copyright 2017 Albert Meroño",
     author='Albert Meroño',
     author_email='albert.merono@vu.nl',
