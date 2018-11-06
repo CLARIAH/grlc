@@ -3,9 +3,9 @@ Flask-Cors==3.0.6
 gevent==1.1.2
 greenlet==0.4.10
 gunicorn==19.6.0
-html5lib==0.9999999
+html5lib==1.0.1
 isodate==0.5.4
-itsdangerous==0.24
+itsdangerous==1.1.0
 keepalive==0.5
 MarkupSafe==0.23
 pyaml==15.8.2
@@ -14,7 +14,7 @@ PyYAML==3.11
 rdflib==4.2.1
 rdflib-jsonld==0.4.0
 requests==2.20.0
-six==1.10.0
+six==1.11.0
 SPARQLWrapper==1.8.2
 Werkzeug==0.14.1
 PyGithub==1.35
