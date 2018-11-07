@@ -41,7 +41,9 @@ def query(user, repo, query_name, sha=None, content=None):
     requestUrl = request.url
     formData = request.form
 
-    query_response, status, headers = utils.dispatch_query(user, repo, query_name, sha, content, requestArgs, acceptHeader, requestUrl, formData)
+    query_response, status, headers = utils.dispatch_query(user, repo, query_name,
+        sha=sha, content=content, requestArgs=requestArgs, acceptHeader=acceptHeader,
+        requestUrl=requestUrl, formData=formData)
 
     return make_response(query_response, status, headers)
 
