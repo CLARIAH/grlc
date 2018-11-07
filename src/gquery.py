@@ -5,7 +5,7 @@
 import yaml
 from rdflib.plugins.sparql.parser import Query, UpdateUnit
 from rdflib.plugins.sparql.processor import translateQuery
-from flask import request
+from flask import request, has_request_context
 from pyparsing import ParseException
 import logging
 from pprint import pformat
@@ -31,7 +31,7 @@ def guess_endpoint_uri(rq, gh_repo):
     if auth == ('none','none'):
         auth = None
 
-    if "endpoint" in request.args:
+    if has_request_context() and "endpoint" in request.args:
         endpoint = request.args['endpoint']
         glogger.info("Endpoint provided in request: " + endpoint)
         return endpoint, auth
@@ -48,7 +48,7 @@ def guess_endpoint_uri(rq, gh_repo):
             endpoint_content = gh_repo.getTextFor({'download_url': 'endpoint.txt'})
             endpoint = endpoint_content.strip().splitlines()[0]
             auth = None
-            glogger.debug("File guessed endpoint: " + endpoint)
+            glogger.info("File guessed endpoint: " + endpoint)
         # TODO: except all is really ugly
         except:
             # Default
@@ -157,7 +157,7 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
                 'format': vformat
             }
 
-            glogger.info('Finished parsing the following parameters: {}'.format(parameters))
+            glogger.debug('Finished parsing the following parameters: {}'.format(parameters))
 
     return parameters
 
@@ -290,9 +290,9 @@ def get_metadata(rq, endpoint):
             glogger.error(traceback.print_exc())
             pass
 
-    glogger.info("Finished parsing query of type {}".format(query_metadata['type']))
-    glogger.info("All parsed query metadata (from decorators and content): ")
-    glogger.info(pformat(query_metadata, indent=32))
+    glogger.debug("Finished parsing query of type {}".format(query_metadata['type']))
+    glogger.debug("All parsed query metadata (from decorators and content): ")
+    glogger.debug(pformat(query_metadata, indent=32))
 
     return query_metadata
 

@@ -62,7 +62,7 @@ def build_swagger_spec(user, repo, sha, serverName):
         swag['prov'] = prov_g.serialize(format='turtle')
     return swag
 
-def dispatch_query(user, repo, query_name, sha, content, requestArgs, acceptHeader, requestUrl, formData):
+def dispatch_query(user, repo, query_name, sha=None, content=None, requestArgs={}, acceptHeader='application/json', requestUrl='http://', formData={}):
     loader = getLoader(user, repo, sha=sha, prov=None)
     query, q_type = loader.getTextForName(query_name)
 
