@@ -60,11 +60,15 @@ def get_repo_info(user, repo, sha, prov_g):
     return prev_commit, next_commit, info, basePath
 
 def get_path_for_item(item):
+    description = item['description']
+    description += '\n\n```{}```'.format(item['query'])
+    description += '\n\nSPARQL projection:\n```pythonql\n{}```'.format(item['projection']) if 'projection' in item else ''
+
     item_path = {
         item['method']: {
             'tags' : item['tags'],
             'summary' : item['summary'],
-            'description' : item['description'] + '\n\n```{}```'.format(item['query']),
+            'description' : description,
             'produces' : ['text/csv', 'application/json', 'text/html'],
             'parameters': item['params'] if 'params' in item else None,
             'responses': {
@@ -87,6 +91,8 @@ def get_path_for_item(item):
             }
         }
     }
+    if 'projection' in item:
+        item_path['projection'] = item['projection']
     return item_path
 
 def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
@@ -120,6 +126,7 @@ def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
                 item = process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata)
             else:
                 glogger.info("Ignoring unsupported source call name: {}".format(c['name']))
+
             if item:
                 items.append(item)
     return items
@@ -184,6 +191,8 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
     pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
 
     endpoint_in_url = query_metadata['endpoint_in_url'] if 'endpoint_in_url' in query_metadata else True
+
+    projection = loader.getProjectionForQueryName(call_name)
 
     # Processing of the parameters
     params = []
@@ -263,11 +272,11 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
         glogger.warning("Query of type {} is currently unsupported! Skipping".format(query_metadata['type']))
 
     # Finally: main structure of the callname spec
-    item = packItem('/' + call_name, method, tags, summary, description, params, query_metadata, extraMetadata)
+    item = packItem('/' + call_name, method, tags, summary, description, params, query_metadata, extraMetadata, projection)
 
     return item
 
-def packItem(call_name, method, tags, summary, description, params, query_metadata, extraMetadata):
+def packItem(call_name, method, tags, summary, description, params, query_metadata, extraMetadata, projection=None):
     item = {
         'call_name': call_name,
         'method': method,
@@ -278,6 +287,10 @@ def packItem(call_name, method, tags, summary, description, params, query_metada
         'item_properties': None, # From projection variables, only SelectQuery
         'query': query_metadata['query']
     }
+
+    if projection:
+        item['projection'] = projection # SPARQL projection PyQL file is available
+
     for extraField in extraMetadata:
         if extraField in query_metadata:
             item[extraField] = query_metadata[extraField]

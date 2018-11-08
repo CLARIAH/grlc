@@ -26,6 +26,15 @@ class BaseLoader:
         # No query found...
         return '', None
 
+    def getProjectionForQueryName(self, query_name):
+        ''' TODO: DOCUMENT !!
+        Returns None if no such projection exists
+        '''
+        projectionFileName = query_name + '.pyql'
+        projectionText = self._getText(projectionFileName)
+        return projectionText
+
+
 class GithubLoader(BaseLoader):
     def __init__(self, user, repo, sha, prov):
         self.user = user
