@@ -2,7 +2,7 @@
 
 # static.py: static values for the grlc Server
 
-from ConfigParser import SafeConfigParser
+from configparser import SafeConfigParser
 
 DEFAULT_HOST = None
 DEFAULT_PORT = 8088

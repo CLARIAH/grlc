@@ -1,5 +1,6 @@
 import logging
 from pythonql.parser.Preprocessor import makeProgramFromString
+from six import PY3
 
 glogger = logging.getLogger(__name__)
 
@@ -11,7 +12,15 @@ def project(dataIn, projectionScript):
     try:
         projectionScript = str(projectionScript)
         program = makeProgramFromString(projectionScript)
-        exec(program)
+        if PY3:
+            loc = {
+                'dataIn': dataIn,
+                'dataOut': dataOut
+            }
+            exec(program, {}, loc)
+            dataOut = loc['dataOut']
+        else:
+            exec(program)
     except Exception as e:
         glogger.error("Error while executing SPARQL projection")
         glogger.error(projectionScript)

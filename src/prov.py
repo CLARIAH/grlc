@@ -3,13 +3,13 @@
 # prov.py: class generating grlc related W3C prov triples
 
 from rdflib import Graph, URIRef, Namespace, RDF, Literal
-from rdflib.plugins.parsers.notation3 import BadSyntax
 import logging
 from datetime import datetime
 from subprocess import check_output
 
 # grlc modules
 import static as static
+from six import PY3
 
 glogger = logging.getLogger(__name__)
 
@@ -92,4 +92,7 @@ class grlcPROV():
         '''
         Serialize provenance graph in the specified format
         '''
-        return self.prov_g.serialize(format=format)
+        if PY3:
+            return self.prov_g.serialize(format=format).decode('utf-8')
+        else:
+            return self.prov_g.serialize(format=format)
