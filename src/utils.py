@@ -1,11 +1,11 @@
-import static as static
-import gquery as gquery
-import pagination as pageUtils
-import swagger as swagger
-from prov import grlcPROV
-from fileLoaders import GithubLoader, LocalLoader
-from queryTypes import qType
-from projection import project
+import grlc.static as static
+import grlc.gquery as gquery
+import grlc.pagination as pageUtils
+import grlc.swagger as swagger
+from grlc.prov import grlcPROV
+from grlc.fileLoaders import GithubLoader, LocalLoader
+from grlc.queryTypes import qType
+from grlc.projection import project
 from grlc import __version__ as grlc_version
 
 import re

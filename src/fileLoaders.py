@@ -1,11 +1,10 @@
-import static as static
-import requests
+import grlc.static as static
+from grlc.queryTypes import qType
 
+import requests
 from os import path
 from glob import glob
 from github import Github
-
-from queryTypes import qType
 
 class BaseLoader:
     def getTextForName(self, query_name):

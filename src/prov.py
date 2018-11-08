@@ -6,10 +6,10 @@ from rdflib import Graph, URIRef, Namespace, RDF, Literal
 import logging
 from datetime import datetime
 from subprocess import check_output
+from six import PY3
 
 # grlc modules
-import static as static
-from six import PY3
+import grlc.static as static
 
 glogger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
-import utils
-import gquery
-import pagination as pageUtils
+import grlc.utils
+import grlc.gquery as gquery
+import grlc.pagination as pageUtils
 
 import traceback
 import logging
@@ -20,7 +20,7 @@ def get_blank_spec():
 
 def get_repo_info(user, repo, sha, prov_g):
     '''Generate swagger information from the repo being used.'''
-    loader = utils.getLoader(user, repo, sha, prov_g)
+    loader = grlc.utils.getLoader(user, repo, sha, prov_g)
 
     user_repo = loader.getFullName()
     repo_title = loader.getRepoTitle()
@@ -97,7 +97,7 @@ def get_path_for_item(item):
 
 def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
     '''Build grlc specification for the given github user / repo.'''
-    loader = utils.getLoader(user, repo, sha=sha, prov=prov)
+    loader = grlc.utils.getLoader(user, repo, sha=sha, prov=prov)
 
     files = loader.fetchFiles()
     raw_repo_uri = loader.getRawRepoUri()
