@@ -30,3 +30,50 @@ def mock_requestsGithub(uri, headers={}, params={}):
         else:
             return_value = Mock(status_code=404)
             return return_value
+
+mock_sparqlResponse = {
+  "head": {
+    "link": [],
+    "vars": [ "country_name", "capital_name", "population" ]
+  },
+  "results": {
+    "distinct": "false",
+    "ordered": "true",
+    "bindings": [
+      {
+        "country_name": {
+          "type": "literal",
+          "xml:lang": "en",
+          "value": "Albania"
+        },
+        "capital_name": {
+          "type": "literal",
+          "xml:lang": "en",
+          "value": "Tirana"
+        },
+        "population": {
+          "type": "typed-literal",
+          "datatype": "http://www.w3.org/2001/XMLSchema#nonNegativeInteger",
+          "value": "2886026"
+        }
+      },
+      {
+        "country_name": {
+          "type": "literal",
+          "xml:lang": "en",
+          "value": "Algeria"
+        },
+        "capital_name": {
+          "type": "literal",
+          "xml:lang": "en",
+          "value": "Algiers"
+        },
+        "population": {
+          "type": "typed-literal",
+          "datatype": "http://www.w3.org/2001/XMLSchema#nonNegativeInteger",
+          "value": "40400000"
+        }
+      }
+    ]
+  }
+}

@@ -14,7 +14,7 @@ import re
 import requests
 
 # grlc modules
-import static as static
+import grlc.static as static
 
 glogger = logging.getLogger(__name__)
 
@@ -318,7 +318,7 @@ def rewrite_query(query, parameters, get_args):
     requireXSD = False
 
     required_params = {}
-    for k,v in parameters.iteritems():
+    for k,v in parameters.items():
         if parameters[k]['required']:
             required_params[k] = v
     requiredParams = set(required_params.keys())

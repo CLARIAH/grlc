@@ -18,3 +18,5 @@ six==1.11.0
 SPARQLWrapper==1.8.2
 Werkzeug==0.14.1
 PyGithub==1.35
+pythonql==0.9.51;python_version<"3.5"
+pythonql3==0.9.61;python_version>="3.5"
