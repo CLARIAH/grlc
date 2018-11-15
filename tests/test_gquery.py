@@ -85,8 +85,8 @@ class TestGQuery(unittest.TestCase):
         metadata = gquery.get_yaml_decorators(rq)
         self.assertIn('enumerate', metadata, 'Should contain enumerate')
 
-        enumeration = gquery.get_enumeration(rq, '_o', 'http://mock-endpoint/sparql', metadata)
-        self.assertIsInstance(enumeration, (list, type(None)), 'Should return a list of values')
+        enumeration = gquery.get_enumeration(rq, 'o', 'http://mock-endpoint/sparql', metadata)
+        self.assertIsInstance(enumeration, list, 'Should return a list of values')
         self.assertEquals(len(enumeration), 2, 'Should have two elements')
 
 
