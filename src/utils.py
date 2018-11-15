@@ -1,14 +1,16 @@
-import static as static
-import gquery as gquery
-import pagination as pageUtils
-import swagger as swagger
-from prov import grlcPROV
-from fileLoaders import GithubLoader, LocalLoader
-from queryTypes import qType
+import grlc.static as static
+import grlc.gquery as gquery
+import grlc.pagination as pageUtils
+import grlc.swagger as swagger
+from grlc.prov import grlcPROV
+from grlc.fileLoaders import GithubLoader, LocalLoader
+from grlc.queryTypes import qType
+from grlc.projection import project
 from grlc import __version__ as grlc_version
 
 import re
 import requests
+import json
 import logging
 
 from rdflib import Graph
@@ -69,6 +71,14 @@ def dispatch_query(user, repo, query_name, sha=None, content=None, requestArgs={
     # Call name implemented with SPARQL query
     if q_type == qType['SPARQL']:
         resp, status, headers = dispatchSPARQLQuery(query, loader, requestArgs, acceptHeader, content, formData, requestUrl)
+
+        if acceptHeader == 'application/json':
+            projection = loader.getProjectionForQueryName(query_name)
+            if projection:
+                dataIn = json.loads(resp)
+                dataOut = project(dataIn, projection)
+                resp = json.dumps(dataOut)
+
         return resp, status, headers
     # Call name implemented with TPF query
     elif q_type == qType['TPF']:

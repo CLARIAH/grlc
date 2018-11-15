@@ -3,6 +3,7 @@
 import unittest
 from mock import patch
 
+import grlc.utils # BUG: grlc.swagger will not import without this import first
 from grlc.swagger import build_spec
 
 def mock_process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata):

@@ -6,8 +6,8 @@ from flask import Flask, request, jsonify, render_template, make_response
 import logging
 
 # grlc modules
-import static as static
-import utils as utils
+import grlc.static as static
+import grlc.utils as utils
 
 # The Flask app
 app = Flask(__name__)
