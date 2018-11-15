@@ -150,14 +150,17 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
                 'original': '?{}'.format(v),
                 'required': vrequired,
                 'name': vname,
-                'enum': sorted(vcodes),
                 'type': vtype,
                 'datatype': vdatatype,
                 'lang': vlang,
                 'format': vformat
             }
 
-            glogger.debug('Finished parsing the following parameters: {}'.format(parameters))
+            # Give an enumeration to the parameter only if there are enumeration values
+            if vcodes:
+                parameters[vname]['enum'] = sorted(vcodes)
+
+            glogger.info('Finished parsing the following parameters: {}'.format(parameters))
 
     return parameters
 
@@ -167,6 +170,7 @@ def get_enumeration(rq, v, endpoint, metadata={}, auth=None):
     '''
     v = v.replace('_', '')
 
+    # glogger.debug("Metadata before processing enums: {}".format(metadata))
     # We only fire the enum filling queries if indicated by the query metadata
     if 'enumerate' not in metadata:
         return []
@@ -234,7 +238,7 @@ def get_yaml_decorators(rq):
         query_metadata = {}
     query_metadata['query'] = query_string
 
-    #glogger.debug("Parsed query decorators: {}".format(query_metadata))
+    # glogger.debug("Parsed query decorators: {}".format(query_metadata))
 
     return query_metadata
 
