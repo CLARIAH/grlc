@@ -121,9 +121,10 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
         # TODO: currently only one parameter per triple pattern is supported
         if match :
             vname = match.group('name')
-            vcodes = get_enumeration(rq, v, endpoint, query_metadata, auth)
             vrequired = True if match.group('required') == '_' else False
             vtype = 'string'
+            # All these can be None
+            vcodes = get_enumeration(rq, vname, endpoint, query_metadata, auth)
             vlang = None
             vdatatype = None
             vformat = None
@@ -150,15 +151,18 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
                 'original': '?{}'.format(v),
                 'required': vrequired,
                 'name': vname,
-                'type': vtype,
-                'datatype': vdatatype,
-                'lang': vlang,
-                'format': vformat
+                'type': vtype
             }
 
-            # Give an enumeration to the parameter only if there are enumeration values
-            if vcodes:
+            # Possibly None parameter attributes
+            if vcodes is not None:
                 parameters[vname]['enum'] = sorted(vcodes)
+            if vlang is not None:
+                parameters[vname]['lang'] = vlang
+            if vdatatype is not None:
+                parameters[vname]['datatype'] = vdatatype
+            if vformat is not None:
+                parameters[vname]['format'] = vformat
 
             glogger.info('Finished parsing the following parameters: {}'.format(parameters))
 
@@ -168,18 +172,16 @@ def get_enumeration(rq, v, endpoint, metadata={}, auth=None):
     '''
     Returns a list of enumerated values for variable 'v' in query 'rq'
     '''
-    v = v.replace('_', '')
-
     # glogger.debug("Metadata before processing enums: {}".format(metadata))
     # We only fire the enum filling queries if indicated by the query metadata
     if 'enumerate' not in metadata:
-        return []
+        return None
     enumDict = _getDictWithKey(v, metadata['enumerate'])
     if enumDict:
         return enumDict[v]
     if v in metadata['enumerate']:
         return get_enumeration_sparql(rq, v, endpoint, auth)
-    return []
+    return None
 
 def get_enumeration_sparql(rq, v, endpoint, auth=None):
     '''
@@ -344,12 +346,12 @@ def rewrite_query(query, parameters, get_args):
             # Literals
             elif p['type'] == 'literal' or p['type'] == 'string':
                 # If it's a iri
-                if p['format'] == 'iri':
+                if 'format' in p and p['format'] == 'iri':
                     query = query.replace(p['original'], "{}{}{}".format('<',v,'>'))
                 # If there is a language tag
-                if p['lang']:
+                if 'lang' in p and p['lang']:
                     query = query.replace(p['original'], "\"{}\"@{}".format(v, p['lang']))
-                elif p['datatype']:
+                elif 'datatype' in p and p['datatype']:
                     query = query.replace(p['original'], "\"{}\"^^{}".format(v, p['datatype']))
                     if 'xsd' in p['datatype']:
                         requireXSD = True
