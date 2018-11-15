@@ -214,6 +214,8 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
                 param['description'] = "A value of type {} ({}) that will substitute {} in the original query".format(p['type'], p['format'], p['original'])
             if 'enum' in p:
                 param['enum'] = p['enum']
+            if 'default' in p:
+                param['default'] = p['default']
 
             params.append(param)
 

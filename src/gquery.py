@@ -125,6 +125,7 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
             vtype = 'string'
             # All these can be None
             vcodes = get_enumeration(rq, vname, endpoint, query_metadata, auth)
+            vdefault = get_defaults(rq, vname, query_metadata)
             vlang = None
             vdatatype = None
             vformat = None
@@ -163,10 +164,24 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
                 parameters[vname]['datatype'] = vdatatype
             if vformat is not None:
                 parameters[vname]['format'] = vformat
+            if vdefault is not None:
+                parameters[vname]['default'] = vdefault
 
             glogger.info('Finished parsing the following parameters: {}'.format(parameters))
 
     return parameters
+
+def get_defaults(rq, v, metadata):
+    '''
+    Returns the default value for a parameter or None
+    '''
+    glogger.debug("Metadata with defaults: {}".format(metadata))
+    if 'defaults' not in metadata:
+        return None
+    defaultsDict = _getDictWithKey(v, metadata['defaults'])
+    if defaultsDict:
+        return defaultsDict[v]
+    return None
 
 def get_enumeration(rq, v, endpoint, metadata={}, auth=None):
     '''
