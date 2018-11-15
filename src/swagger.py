@@ -152,7 +152,7 @@ def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
     if pagination:
         params.append(pageUtils.getSwaggerPaginationDef(pagination))
 
-    item = packItem(call_name, method, tags, summary, description, params, query_metadata, extraMetadata)
+    item = packItem('/' + call_name, method, tags, summary, description, params, query_metadata, extraMetadata)
 
     return item
 

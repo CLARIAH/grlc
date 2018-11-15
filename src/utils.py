@@ -72,8 +72,8 @@ def dispatch_query(user, repo, query_name, sha, content, requestArgs, acceptHead
         return resp, status, headers
     # Call name implemented with TPF query
     elif q_type == qType['TPF']:
-        response, headers = dispatchTPFQuery(query, loader, acceptHeader, content)
-        return response, 200, headers
+        resp, status, headers = dispatchTPFQuery(query, loader, acceptHeader, content)
+        return resp, status, headers
     else:
         return "Couldn't find a SPARQL, RDF dump, or TPF query with the requested name", 404, {}
 
