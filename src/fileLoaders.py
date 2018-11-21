@@ -33,6 +33,11 @@ class BaseLoader:
         projectionText = self._getText(projectionFileName)
         return projectionText
 
+    def getLicenceURL(self):
+        for f in self.fetchFiles():
+            if f['name'].lower()=='license' or f['name'].lower()=='licence':
+                return f['download_url']
+        return None
 
 class GithubLoader(BaseLoader):
     def __init__(self, user, repo, sha, prov):
@@ -98,9 +103,6 @@ class GithubLoader(BaseLoader):
     def getRepoURI(self):
         return static.GITHUB_API_BASE_URL + self.gh_repo.full_name
 
-    def getLicenceURL(self):
-        # TODO: Does it make sense to actually search for License file?
-        return static.GITHUB_RAW_BASE_URL + self.gh_repo.full_name + '/master/LICENSE'
 
 class LocalLoader(BaseLoader):
     def __init__(self, baseDir=static.LOCAL_SPARQL_DIR):
@@ -155,6 +157,3 @@ class LocalLoader(BaseLoader):
 
     def getRepoURI(self):
         return 'local-file-system'
-
-    def getLicenceURL(self):
-        return 'no-licence-on-local-files'
