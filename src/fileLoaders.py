@@ -46,7 +46,10 @@ class GithubLoader(BaseLoader):
         self.sha = sha
         self.prov = prov
         gh = Github(static.ACCESS_TOKEN)
-        self.gh_repo = gh.get_repo(user + '/' + repo)
+        try:
+            self.gh_repo = gh.get_repo(user + '/' + repo, lazy=False)
+        except:
+            raise Exception('Repo not found: ' + user + '/' + repo)
 
     def fetchFiles(self):
         api_repo_content_uri = static.GITHUB_API_BASE_URL + self.user + '/' + self.repo + '/contents'

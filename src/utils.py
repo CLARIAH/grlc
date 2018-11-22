@@ -48,13 +48,27 @@ def build_swagger_spec(user, repo, sha, serverName):
 
     swag = swagger.get_blank_spec()
     swag['host'] = serverName
+
+    try:
+        loader = getLoader(user, repo, sha, prov_g)
+    except Exception as e:
+        # If repo does not exits
+        swag['info'] = {
+            'title': 'ERROR!',
+            'description': e.message
+        }
+        swag['paths'] = {}
+        return swag
+
+
     prev_commit, next_commit, info, basePath = \
-        swagger.get_repo_info(user, repo, sha, prov_g)
+        swagger.get_repo_info(loader, sha, prov_g)
     swag['prev_commit'] = prev_commit
     swag['next_commit'] = next_commit
     swag['info'] = info
     swag['basePath'] = basePath
 
+    # TODO: can we pass loader to build_spec ?
     spec = swagger.build_spec(user, repo, sha, prov_g)
     for item in spec:
         swag['paths'][item['call_name']] = swagger.get_path_for_item(item)

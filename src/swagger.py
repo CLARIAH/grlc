@@ -18,10 +18,8 @@ def get_blank_spec():
     }
     return swag
 
-def get_repo_info(user, repo, sha, prov_g):
+def get_repo_info(loader, sha, prov_g):
     '''Generate swagger information from the repo being used.'''
-    loader = grlc.utils.getLoader(user, repo, sha, prov_g)
-
     user_repo = loader.getFullName()
     repo_title = loader.getRepoTitle()
     contact_name = loader.getContactName()
