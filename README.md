@@ -110,7 +110,7 @@ Check these out:
 You'll find the sources of these and many more in [GitHub](https://github.com/search?o=desc&q=endpoint+summary+language%3ASPARQL&s=indexed&type=Code&utf8=%E2%9C%93)
 
 ## Decorator syntax
-A couple of SPARQL comment embedded decorators are available to make your swagger-ui look nicer (note all comments start with <code>#+ </code>):
+A couple of SPARQL comment embedded decorators are available to make your swagger-ui look nicer (note all comments start with <code>#+ </code> and the use of `':'` is restricted to list-representation):
 
 - To specify a query-specific endpoint, <code>#+ endpoint: http://example.com/sparql</code>.
 - To indicate the HTTP request method, <code>#+ method: GET</code>.
