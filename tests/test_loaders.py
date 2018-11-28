@@ -16,7 +16,8 @@ class TestGithubLoader(unittest.TestCase):
         self.patcher.stop()
 
     @classmethod
-    def setUpClass(self):
+    @patch('github.Github.get_repo', return_value=[])
+    def setUpClass(self, github_get_repo_patch):
         self.user = 'fakeuser'
         self.repo = 'fakerepo'
         self.loader = GithubLoader(self.user, self.repo, None, None)

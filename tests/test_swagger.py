@@ -20,11 +20,13 @@ filesInRepo = [
     }
 ]
 
-class TestUtils(unittest.TestCase):
-    @patch('grlc.utils.GithubLoader.fetchFiles')
+class TestSwagger(unittest.TestCase):
+    @patch('github.Github.get_repo')             # Corresponding patch object: mockGithubRepo
+    @patch('grlc.utils.GithubLoader.fetchFiles') # Corresponding patch object: mockLoaderFiles
     @patch('grlc.swagger.process_sparql_query_text', side_effect=mock_process_sparql_query_text)
-    def test_github(self, mockQueryText, mockLoaderFiles):
+    def test_github(self, mockQueryText, mockLoaderFiles, mockGithubRepo):
         mockLoaderFiles.return_value = filesInRepo
+        mockGithubRepo.return_value = []
 
         user = 'testuser'
         repo = 'testrepo'
