@@ -135,7 +135,7 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
 
             if mtype in ['number','literal','string']:
                 vtype = mtype
-            if mtype in ['iri']: #TODO: proper form validation of input parameter uris
+            elif mtype in ['iri']: #TODO: proper form validation of input parameter uris
                 vtype = 'string'
                 vformat = 'iri'
             elif mtype:
