@@ -3,8 +3,6 @@
 from grlc.server import app as grlc_app
 from grlc import static
 from sys import platform
-from gunicorn.app.base import BaseApplication
-from gunicorn.six import iteritems
 
 
 def runViaWaitress():
@@ -12,6 +10,8 @@ def runViaWaitress():
     serve(grlc_app, listen='*:8088')
 
 def runViaGunicorn():
+    from gunicorn.app.base import BaseApplication
+    from gunicorn.six import iteritems
     class StandaloneApplication(BaseApplication):
         def __init__(self, app, options=None):
             self.options = options or {}
