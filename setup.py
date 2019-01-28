@@ -5,8 +5,14 @@ import codecs
 import os
 from setuptools import setup
 
-grlc_base = 'src/'
-grlc_data = [ root.replace(grlc_base, '') + '/*' for root,dirs,files in os.walk(grlc_base) if root !=grlc_base ]
+grlc_base = 'src'
+grlc_base_dir = os.path.join(grlc_base, '')
+grlc_data = []
+for root,dirs,files in os.walk(grlc_base):
+    if root != grlc_base:
+        root_dir = root.replace(grlc_base_dir, '')
+        data_files = os.path.join(root_dir, '*')
+        grlc_data.append(data_files)
 grlc_version = '1.2.0'
 
 with codecs.open('requirements.txt', mode='r') as f:

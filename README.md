@@ -80,6 +80,11 @@ You can run grlc natively as follows:
 gunicorn -c gunicorn_config.py src.server:app
 ```
 
+**Note:** Since `gunicorn` does not work under Windows, you can use `waitress` instead:
+```
+waitress-serve --port=8088 src.server:app
+```
+
 You can also find an example [here](https://github.com/CLARIAH/grlc/blob/master/docker-assets/entrypoint.sh#L24)
 
 ## Usage

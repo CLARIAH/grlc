@@ -2,7 +2,6 @@ Flask==1.0.2
 Flask-Cors==3.0.6
 gevent==1.1.2
 greenlet==0.4.10
-gunicorn==19.6.0
 html5lib==1.0.1
 isodate==0.5.4
 itsdangerous==1.1.0
@@ -20,3 +19,5 @@ Werkzeug==0.14.1
 PyGithub==1.35
 pythonql==0.9.51;python_version<"3.5"
 pythonql3==0.9.61;python_version>="3.5"
+gunicorn==19.6.0; sys_platform!="win32"
+waitress==1.1.0; sys_platform=="win32"
