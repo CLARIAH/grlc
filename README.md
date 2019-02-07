@@ -45,6 +45,11 @@ docker pull clariah/grlc
 docker-compose -f docker-compose.default.yml up
 </pre>
 
+To run directly from Docker Hub it is sufficient to do:
+```
+docker run --rm -p 8088:80 -e GRLC_SERVER_NAME=grlc.io -e GRLC_GITHUB_ACCESS_TOKEN=xxx -e DEBUG=true claria/grlc
+```
+
 (You can omit the first two commands if you just copy [this file](docker-compose.default.yml) somehwere in your filesystem)
 If you use the supplied `docker-compose.default.yml` your grlc instance will be available at http://localhost:8001
 
