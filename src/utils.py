@@ -1,14 +1,16 @@
-import static as static
-import gquery as gquery
-import pagination as pageUtils
-import swagger as swagger
-from prov import grlcPROV
-from fileLoaders import GithubLoader, LocalLoader
-from queryTypes import qType
+import grlc.static as static
+import grlc.gquery as gquery
+import grlc.pagination as pageUtils
+import grlc.swagger as swagger
+from grlc.prov import grlcPROV
+from grlc.fileLoaders import GithubLoader, LocalLoader
+from grlc.queryTypes import qType
+from grlc.projection import project
 from grlc import __version__ as grlc_version
 
 import re
 import requests
+import json
 import logging
 
 from rdflib import Graph
@@ -46,13 +48,27 @@ def build_swagger_spec(user, repo, sha, serverName):
 
     swag = swagger.get_blank_spec()
     swag['host'] = serverName
+
+    try:
+        loader = getLoader(user, repo, sha, prov_g)
+    except Exception as e:
+        # If repo does not exits
+        swag['info'] = {
+            'title': 'ERROR!',
+            'description': e.message
+        }
+        swag['paths'] = {}
+        return swag
+
+
     prev_commit, next_commit, info, basePath = \
-        swagger.get_repo_info(user, repo, sha, prov_g)
+        swagger.get_repo_info(loader, sha, prov_g)
     swag['prev_commit'] = prev_commit
     swag['next_commit'] = next_commit
     swag['info'] = info
     swag['basePath'] = basePath
 
+    # TODO: can we pass loader to build_spec ?
     spec = swagger.build_spec(user, repo, sha, prov_g)
     for item in spec:
         swag['paths'][item['call_name']] = swagger.get_path_for_item(item)
@@ -62,13 +78,21 @@ def build_swagger_spec(user, repo, sha, serverName):
         swag['prov'] = prov_g.serialize(format='turtle')
     return swag
 
-def dispatch_query(user, repo, query_name, sha, content, requestArgs, acceptHeader, requestUrl, formData):
+def dispatch_query(user, repo, query_name, sha=None, content=None, requestArgs={}, acceptHeader='application/json', requestUrl='http://', formData={}):
     loader = getLoader(user, repo, sha=sha, prov=None)
     query, q_type = loader.getTextForName(query_name)
 
     # Call name implemented with SPARQL query
     if q_type == qType['SPARQL']:
         resp, status, headers = dispatchSPARQLQuery(query, loader, requestArgs, acceptHeader, content, formData, requestUrl)
+
+        if acceptHeader == 'application/json':
+            projection = loader.getProjectionForQueryName(query_name)
+            if projection:
+                dataIn = json.loads(resp)
+                dataOut = project(dataIn, projection)
+                resp = json.dumps(dataOut)
+
         return resp, status, headers
     # Call name implemented with TPF query
     elif q_type == qType['TPF']:

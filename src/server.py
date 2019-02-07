@@ -6,8 +6,8 @@ from flask import Flask, request, jsonify, render_template, make_response
 import logging
 
 # grlc modules
-import static as static
-import utils as utils
+import grlc.static as static
+import grlc.utils as utils
 
 # The Flask app
 app = Flask(__name__)
@@ -41,7 +41,9 @@ def query(user, repo, query_name, sha=None, content=None):
     requestUrl = request.url
     formData = request.form
 
-    query_response, status, headers = utils.dispatch_query(user, repo, query_name, sha, content, requestArgs, acceptHeader, requestUrl, formData)
+    query_response, status, headers = utils.dispatch_query(user, repo, query_name,
+        sha=sha, content=content, requestArgs=requestArgs, acceptHeader=acceptHeader,
+        requestUrl=requestUrl, formData=formData)
 
     return make_response(query_response, status, headers)
 

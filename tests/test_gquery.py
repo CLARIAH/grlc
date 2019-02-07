@@ -35,7 +35,7 @@ class TestGQuery(unittest.TestCase):
         rq, _ = self.loader.getTextForName('test-rq')
 
         params = gquery.get_parameters(rq, '', '', {})
-        for paramName, param in params.iteritems():
+        for paramName, param in params.items():
             self.assertIn('name', param, 'Should have a name')
             self.assertIn('type', param, 'Should have a type')
             self.assertIn('required', param, 'Should have a required')
@@ -175,11 +175,7 @@ class TestGQuery(unittest.TestCase):
         # carefully constructed, but that is not the scope of this test
         rq_rw = gquery.rewrite_query(rq, parameters, args)
 
-        for pName, pValue in parameters.iteritems():
-            print 'pName : ',pName
-            print 'pValue: ',pValue
-            print 'rq    : ',rq
-            print 'rq_rw  : ',rq_rw
+        for pName, pValue in parameters.items():
             self.assertIn(
                 pName, rq, 'Original query should contain original parameter name')
             self.assertNotIn(

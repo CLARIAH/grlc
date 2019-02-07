@@ -1,11 +1,10 @@
-import static as static
-import requests
+import grlc.static as static
+from grlc.queryTypes import qType
 
+import requests
 from os import path
 from glob import glob
 from github import Github
-
-from queryTypes import qType
 
 class BaseLoader:
     def getTextForName(self, query_name):
@@ -26,6 +25,20 @@ class BaseLoader:
         # No query found...
         return '', None
 
+    def getProjectionForQueryName(self, query_name):
+        ''' TODO: DOCUMENT !!
+        Returns None if no such projection exists
+        '''
+        projectionFileName = query_name + '.pyql'
+        projectionText = self._getText(projectionFileName)
+        return projectionText
+
+    def getLicenceURL(self):
+        for f in self.fetchFiles():
+            if f['name'].lower()=='license' or f['name'].lower()=='licence':
+                return f['download_url']
+        return None
+
 class GithubLoader(BaseLoader):
     def __init__(self, user, repo, sha, prov):
         self.user = user
@@ -33,7 +46,10 @@ class GithubLoader(BaseLoader):
         self.sha = sha
         self.prov = prov
         gh = Github(static.ACCESS_TOKEN)
-        self.gh_repo = gh.get_repo(user + '/' + repo)
+        try:
+            self.gh_repo = gh.get_repo(user + '/' + repo, lazy=False)
+        except:
+            raise Exception('Repo not found: ' + user + '/' + repo)
 
     def fetchFiles(self):
         api_repo_content_uri = static.GITHUB_API_BASE_URL + self.user + '/' + self.repo + '/contents'
@@ -90,9 +106,6 @@ class GithubLoader(BaseLoader):
     def getRepoURI(self):
         return static.GITHUB_API_BASE_URL + self.gh_repo.full_name
 
-    def getLicenceURL(self):
-        # TODO: Does it make sense to actually search for License file?
-        return static.GITHUB_RAW_BASE_URL + self.gh_repo.full_name + '/master/LICENSE'
 
 class LocalLoader(BaseLoader):
     def __init__(self, baseDir=static.LOCAL_SPARQL_DIR):
@@ -147,6 +160,3 @@ class LocalLoader(BaseLoader):
 
     def getRepoURI(self):
         return 'local-file-system'
-
-    def getLicenceURL(self):
-        return 'no-licence-on-local-files'

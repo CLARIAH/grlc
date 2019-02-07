@@ -3,6 +3,7 @@
 import unittest
 from mock import patch
 
+import grlc.utils # BUG: grlc.swagger will not import without this import first
 from grlc.swagger import build_spec
 
 def mock_process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
@@ -19,11 +20,13 @@ filesInRepo = [
     }
 ]
 
-class TestUtils(unittest.TestCase):
-    @patch('grlc.utils.GithubLoader.fetchFiles')
+class TestSwagger(unittest.TestCase):
+    @patch('github.Github.get_repo')             # Corresponding patch object: mockGithubRepo
+    @patch('grlc.utils.GithubLoader.fetchFiles') # Corresponding patch object: mockLoaderFiles
     @patch('grlc.swagger.process_sparql_query_text', side_effect=mock_process_sparql_query_text)
-    def test_github(self, mockQueryText, mockLoaderFiles):
+    def test_github(self, mockQueryText, mockLoaderFiles, mockGithubRepo):
         mockLoaderFiles.return_value = filesInRepo
+        mockGithubRepo.return_value = []
 
         user = 'testuser'
         repo = 'testrepo'
