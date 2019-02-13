@@ -5,6 +5,7 @@ import requests
 from os import path
 from glob import glob
 from github import Github
+from github.GithubException import BadCredentialsException
 
 class BaseLoader:
     def getTextForName(self, query_name):
@@ -48,7 +49,9 @@ class GithubLoader(BaseLoader):
         gh = Github(static.ACCESS_TOKEN)
         try:
             self.gh_repo = gh.get_repo(user + '/' + repo, lazy=False)
-        except:
+        except BadCredentialsException:
+            raise Exception('BadCredentials: have you set up github_access_token on config.ini ?')
+        except Exception as e:
             raise Exception('Repo not found: ' + user + '/' + repo)
 
     def fetchFiles(self):
