@@ -12,34 +12,37 @@ import re
 import requests
 import json
 import logging
+import SPARQLTransformer
 
 from rdflib import Graph
 
 glogger = logging.getLogger(__name__)
 
+
 def turtleize(swag):
-    '''
-    Transforoms a JSON swag object into a text/turtle LDA equivalent representation
-    '''
+    """ Transforms a JSON swag object into a text/turtle LDA equivalent representation """
     swag_graph = Graph()
 
     return swag_graph.serialize(format='turtle')
 
+
 def getLoader(user, repo, sha=None, prov=None):
-    '''Build a fileLoader (LocalLoader or GithubLoader) for the given repository.'''
+    """Build a fileLoader (LocalLoader or GithubLoader) for the given repository."""
     if user is None and repo is None:
         loader = LocalLoader()
     else:
         loader = GithubLoader(user, repo, sha, prov)
     return loader
 
+
 def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
     glogger.warning("grlc.utils.build_spec is deprecated and will " \
-        "be removed in the future. Use grlc.swagger.build_spec instead.")
+                    "be removed in the future. Use grlc.swagger.build_spec instead.")
     return swagger.build_spec(user, repo, sha, prov, extraMetadata)
 
+
 def build_swagger_spec(user, repo, sha, serverName):
-    '''Build grlc specification for the given github user / repo in swagger format '''
+    """Build grlc specification for the given github user / repo in swagger format """
     if user and repo:
         # Init provenance recording
         prov_g = grlcPROV(user, repo)
@@ -60,7 +63,6 @@ def build_swagger_spec(user, repo, sha, serverName):
         swag['paths'] = {}
         return swag
 
-
     prev_commit, next_commit, info, basePath = \
         swagger.get_repo_info(loader, sha, prov_g)
     swag['prev_commit'] = prev_commit
@@ -78,13 +80,16 @@ def build_swagger_spec(user, repo, sha, serverName):
         swag['prov'] = prov_g.serialize(format='turtle')
     return swag
 
-def dispatch_query(user, repo, query_name, sha=None, content=None, requestArgs={}, acceptHeader='application/json', requestUrl='http://', formData={}):
+
+def dispatch_query(user, repo, query_name, sha=None, content=None, requestArgs={}, acceptHeader='application/json',
+                   requestUrl='http://', formData={}):
     loader = getLoader(user, repo, sha=sha, prov=None)
     query, q_type = loader.getTextForName(query_name)
 
     # Call name implemented with SPARQL query
-    if q_type == qType['SPARQL']:
-        resp, status, headers = dispatchSPARQLQuery(query, loader, requestArgs, acceptHeader, content, formData, requestUrl)
+    if q_type == qType['SPARQL'] or q_type == qType['JSON']:
+        resp, status, headers = dispatchSPARQLQuery(query, loader, requestArgs, acceptHeader, content, formData,
+                                                    requestUrl)
 
         if acceptHeader == 'application/json':
             projection = loader.getProjectionForQueryName(query_name)
@@ -101,9 +106,10 @@ def dispatch_query(user, repo, query_name, sha=None, content=None, requestArgs={
     else:
         return "Couldn't find a SPARQL, RDF dump, or TPF query with the requested name", 404, {}
 
+
 def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, content, formData, requestUrl):
     endpoint, auth = gquery.guess_endpoint_uri(raw_sparql_query, loader)
-    if endpoint=='':
+    if endpoint == '':
         return 'No SPARQL endpoint indicated', 407, {}
 
     glogger.debug("=====================================================")
@@ -125,9 +131,12 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
         rewritten_query = gquery.paginate_query(rewritten_query, query_metadata['pagination'], requestArgs)
 
     resp = None
+    headers = {}
+
     # If we have a mime field, we load the remote dump and query it locally
     if 'mime' in query_metadata and query_metadata['mime']:
-        glogger.debug("Detected {} MIME type, proceeding with locally loading remote dump".format(query_metadata['mime']))
+        glogger.debug(
+            "Detected {} MIME type, proceeding with locally loading remote dump".format(query_metadata['mime']))
         g = Graph()
         try:
             query_metadata = gquery.get_metadata(raw_sparql_query, endpoint)
@@ -149,12 +158,8 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
         glogger.debug("Finished processing query against RDF dump, end of use case")
         del g
 
-        return resp_string, 200, {}
-
-    headers = {
-    }
     # Check for INSERT/POST
-    if query_metadata['type'] == 'InsertData':
+    elif query_metadata['type'] == 'InsertData':
         glogger.debug("Processing INSERT query")
         # Rewrite INSERT
         rewritten_query = rewritten_query.replace("?_g_iri", "{}".format(formData.get('g')))
@@ -162,7 +167,7 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
         glogger.debug("INSERT query rewritten as {}".format(rewritten_query))
 
         # Prepare HTTP POST request
-        reqHeaders = { 'Accept' : acceptHeader, 'Content-Type' : 'application/sparql-update' }
+        reqHeaders = {'Accept': acceptHeader, 'Content-Type': 'application/sparql-update'}
         response = requests.post(endpoint, data=rewritten_query, headers=reqHeaders, auth=auth)
         glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
 
@@ -174,10 +179,10 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
     else:
         # requestedMimeType = static.mimetypes[content] if content else acceptHeader
         # result, contentType = sparql.getResponseText(endpoint, query, requestedMimeType)
-        reqHeaders = { 'Accept' : acceptHeader }
+        reqHeaders = {'Accept': acceptHeader}
         if content:
-            reqHeaders = { 'Accept' : static.mimetypes[content]}
-        data = { 'query' : rewritten_query }
+            reqHeaders = {'Accept': static.mimetypes[content]}
+        data = {'query': rewritten_query}
 
         glogger.debug('Sending HTTP request to SPARQL endpoint with params: {}'.format(data))
         glogger.debug('Sending HTTP request to SPARQL endpoint with headers: {}'.format(reqHeaders))
@@ -194,11 +199,15 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
         # Get number of total results
         count = gquery.count_query_results(rewritten_query, endpoint)
         pageArg = requestArgs.get('page', None)
-        headerLink =  pageUtils.buildPaginationHeader(count, pagination, pageArg, requestUrl)
+        headerLink = pageUtils.buildPaginationHeader(count, pagination, pageArg, requestUrl)
         headers['Link'] = headerLink
+
+    if 'proto' in query_metadata:  # sparql transformer
+        resp = SPARQLTransformer.post_process(json.loads(resp), query_metadata['proto'], query_metadata['opt'])
 
     headers['Server'] = 'grlc/' + grlc_version
     return resp, 200, headers
+
 
 def dispatchTPFQuery(raw_tpf_query, loader, acceptHeader, content):
     endpoint, auth = gquery.guess_endpoint_uri(raw_tpf_query, loader)
@@ -209,14 +218,14 @@ def dispatchTPFQuery(raw_tpf_query, loader, acceptHeader, content):
     # TODO: pagination for TPF
 
     # Preapre HTTP request
-    reqHeaders = { 'Accept' : acceptHeader , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
+    reqHeaders = {'Accept': acceptHeader, 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
     if content:
-        reqHeaders = { 'Accept' : static.mimetypes[content] , 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
+        reqHeaders = {'Accept': static.mimetypes[content], 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
     tpf_list = re.split('\n|=', raw_tpf_query)
     subject = tpf_list[tpf_list.index('subject') + 1]
     predicate = tpf_list[tpf_list.index('predicate') + 1]
     object = tpf_list[tpf_list.index('object') + 1]
-    data = { 'subject' : subject, 'predicate' : predicate, 'object' : object}
+    data = {'subject': subject, 'predicate': predicate, 'object': object}
 
     response = requests.get(endpoint, params=data, headers=reqHeaders, auth=auth)
     glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])

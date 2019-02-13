@@ -7,6 +7,7 @@ from rdflib.plugins.sparql.parser import Query, UpdateUnit
 from rdflib.plugins.sparql.processor import translateQuery
 from flask import request, has_request_context
 from pyparsing import ParseException
+import SPARQLTransformer
 import logging
 from pprint import pformat
 import traceback
@@ -18,17 +19,17 @@ import grlc.static as static
 
 glogger = logging.getLogger(__name__)
 
+
 def guess_endpoint_uri(rq, gh_repo):
-    '''
+    """
     Guesses the endpoint URI from (in this order):
     - An endpoint parameter in URL
     - An #+endpoint decorator
     - A endpoint.txt file in the repo
     Otherwise assigns a default one
-    '''
-    endpoint = static.DEFAULT_ENDPOINT
+    """
     auth = (static.DEFAULT_ENDPOINT_USER, static.DEFAULT_ENDPOINT_PASSWORD)
-    if auth == ('none','none'):
+    if auth == ('none', 'none'):
         auth = None
 
     if has_request_context() and "endpoint" in request.args:
@@ -54,18 +55,19 @@ def guess_endpoint_uri(rq, gh_repo):
             # Default
             endpoint = static.DEFAULT_ENDPOINT
             auth = (static.DEFAULT_ENDPOINT_USER, static.DEFAULT_ENDPOINT_PASSWORD)
-            if auth == ('none','none'):
+            if auth == ('none', 'none'):
                 auth = None
             glogger.warning("No endpoint specified, using default ({})".format(endpoint))
 
     return endpoint, auth
 
+
 def count_query_results(query, endpoint):
-    '''
+    """
     Returns the total number of results that query 'query' will generate
     WARNING: This is too expensive just for providing a number of result pages
              Providing a dummy count for now
-    '''
+    """
 
     # number_results_query, repl = re.subn("SELECT.*FROM", "SELECT COUNT (*) FROM", query)
     # if not repl:
@@ -88,12 +90,14 @@ def count_query_results(query, endpoint):
 
     return 1000
 
+
 def _getDictWithKey(key, dict_list):
-    '''Return the first dictionary in dict_list which contains the given key'''
+    """ Returns the first dictionary in dict_list which contains the given key"""
     for d in dict_list:
         if key in d:
             return d
     return None
+
 
 def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
     """
@@ -110,7 +114,8 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
     ## Aggregates
     internal_matcher = re.compile("__agg_\d+__")
     ## Basil-style variables
-    variable_matcher = re.compile("(?P<required>[_]{1,2})(?P<name>[^_]+)_?(?P<type>[a-zA-Z0-9]+)?_?(?P<userdefined>[a-zA-Z0-9]+)?.*$")
+    variable_matcher = re.compile(
+        "(?P<required>[_]{1,2})(?P<name>[^_]+)_?(?P<type>[a-zA-Z0-9]+)?_?(?P<userdefined>[a-zA-Z0-9]+)?.*$")
 
     parameters = {}
     for v in variables:
@@ -119,7 +124,7 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
 
         match = variable_matcher.match(v)
         # TODO: currently only one parameter per triple pattern is supported
-        if match :
+        if match:
             vname = match.group('name')
             vrequired = True if match.group('required') == '_' else False
             vtype = 'string'
@@ -133,9 +138,9 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
             mtype = match.group('type')
             muserdefined = match.group('userdefined')
 
-            if mtype in ['number','literal','string']:
+            if mtype in ['number', 'literal', 'string']:
                 vtype = mtype
-            elif mtype in ['iri']: #TODO: proper form validation of input parameter uris
+            elif mtype in ['iri']:  # TODO: proper form validation of input parameter uris
                 vtype = 'string'
                 vformat = 'iri'
             elif mtype:
@@ -143,9 +148,9 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
 
                 if mtype in static.XSD_DATATYPES:
                     vdatatype = 'xsd:{}'.format(mtype)
-                elif len(mtype) == 2 :
+                elif len(mtype) == 2:
                     vlang = mtype
-                elif muserdefined :
+                elif muserdefined:
                     vdatatype = '{}:{}'.format(mtype, muserdefined)
 
             parameters[vname] = {
@@ -171,10 +176,11 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
 
     return parameters
 
+
 def get_defaults(rq, v, metadata):
-    '''
+    """
     Returns the default value for a parameter or None
-    '''
+    """
     glogger.debug("Metadata with defaults: {}".format(metadata))
     if 'defaults' not in metadata:
         return None
@@ -183,10 +189,11 @@ def get_defaults(rq, v, metadata):
         return defaultsDict[v]
     return None
 
+
 def get_enumeration(rq, v, endpoint, metadata={}, auth=None):
-    '''
+    """
     Returns a list of enumerated values for variable 'v' in query 'rq'
-    '''
+    """
     # glogger.debug("Metadata before processing enums: {}".format(metadata))
     # We only fire the enum filling queries if indicated by the query metadata
     if 'enumerate' not in metadata:
@@ -198,17 +205,19 @@ def get_enumeration(rq, v, endpoint, metadata={}, auth=None):
         return get_enumeration_sparql(rq, v, endpoint, auth)
     return None
 
+
 def get_enumeration_sparql(rq, v, endpoint, auth=None):
-    '''
+    """
     Returns a list of enumerated values for variable 'v' in query 'rq'
-    '''
+    """
     glogger.info('Retrieving enumeration for variable {}'.format(v))
     vcodes = []
     # tpattern_matcher = re.compile(".*(FROM\s+)?(?P<gnames>.*)\s+WHERE.*[\.\{][\n\t\s]*(?P<tpattern>.*\?" + re.escape(v) + ".*?\.).*", flags=re.DOTALL)
     # tpattern_matcher = re.compile(".*?((FROM\s*)(?P<gnames>(\<.*\>)+))?\s*WHERE\s*\{(?P<tpattern>.*)\}.*", flags=re.DOTALL)
 
     # WHERE is optional too!!
-    tpattern_matcher = re.compile(".*?(FROM\s*(?P<gnames>\<.*\>+))?\s*(WHERE\s*)?\{(?P<tpattern>.*)\}.*", flags=re.DOTALL)
+    tpattern_matcher = re.compile(".*?(FROM\s*(?P<gnames>\<.*\>+))?\s*(WHERE\s*)?\{(?P<tpattern>.*)\}.*",
+                                  flags=re.DOTALL)
 
     glogger.debug(rq)
     tp_match = tpattern_matcher.match(rq)
@@ -219,12 +228,18 @@ def get_enumeration_sparql(rq, v, endpoint, auth=None):
         glogger.debug("Detected BGP: {}".format(vtpattern))
         glogger.debug("Matched triple pattern with parameter")
         if gnames:
-            codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " FROM " + gnames + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
+            codes_subquery = re.sub("SELECT.*\{.*\}.*",
+                                    "SELECT DISTINCT ?" + v + " FROM " + gnames + " WHERE { " + vtpattern + " }", rq,
+                                    flags=re.DOTALL)
         else:
-            codes_subquery = re.sub("SELECT.*\{.*\}.*", "SELECT DISTINCT ?" + v + " WHERE { " + vtpattern + " }", rq, flags=re.DOTALL)
+            codes_subquery = re.sub("SELECT.*\{.*\}.*",
+                                    "SELECT DISTINCT ?" + v + " WHERE { " + vtpattern + " }", rq,
+                                    flags=re.DOTALL)
         glogger.debug("Codes subquery: {}".format(codes_subquery))
         glogger.debug(endpoint)
-        codes_json = requests.get(endpoint, params={'query' : codes_subquery}, headers={'Accept' : static.mimetypes['json'], 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}, auth=auth).json()
+        codes_json = requests.get(endpoint, params={'query': codes_subquery},
+                                  headers={'Accept': static.mimetypes['json'],
+                                           'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}, auth=auth).json()
         for code in codes_json['results']['bindings']:
             vcodes.append(list(code.values())[0]["value"])
     else:
@@ -232,26 +247,32 @@ def get_enumeration_sparql(rq, v, endpoint, auth=None):
 
     return vcodes
 
+
 def get_yaml_decorators(rq):
-    '''
+    """
     Returns the yaml decorator metadata only (this is needed by triple pattern fragments)
-    '''
-    #glogger.debug('Guessing decorators for query {}'.format(rq))
+    """
+    # glogger.debug('Guessing decorators for query {}'.format(rq))
     if not rq:
         return None
 
-    yaml_string = "\n".join([row.lstrip('#+') for row in rq.split('\n') if row.startswith('#+')])
-    query_string = "\n".join([row for row in rq.split('\n') if not row.startswith('#+')])
+    if isinstance(rq, dict) and 'grlc' in rq:  # json query (sparql transformer
+        # TODO structured way of writing this
+        yaml_string = "\n".join([row.lstrip('#+') for row in rq['grlc'].split('\n')])
+        query_string = rq
+    else:  # classic query
+        yaml_string = "\n".join([row.lstrip('#+') for row in rq.split('\n') if row.startswith('#+')])
+        query_string = "\n".join([row for row in rq.split('\n') if not row.startswith('#+')])
 
     query_metadata = None
-    try: # Invalid YAMLs will produce empty metadata
+    try:  # Invalid YAMLs will produce empty metadata
         query_metadata = yaml.load(yaml_string)
     except yaml.scanner.ScannerError:
         glogger.warning("Query decorators could not be parsed; check your YAML syntax")
         pass
 
     # If there is no YAML string
-    if query_metadata == None:
+    if query_metadata is None:
         query_metadata = {}
     query_metadata['query'] = query_string
 
@@ -259,13 +280,21 @@ def get_yaml_decorators(rq):
 
     return query_metadata
 
+
 def get_metadata(rq, endpoint):
-    '''
+    """
     Returns the metadata 'exp' parsed from the raw query file 'rq'
     'exp' is one of: 'endpoint', 'tags', 'summary', 'request', 'pagination', 'enumerate'
-    '''
+    """
     query_metadata = get_yaml_decorators(rq)
     query_metadata['type'] = 'UNKNOWN'
+
+    if isinstance(rq, dict):  # json query (sparql transformer)
+        rq, proto, opt = SPARQLTransformer.pre_process(rq)
+        rq = rq.strip()
+        query_metadata['proto'] = proto
+        query_metadata['opt'] = opt
+        query_metadata['query'] = rq
 
     try:
         # THE PARSING
@@ -281,7 +310,8 @@ def get_metadata(rq, endpoint):
             # Parameters
             query_metadata['parameters'] = get_parameters(rq, parsed_query.algebra['_vars'], endpoint, query_metadata)
         else:
-            glogger.warning("Query type {} is currently unsupported and no metadata was parsed!".format(query_metadata['type']))
+            glogger.warning(
+                "Query type {} is currently unsupported and no metadata was parsed!".format(query_metadata['type']))
     except ParseException:
         glogger.warning("Could not parse regular SELECT, CONSTRUCT, DESCRIBE or ASK query")
         # glogger.warning(traceback.print_exc())
@@ -299,8 +329,11 @@ def get_metadata(rq, endpoint):
             glogger.info(parsed_query)
             query_metadata['type'] = parsed_query[0]['request'][0].name
             if query_metadata['type'] == 'InsertData':
-                query_metadata['parameters'] = {'g': {'datatype': None, 'enum': [], 'lang': None, 'name': 'g', 'original': '?_g_iri', 'required': True, 'type': 'iri'},
-                                                'data': {'datatype': None, 'enum': [], 'lang': None, 'name': 'data', 'original': '?_data', 'required': True, 'type': 'literal'}}
+                query_metadata['parameters'] = {
+                    'g': {'datatype': None, 'enum': [], 'lang': None, 'name': 'g', 'original': '?_g_iri',
+                          'required': True, 'type': 'iri'},
+                    'data': {'datatype': None, 'enum': [], 'lang': None, 'name': 'data', 'original': '?_data',
+                             'required': True, 'type': 'literal'}}
 
             glogger.info("Update query parsed with {}".format(query_metadata['type']))
             # if query_metadata['type'] == 'InsertData':
@@ -317,6 +350,7 @@ def get_metadata(rq, endpoint):
 
     return query_metadata
 
+
 def paginate_query(query, results_per_page, get_args):
     page = get_args.get('page', 1)
 
@@ -328,10 +362,12 @@ def paginate_query(query, results_per_page, get_args):
     glogger.debug("No limit query: " + no_limit_query)
 
     # Append LIMIT results_per_page OFFSET (page-1)*results_per_page
-    paginated_query = no_limit_query + " LIMIT {} OFFSET {}".format(results_per_page, (int(page) - 1) * results_per_page)
+    paginated_query = no_limit_query + " LIMIT {} OFFSET {}".format(results_per_page,
+                                                                    (int(page) - 1) * results_per_page)
     glogger.debug("Paginated query: " + paginated_query)
 
     return paginated_query
+
 
 def rewrite_query(query, parameters, get_args):
     glogger.debug("Query parameters")
@@ -339,7 +375,7 @@ def rewrite_query(query, parameters, get_args):
     requireXSD = False
 
     required_params = {}
-    for k,v in parameters.items():
+    for k, v in parameters.items():
         if parameters[k]['required']:
             required_params[k] = v
     requiredParams = set(required_params.keys())
@@ -353,8 +389,8 @@ def rewrite_query(query, parameters, get_args):
         # If the parameter has a value
         if v:
             # IRI
-            if p['type'] == 'iri': # TODO: never reached anymore, since iris are now type=string with format=iri
-                query = query.replace(p['original'], "{}{}{}".format('<',v,'>'))
+            if p['type'] == 'iri':  # TODO: never reached anymore, since iris are now type=string with format=iri
+                query = query.replace(p['original'], "{}{}{}".format('<', v, '>'))
             # A number (without a datatype)
             elif p['type'] == 'number':
                 query = query.replace(p['original'], v)
@@ -362,7 +398,7 @@ def rewrite_query(query, parameters, get_args):
             elif p['type'] == 'literal' or p['type'] == 'string':
                 # If it's a iri
                 if 'format' in p and p['format'] == 'iri':
-                    query = query.replace(p['original'], "{}{}{}".format('<',v,'>'))
+                    query = query.replace(p['original'], "{}{}{}".format('<', v, '>'))
                 # If there is a language tag
                 if 'lang' in p and p['lang']:
                     query = query.replace(p['original'], "\"{}\"@{}".format(v, p['lang']))
@@ -375,7 +411,7 @@ def rewrite_query(query, parameters, get_args):
 
     xsdPrefix = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
     if requireXSD and xsdPrefix not in query:
-            query = query.replace('SELECT', xsdPrefix + '\n\nSELECT')
+        query = query.replace('SELECT', xsdPrefix + '\n\nSELECT')
 
     glogger.debug("Query rewritten as: " + query)
 
