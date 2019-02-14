@@ -1,25 +1,28 @@
+import json
 import grlc.utils
-import grlc.gquery as gquery
-import grlc.pagination as pageUtils
+import gquery as gquery
+import pagination as pageUtils
 
 import traceback
 import logging
 
 glogger = logging.getLogger(__name__)
 
+
 def get_blank_spec():
-    '''Creates the base (blank) structure of swagger specification.'''
+    """Creates the base (blank) structure of swagger specification."""
     swag = {}
     swag['swagger'] = '2.0'
-    swag['schemes'] = [] # 'http' or 'https' -- leave blank to make it dependent on how UI is loaded
+    swag['schemes'] = []  # 'http' or 'https' -- leave blank to make it dependent on how UI is loaded
     swag['paths'] = {}
     swag['definitions'] = {
         'Message': {'type': 'string'}
     }
     return swag
 
+
 def get_repo_info(loader, sha, prov_g):
-    '''Generate swagger information from the repo being used.'''
+    """Generate swagger information from the repo being used."""
     user_repo = loader.getFullName()
     repo_title = loader.getRepoTitle()
     contact_name = loader.getContactName()
@@ -35,9 +38,9 @@ def get_repo_info(loader, sha, prov_g):
     next_commit = None
     version = sha if sha else commit_list[0]
     if commit_list.index(version) < len(commit_list) - 1:
-        prev_commit = commit_list[commit_list.index(version)+1]
+        prev_commit = commit_list[commit_list.index(version) + 1]
     if commit_list.index(version) > 0:
-        next_commit = commit_list[commit_list.index(version)-1]
+        next_commit = commit_list[commit_list.index(version) - 1]
 
     info = {
         'version': version,
@@ -47,7 +50,7 @@ def get_repo_info(loader, sha, prov_g):
             'url': contact_url
         },
         'license': {
-            'name' : 'License',
+            'name': 'License',
             'url': licence_url
         }
     }
@@ -57,33 +60,35 @@ def get_repo_info(loader, sha, prov_g):
 
     return prev_commit, next_commit, info, basePath
 
+
 def get_path_for_item(item):
     description = item['description']
     description += '\n\n```{}```'.format(item['query'])
-    description += '\n\nSPARQL projection:\n```pythonql\n{}```'.format(item['projection']) if 'projection' in item else ''
+    description += '\n\nSPARQL projection:\n```pythonql\n{}```'.format(
+        item['projection']) if 'projection' in item else ''
 
     item_path = {
         item['method']: {
-            'tags' : item['tags'],
-            'summary' : item['summary'],
-            'description' : description,
-            'produces' : ['text/csv', 'application/json', 'text/html'],
+            'tags': item['tags'],
+            'summary': item['summary'],
+            'description': description,
+            'produces': ['text/csv', 'application/json', 'text/html'],
             'parameters': item['params'] if 'params' in item else None,
             'responses': {
-                '200' : {
-                    'description' : 'Query response',
-                    'schema' : {
-                        'type' : 'array',
+                '200': {
+                    'description': 'Query response',
+                    'schema': {
+                        'type': 'array',
                         'items': {
                             'type': 'object',
                             'properties': item['item_properties'] if 'item_properties' in item else None
                         },
                     }
                 },
-                'default' : {
-                    'description' : 'Unexpected error',
-                    'schema' : {
-                        '$ref' : '#/definitions/Message'
+                'default': {
+                    'description': 'Unexpected error',
+                    'schema': {
+                        '$ref': '#/definitions/Message'
                     }
                 }
             }
@@ -93,8 +98,9 @@ def get_path_for_item(item):
         item_path['projection'] = item['projection']
     return item_path
 
+
 def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
-    '''Build grlc specification for the given github user / repo.'''
+    """Build grlc specification for the given github user / repo."""
     loader = grlc.utils.getLoader(user, repo, sha=sha, prov=prov)
 
     files = loader.fetchFiles()
@@ -103,21 +109,26 @@ def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
     # Fetch all .rq files
     items = []
 
+    allowed_ext = ["rq", "sparql", "json", "tpf"]
     for c in files:
-        glogger.debug('>>>>>>>>>>>>>>>>>>>>>>>>>c_name: {}'.format(c['name']))
-        if ".rq" in c['name'] or ".tpf" in c['name'] or ".sparql" in c['name']:
+        print('>>>>>>>>>>>>>>>>>>>>>>>>>c_name: {}'.format(c['name']))
+        extension = c['name'].split('.')[-1]
+        if extension in allowed_ext:
             call_name = c['name'].split('.')[0]
 
             # Retrieve extra metadata from the query decorators
             query_text = loader.getTextFor(c)
 
             item = None
-            if ".rq" in c['name'] or ".sparql" in c['name']:
+            if extension == "json":
+                query_text = json.loads(query_text)
+
+            if extension in ["rq", "sparql", "json"]:
                 glogger.debug("===================================================================")
                 glogger.debug("Processing SPARQL query: {}".format(c['name']))
                 glogger.debug("===================================================================")
                 item = process_sparql_query_text(query_text, loader, call_name, extraMetadata)
-            elif ".tpf" in c['name']:
+            elif "tpf" == extension:
                 glogger.debug("===================================================================")
                 glogger.debug("Processing TPF query: {}".format(c['name']))
                 glogger.debug("===================================================================")
@@ -161,6 +172,7 @@ def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
 
     return item
 
+
 def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
     # We get the endpoint name first, since some query metadata fields (eg enums) require it
 
@@ -202,7 +214,7 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
     if pagination:
         params.append(pageUtils.getSwaggerPaginationDef(pagination))
 
-    if query_metadata['type'] == 'SelectQuery' or query_metadata['type'] == 'ConstructQuery' or query_metadata['type'] == 'InsertData':
+    if query_metadata['type'] in ['SelectQuery', 'ConstructQuery', 'InsertData']:
         # TODO: do something intelligent with the parameters!
         # As per #3, prefetching IRIs via SPARQL and filling enum
         parameters = query_metadata['parameters']
@@ -213,12 +225,15 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
             param['type'] = p['type']
             param['required'] = p['required']
             param['in'] = "query"
-            param['description'] = "A value of type {} that will substitute {} in the original query".format(p['type'], p['original'])
+            param['description'] = "A value of type {} that will substitute {} in the original query".format(p['type'],
+                                                                                                             p['original'])
             if 'lang' in p:
-                param['description'] = "A value of type {}@{} that will substitute {} in the original query".format(p['type'], p['lang'], p['original'])
+                param['description'] = "A value of type {}@{} that will substitute {} in the original query".format(
+                    p['type'], p['lang'], p['original'])
             if 'format' in p:
                 param['format'] = p['format']
-                param['description'] = "A value of type {} ({}) that will substitute {} in the original query".format(p['type'], p['format'], p['original'])
+                param['description'] = "A value of type {} ({}) that will substitute {} in the original query".format(
+                    p['type'], p['format'], p['original'])
             if 'enum' in p:
                 param['enum'] = p['enum']
             if 'default' in p:
@@ -272,9 +287,11 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
         glogger.warning("Query of type {} is currently unsupported! Skipping".format(query_metadata['type']))
 
     # Finally: main structure of the callname spec
-    item = packItem('/' + call_name, method, tags, summary, description, params, query_metadata, extraMetadata, projection)
+    item = packItem('/' + call_name, method, tags, summary, description, params, query_metadata, extraMetadata,
+                    projection)
 
     return item
+
 
 def packItem(call_name, method, tags, summary, description, params, query_metadata, extraMetadata, projection=None):
     item = {
@@ -284,12 +301,12 @@ def packItem(call_name, method, tags, summary, description, params, query_metada
         'summary': summary,
         'description': description,
         'params': params,
-        'item_properties': None, # From projection variables, only SelectQuery
+        'item_properties': None,  # From projection variables, only SelectQuery
         'query': query_metadata['query']
     }
 
     if projection:
-        item['projection'] = projection # SPARQL projection PyQL file is available
+        item['projection'] = projection  # SPARQL projection PyQL file is available
 
     for extraField in extraMetadata:
         if extraField in query_metadata:

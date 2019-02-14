@@ -19,6 +19,8 @@ import grlc.static as static
 
 glogger = logging.getLogger(__name__)
 
+XSD_PREFIX = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
+
 
 def guess_endpoint_uri(rq, gh_repo):
     """
@@ -288,6 +290,7 @@ def get_metadata(rq, endpoint):
     """
     query_metadata = get_yaml_decorators(rq)
     query_metadata['type'] = 'UNKNOWN'
+    query_metadata['original_query'] = rq
 
     if isinstance(rq, dict):  # json query (sparql transformer)
         rq, proto, opt = SPARQLTransformer.pre_process(rq)
@@ -312,7 +315,8 @@ def get_metadata(rq, endpoint):
         else:
             glogger.warning(
                 "Query type {} is currently unsupported and no metadata was parsed!".format(query_metadata['type']))
-    except ParseException:
+    except ParseException as pe:
+        glogger.warning(pe)
         glogger.warning("Could not parse regular SELECT, CONSTRUCT, DESCRIBE or ASK query")
         # glogger.warning(traceback.print_exc())
 
@@ -387,31 +391,50 @@ def rewrite_query(query, parameters, get_args):
         # Get the parameter value from the GET request
         v = get_args.get(pname, None)
         # If the parameter has a value
-        if v:
-            # IRI
-            if p['type'] == 'iri':  # TODO: never reached anymore, since iris are now type=string with format=iri
-                query = query.replace(p['original'], "{}{}{}".format('<', v, '>'))
-            # A number (without a datatype)
-            elif p['type'] == 'number':
-                query = query.replace(p['original'], v)
-            # Literals
-            elif p['type'] == 'literal' or p['type'] == 'string':
-                # If it's a iri
-                if 'format' in p and p['format'] == 'iri':
-                    query = query.replace(p['original'], "{}{}{}".format('<', v, '>'))
-                # If there is a language tag
-                if 'lang' in p and p['lang']:
-                    query = query.replace(p['original'], "\"{}\"@{}".format(v, p['lang']))
-                elif 'datatype' in p and p['datatype']:
-                    query = query.replace(p['original'], "\"{}\"^^{}".format(v, p['datatype']))
-                    if 'xsd' in p['datatype']:
-                        requireXSD = True
-                else:
-                    query = query.replace(p['original'], "\"{}\"".format(v))
+        if not v:
+            continue
 
-    xsdPrefix = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
-    if requireXSD and xsdPrefix not in query:
-        query = query.replace('SELECT', xsdPrefix + '\n\nSELECT')
+        if isinstance(query, dict):  # json query (sparql transformer)
+            if '$values' not in query:
+                query['$values'] = {}
+            values = query['$values']
+
+            if not p['original'] in values:
+                values[p['original']] = v
+            elif isinstance(values[p['original']], list):
+                values[p['original']].append(v)
+            else:
+                values[p['original']] = [values[p['original']], v]
+
+            continue
+
+        # IRI
+        if p['type'] == 'iri':  # TODO: never reached anymore, since iris are now type=string with format=iri
+            query = query.replace(p['original'], "{}{}{}".format('<', v, '>'))
+        # A number (without a datatype)
+        elif p['type'] == 'number':
+            query = query.replace(p['original'], v)
+        # Literals
+        elif p['type'] == 'literal' or p['type'] == 'string':
+            # If it's a iri
+            if 'format' in p and p['format'] == 'iri':
+                query = query.replace(p['original'], "{}{}{}".format('<', v, '>'))
+            # If there is a language tag
+            if 'lang' in p and p['lang']:
+                query = query.replace(p['original'], "\"{}\"@{}".format(v, p['lang']))
+            elif 'datatype' in p and p['datatype']:
+                query = query.replace(p['original'], "\"{}\"^^{}".format(v, p['datatype']))
+                if 'xsd' in p['datatype']:
+                    requireXSD = True
+            else:
+                query = query.replace(p['original'], "\"{}\"".format(v))
+
+    if isinstance(query, dict):  # json query (sparql transformer)
+        rq, proto, opt = SPARQLTransformer.pre_process(query)
+        query = rq.strip()
+
+    if requireXSD and XSD_PREFIX not in query:
+        query = query.replace('SELECT', XSD_PREFIX + '\n\nSELECT')
 
     glogger.debug("Query rewritten as: " + query)
 

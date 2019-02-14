@@ -58,7 +58,7 @@ def build_swagger_spec(user, repo, sha, serverName):
         # If repo does not exits
         swag['info'] = {
             'title': 'ERROR!',
-            'description': e.message
+            'description': str(e)
         }
         swag['paths'] = {}
         return swag
@@ -118,13 +118,14 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
 
     query_metadata = gquery.get_metadata(raw_sparql_query, endpoint)
 
+    acceptHeader = 'application/json' if isinstance(raw_sparql_query, dict) else acceptHeader
     pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
 
     rewritten_query = query_metadata['query']
 
     # Rewrite query using parameter values
     if query_metadata['type'] == 'SelectQuery' or query_metadata['type'] == 'ConstructQuery':
-        rewritten_query = gquery.rewrite_query(query_metadata['query'], query_metadata['parameters'], requestArgs)
+        rewritten_query = gquery.rewrite_query(query_metadata['original_query'], query_metadata['parameters'], requestArgs)
 
     # Rewrite query using pagination
     if query_metadata['type'] == 'SelectQuery' and 'pagination' in query_metadata:
