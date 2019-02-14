@@ -1,5 +1,5 @@
 import json
-import grlc.utils
+import grlc.utils as utils
 import gquery as gquery
 import pagination as pageUtils
 
@@ -62,8 +62,13 @@ def get_repo_info(loader, sha, prov_g):
 
 
 def get_path_for_item(item):
+    query = item['original_query']
+    if isinstance(query, dict):
+        del query['grlc']
+        query = "\n" + json.dumps(query, indent=2) + "\n"
+
     description = item['description']
-    description += '\n\n```{}```'.format(item['query'])
+    description += '\n\n```{}```'.format(query)
     description += '\n\nSPARQL projection:\n```pythonql\n{}```'.format(
         item['projection']) if 'projection' in item else ''
 
@@ -101,7 +106,7 @@ def get_path_for_item(item):
 
 def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
     """Build grlc specification for the given github user / repo."""
-    loader = grlc.utils.getLoader(user, repo, sha=sha, prov=prov)
+    loader = utils.getLoader(user, repo, sha=sha, prov=prov)
 
     files = loader.fetchFiles()
     raw_repo_uri = loader.getRawRepoUri()
@@ -111,7 +116,7 @@ def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
 
     allowed_ext = ["rq", "sparql", "json", "tpf"]
     for c in files:
-        print('>>>>>>>>>>>>>>>>>>>>>>>>>c_name: {}'.format(c['name']))
+        glogger.debug('>>>>>>>>>>>>>>>>>>>>>>>>>c_name: {}'.format(c['name']))
         extension = c['name'].split('.')[-1]
         if extension in allowed_ext:
             call_name = c['name'].split('.')[0]
@@ -226,7 +231,8 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
             param['required'] = p['required']
             param['in'] = "query"
             param['description'] = "A value of type {} that will substitute {} in the original query".format(p['type'],
-                                                                                                             p['original'])
+                                                                                                             p[
+                                                                                                                 'original'])
             if 'lang' in p:
                 param['description'] = "A value of type {}@{} that will substitute {} in the original query".format(
                     p['type'], p['lang'], p['original'])
@@ -302,7 +308,8 @@ def packItem(call_name, method, tags, summary, description, params, query_metada
         'description': description,
         'params': params,
         'item_properties': None,  # From projection variables, only SelectQuery
-        'query': query_metadata['query']
+        'query': query_metadata['query'],
+        'original_query': query_metadata.get('original_query', query_metadata['query'])
     }
 
     if projection:
