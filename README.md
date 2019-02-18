@@ -47,7 +47,7 @@ docker-compose -f docker-compose.default.yml up
 
 To run directly from Docker Hub it is sufficient to do:
 ```
-docker run --rm -p 8088:80 -e GRLC_SERVER_NAME=grlc.io -e GRLC_GITHUB_ACCESS_TOKEN=xxx -e DEBUG=true claria/grlc
+docker run --rm -p 8088:80 -e GRLC_SERVER_NAME=grlc.io -e GRLC_GITHUB_ACCESS_TOKEN=xxx -e DEBUG=true clariah/grlc
 ```
 
 (You can omit the first two commands if you just copy [this file](docker-compose.default.yml) somehwere in your filesystem)
