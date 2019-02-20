@@ -45,6 +45,11 @@ docker pull clariah/grlc
 docker-compose -f docker-compose.default.yml up
 </pre>
 
+To run directly from Docker Hub it is sufficient to do:
+```
+docker run --rm -p 8088:80 -e GRLC_SERVER_NAME=grlc.io -e GRLC_GITHUB_ACCESS_TOKEN=xxx -e DEBUG=true claria/grlc
+```
+
 (You can omit the first two commands if you just copy [this file](docker-compose.default.yml) somehwere in your filesystem)
 If you use the supplied `docker-compose.default.yml` your grlc instance will be available at http://localhost:8001
 
@@ -115,7 +120,7 @@ Check these out:
 You'll find the sources of these and many more in [GitHub](https://github.com/search?o=desc&q=endpoint+summary+language%3ASPARQL&s=indexed&type=Code&utf8=%E2%9C%93)
 
 ## Decorator syntax
-A couple of SPARQL comment embedded decorators are available to make your swagger-ui look nicer (note all comments start with <code>#+ </code>):
+A couple of SPARQL comment embedded decorators are available to make your swagger-ui look nicer (note all comments start with <code>#+ </code> and the use of `':'` is restricted to list-representations and cannot be used in the summary text):
 
 - To specify a query-specific endpoint, <code>#+ endpoint: http://example.com/sparql</code>.
 - To indicate the HTTP request method, <code>#+ method: GET</code>.
