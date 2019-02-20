@@ -19,19 +19,16 @@ passwd -d ${GRLC_USER}
 cd ${GRLC_INSTALL_DIR}
 chown ${GRLC_USER}:${GRLC_USER} ${GRLC_HOME} -R
 
-pip install -r requirements.txt
+pip install --upgrade pip
 pip install .
 
 npm install git2prov
-
-
 
 #move nginx logs to ${GITLAB_LOG_DIR}/nginx
 sed -i \
  -e "s|access_log /var/log/nginx/access.log;|access_log ${GRLC_LOG_DIR}/nginx/access.log;|" \
  -e "s|error_log /var/log/nginx/error.log;|error_log ${GRLC_LOG_DIR}/nginx/error.log;|" \
  /etc/nginx/nginx.conf
-
 
  # configure gitlab log rotation
  cat > /etc/logrotate.d/grlc << EOF
