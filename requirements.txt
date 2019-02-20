@@ -1,7 +1,7 @@
 Flask==1.0.2
 Flask-Cors==3.0.6
-gevent==1.1.2
-greenlet==0.4.10
+gevent==1.4.0
+greenlet==0.4.15
 html5lib==1.0.1
 isodate==0.5.4
 itsdangerous==1.1.0
