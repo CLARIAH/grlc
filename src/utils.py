@@ -56,7 +56,7 @@ def build_swagger_spec(user, repo, sha, serverName):
         # If repo does not exits
         swag['info'] = {
             'title': 'ERROR!',
-            'description': e.message
+            'description': str(e)
         }
         swag['paths'] = {}
         return swag
