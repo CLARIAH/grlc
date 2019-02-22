@@ -283,6 +283,12 @@ def get_yaml_decorators(rq):
     return query_metadata
 
 
+def enable_custom_function_prefix(rq, prefix):
+    if ' %s:' % prefix in rq or '(%s:' % prefix in rq and not 'PREFIX %s:' % prefix in rq:
+        rq = 'PREFIX %s: <:%s>\n' % (prefix, prefix) + rq
+    return rq
+
+
 def get_metadata(rq, endpoint):
     """
     Returns the metadata 'exp' parsed from the raw query file 'rq'
@@ -298,6 +304,9 @@ def get_metadata(rq, endpoint):
         query_metadata['proto'] = proto
         query_metadata['opt'] = opt
         query_metadata['query'] = rq
+
+    rq = enable_custom_function_prefix(rq, 'bif')
+    rq = enable_custom_function_prefix(rq, 'sql')
 
     try:
         # THE PARSING
