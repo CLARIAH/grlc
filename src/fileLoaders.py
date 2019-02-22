@@ -117,7 +117,7 @@ class LocalLoader(BaseLoader):
     def fetchFiles(self):
         '''Returns a list of file items contained on the local repo.'''
         print("Fetching files from {}".format(self.baseDir))
-        files = glob(self.baseDir + '*')
+        files = glob(path.join(self.baseDir, '*'))
         filesDef = []
         for f in files:
             print("Found SPARQL file {}".format(f))
