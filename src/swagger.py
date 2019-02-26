@@ -1,7 +1,7 @@
 import json
 import grlc.utils as utils
-import gquery as gquery
-import pagination as pageUtils
+import grlc.gquery as gquery
+import grlc.pagination as pageUtils
 
 import traceback
 import logging
