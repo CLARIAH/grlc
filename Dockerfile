@@ -1,4 +1,4 @@
-FROM python:2.7.12
+FROM python:3.6
 MAINTAINER albert.merono@vu.nl
 
 ENV GRLC_USER="grlc" \

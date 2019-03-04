@@ -22,17 +22,18 @@ For a quick usage tutorial check out our wiki walkthrough [here](https://github.
 
 - Request parameter mappings into SPARQL: grlc is compliant with [BASIL's convention](https://github.com/the-open-university/basil/wiki/SPARQL-variable-name-convention-for-WEB-API-parameters-mapping) on how to map GET/POST request parameters into SPARQL
 - Automatic, user customizable population of parameter values in swagger-ui's dropdown menus via SPARQL triple pattern querying
-- **[NEW]** Parameter values as enumeartions (i.e. closed lists of values that will fill a dropdown in the UI) can now also be specified in the query decorators to save endpoint requests (see [this example](https://github.com/albertmeronyo/lodapi/blob/master/houseType_params.rq))
-- **[NEW]** Parameter default values can now also be indicated through decorators (see [this example](https://github.com/albertmeronyo/lodapi/blob/master/dbpedia_test.rq))
+- Parameter values as enumerations (i.e. closed lists of values that will fill a dropdown in the UI) can now also be specified in the query decorators to save endpoint requests (see [this example](https://github.com/albertmeronyo/lodapi/blob/master/houseType_params.rq))
+- Parameter default values can now also be indicated through decorators (see [this example](https://github.com/albertmeronyo/lodapi/blob/master/dbpedia_test.rq))
 - URL-based content negotiation: you can request for specific content types by attaching them to the operation request URL, e.g. [http://localhost:8088/CEDAR-project/Queries/residenceStatus_all.csv](http://localhost:8088/CEDAR-project/Queries/residenceStatus_all.csv) will request for results in CSV
 - Pagination of API results, as per the `pagination` decorator and [GitHub's API Pagination Traversal](https://developer.github.com/guides/traversing-with-pagination/)
 - Docker images in Docker Hub for easy deployment
 - Compatibility with [Linked Data Fragments](http://linkeddatafragments.org/) servers, RDF dumps, and HTML+RDFa files
+- **[NEW]** grlc integrates now [SPARQLTransformer](https://github.com/D2KLab/py-sparql-transformer), allowing the use of queries in JSON (see [this example](https://github.com/albertmeronyo/lodapi/blob/master/dbpedia_test_json.json)).
 - Generation of provenance in [PROV](https://www.w3.org/TR/prov-primer/) of both the repo history (via [Git2PROV](https://github.com/IDLabResearch/Git2PROV)) and grlc's activity additions
 - Commit-based API versioning that's coherent with the repo versioning with git hashes
-- **[NEW]** SPARQL endpoint address can be set at the query level, repository level, and now also as a query **parameter**. This makes your APIs endpoint agnostic, and enables for generic and  transposable queries!
-- **[NEW]** CONSTRUCT queries are now mapped automatically to GET requests, accept parameters in the WHERE clause, and return content in ``text/turtle`` or ``application/ld+json``
-- **[NEW]** INSERT DATA queries are now mapped automatically to POST requests. Support is limited to queries with no WHERE clause, and parameters are always expected to be values for ``g`` (named graph where to insert the data) and ``data`` (with the triples to insert, in ``ntriples`` format). The INSERT query pattern is so far static, as defined in [static.py](https://github.com/CLARIAH/grlc/blob/master/src/static.py#L61). Only tested with Virtuoso.
+- SPARQL endpoint address can be set at the query level, repository level, and now also as a query **parameter**. This makes your APIs endpoint agnostic, and enables for generic and transposable queries!
+- CONSTRUCT queries are now mapped automatically to GET requests, accept parameters in the WHERE clause, and return content in ``text/turtle`` or ``application/ld+json``
+- INSERT DATA queries are now mapped automatically to POST requests. Support is limited to queries with no WHERE clause, and parameters are always expected to be values for ``g`` (named graph where to insert the data) and ``data`` (with the triples to insert, in ``ntriples`` format). The INSERT query pattern is so far static, as defined in [static.py](https://github.com/CLARIAH/grlc/blob/master/src/static.py#L61). Only tested with Virtuoso.
 
 ## Install and run
 

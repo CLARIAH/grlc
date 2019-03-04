@@ -1,10 +1,12 @@
 import grlc.static as static
 from grlc.queryTypes import qType
 
+import json
 import requests
 from os import path
 from glob import glob
 from github import Github
+
 
 class BaseLoader:
     def getTextForName(self, query_name):
@@ -12,32 +14,37 @@ class BaseLoader:
         rq_name = query_name + '.rq'
         sparql_name = query_name + '.sparql'
         tpf_name = query_name + '.tpf'
+        json_name = query_name + '.json'
         candidates = [
             (rq_name, qType['SPARQL']),
             (sparql_name, qType['SPARQL']),
-            (tpf_name, qType['TPF'])
+            (tpf_name, qType['TPF']),
+            (json_name, qType['JSON'])
         ]
 
         for queryFullName, queryType in candidates:
             queryText = self._getText(queryFullName)
             if queryText:
+                if (queryType == qType['JSON']):
+                    queryText = json.loads(queryText)
                 return queryText, queryType
         # No query found...
         return '', None
 
     def getProjectionForQueryName(self, query_name):
-        ''' TODO: DOCUMENT !!
+        """ TODO: DOCUMENT !!
         Returns None if no such projection exists
-        '''
+        """
         projectionFileName = query_name + '.pyql'
         projectionText = self._getText(projectionFileName)
         return projectionText
 
     def getLicenceURL(self):
         for f in self.fetchFiles():
-            if f['name'].lower()=='license' or f['name'].lower()=='licence':
+            if f['name'].lower() == 'license' or f['name'].lower() == 'licence':
                 return f['download_url']
         return None
+
 
 class GithubLoader(BaseLoader):
     def __init__(self, user, repo, sha, prov):
@@ -54,10 +61,11 @@ class GithubLoader(BaseLoader):
     def fetchFiles(self):
         api_repo_content_uri = static.GITHUB_API_BASE_URL + self.user + '/' + self.repo + '/contents'
         params = {
-            'ref' : 'master' if self.sha is None else self.sha
+            'ref': 'master' if self.sha is None else self.sha
         }
         # TODO: use Github instead of requests ?
-        resp = requests.get(api_repo_content_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}, params=params)
+        resp = requests.get(api_repo_content_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)},
+                            params=params)
         if resp.ok:
             return resp.json()
         else:
@@ -98,7 +106,7 @@ class GithubLoader(BaseLoader):
         return self.gh_repo.owner.html_url
 
     def getCommitList(self):
-        return [ c.sha for c in self.gh_repo.get_commits() ]
+        return [c.sha for c in self.gh_repo.get_commits()]
 
     def getFullName(self):
         return self.gh_repo.full_name
@@ -112,7 +120,7 @@ class LocalLoader(BaseLoader):
         self.baseDir = baseDir
 
     def fetchFiles(self):
-        '''Returns a list of file items contained on the local repo.'''
+        """Returns a list of file items contained on the local repo."""
         print("Fetching files from {}".format(self.baseDir))
         files = glob(self.baseDir + '*')
         filesDef = []
@@ -120,26 +128,26 @@ class LocalLoader(BaseLoader):
             print("Found SPARQL file {}".format(f))
             relative = f.replace(self.baseDir, '')
             filesDef.append({
-                    'download_url': relative,
-                    'name': relative
-                })
+                'download_url': relative,
+                'name': relative
+            })
         return filesDef
 
     def getRawRepoUri(self):
-        '''Returns the root url of the local repo.'''
+        """Returns the root url of the local repo."""
         return ''
 
     def getTextFor(self, fileItem):
-        '''Returns the contents of the given file item on the local repo.'''
+        """Returns the contents of the given file item on the local repo."""
         return self._getText(fileItem['download_url'])
 
     def _getText(self, filename):
         targetFile = self.baseDir + filename
         if path.exists(targetFile):
-            f = open(targetFile, 'r')
-            lines = f.readlines()
-            text = ''.join(lines)
-            return text
+            with open(targetFile, 'r') as f:
+                lines = f.readlines()
+                text = ''.join(lines)
+                return text
         else:
             return None
 
@@ -153,7 +161,7 @@ class LocalLoader(BaseLoader):
         return ''
 
     def getCommitList(self):
-        return [ 'local' ]
+        return ['local']
 
     def getFullName(self):
         return 'local/local'

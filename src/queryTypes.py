@@ -1,4 +1,5 @@
 qType = {
     'SPARQL': 'sparql',
-    'TPF': 'tpf'
+    'TPF': 'tpf',
+    'JSON': 'json'
 }
