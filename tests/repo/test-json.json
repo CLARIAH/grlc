@@ -11,5 +11,16 @@
     "dbo": "http://dbpedia.org/ontology/"
   },
   "$limit": 100,
-  "grlc": "#+ summary: Testing DBpedia endpoint\n#+ endpoint: http://dbpedia.org/sparql\n#+ tags:\n#+   - dbpedia\n#+ method: GET\n#+ pagination: 50\n#+ defaults:\n#+   - type: http://dbpedia.org/ontology/Band"
+  "grlc": {
+    "summary": "Testing DBpedia endpoint",
+    "endpoint": "http://dbpedia.org/sparql",
+    "tags": [
+      "dbpedia"
+    ],
+    "method": "GET",
+    "pagination": 50,
+    "defaults": {
+      "type": "http://dbpedia.org/ontology/Band"
+    }
+  }
 }

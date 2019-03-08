@@ -3,6 +3,7 @@
 # gquery.py: functions that deal with / transform SPARQL queries in grlc
 
 import yaml
+import json
 from rdflib.plugins.sparql.parser import Query, UpdateUnit
 from rdflib.plugins.sparql.processor import translateQuery
 from flask import request, has_request_context
@@ -258,20 +259,24 @@ def get_yaml_decorators(rq):
     if not rq:
         return None
 
-    if isinstance(rq, dict) and 'grlc' in rq:  # json query (sparql transformer
-        # TODO structured way of writing this
-        yaml_string = "\n".join([row.lstrip('#+') for row in rq['grlc'].split('\n')])
+    if isinstance(rq, dict) and 'grlc' in rq:  # json query (sparql transformer)
+        yaml_string = rq['grlc']
         query_string = rq
     else:  # classic query
         yaml_string = "\n".join([row.lstrip('#+') for row in rq.split('\n') if row.startswith('#+')])
         query_string = "\n".join([row for row in rq.split('\n') if not row.startswith('#+')])
 
     query_metadata = None
-    try:  # Invalid YAMLs will produce empty metadata
-        query_metadata = yaml.load(yaml_string)
-    except yaml.scanner.ScannerError:
-        glogger.warning("Query decorators could not be parsed; check your YAML syntax")
-        pass
+    if type(yaml_string) == dict:
+        query_metadata = yaml_string
+    elif type(yaml_string) == str:
+        try:  # Invalid YAMLs will produce empty metadata
+            query_metadata = yaml.load(yaml_string)
+        except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
+            try:
+                query_metadata = json.loads(yaml_string)
+            except json.JSONDecodeError:
+                glogger.warning("Query decorators could not be parsed; check your YAML syntax")
 
     # If there is no YAML string
     if query_metadata is None:

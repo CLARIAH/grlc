@@ -4,9 +4,8 @@ import rdflib
 from mock import patch, Mock
 
 from grlc.fileLoaders import LocalLoader
-from grlc import gquery
+import grlc.gquery as gquery
 import grlc.utils as utils
-from SPARQLTransformer import sparqlTransformer
 
 from flask import Flask
 
@@ -93,6 +92,25 @@ class TestGQuery(unittest.TestCase):
 
     def test_get_yaml_decorators(self):
         rq, _ = self.loader.getTextForName('test-sparql')
+
+        decorators = gquery.get_yaml_decorators(rq)
+
+        # Query always exist -- the rest must be present on the file.
+        self.assertIn('query', decorators, 'Should have a query field')
+        self.assertIn('summary', decorators, 'Should have a summary field')
+        self.assertIn('pagination', decorators,
+                      'Should have a pagination field')
+        self.assertIn('enumerate', decorators, 'Should have a enumerate field')
+
+        self.assertIsInstance(
+            decorators['summary'], six.string_types, 'Summary should be text')
+        self.assertIsInstance(
+            decorators['pagination'], int, 'Pagination should be numeric')
+        self.assertIsInstance(
+            decorators['enumerate'], list, 'Enumerate should be a list')
+
+    def test_get_json_decorators(self):
+        rq, _ = self.loader.getTextForName('test-sparql-jsonconf')
 
         decorators = gquery.get_yaml_decorators(rq)
 
