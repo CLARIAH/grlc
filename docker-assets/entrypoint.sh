@@ -22,7 +22,8 @@ case ${1} in
         sed -i "s/xxx/${GRLC_GITHUB_ACCESS_TOKEN}/" config.ini
         # configure grlc server name
         sed -i "s/grlc.io/${GRLC_SERVER_NAME}/" config.ini
-
+        # configure default sparql endpoint
+        sed -i "s|http://dbpedia.org/sparql|${GRLC_SPARQL_ENDPOINT}|" config.ini
 
         gunicorn -c gunicorn_config.py src.server:app
         # migrate_database

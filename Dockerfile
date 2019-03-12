@@ -1,5 +1,14 @@
-FROM python:2.7.12
+FROM python:3.6.8
 MAINTAINER albert.merono@vu.nl
+
+# Default values for env variables
+ARG GRLC_GITHUB_ACCESS_TOKEN=
+ARG GRLC_SERVER_NAME=grlc.io
+ARG GRLC_SPARQL_ENDPOINT=http://dbpedia.org/sparql
+
+ENV GRLC_GITHUB_ACCESS_TOKEN=$GRLC_GITHUB_ACCESS_TOKEN \
+    GRLC_SERVER_NAME=$GRLC_SERVER_NAME \
+    GRLC_SPARQL_ENDPOINT=$GRLC_SPARQL_ENDPOINT
 
 ENV GRLC_USER="grlc" \
     GRLC_HOME="/home/grlc" \
@@ -13,11 +22,14 @@ ENV GRLC_INSTALL_DIR="${GRLC_HOME}/grlc" \
     GRLC_RUNTIME_DIR="${GRLC_CACHE_DIR}/runtime"
 
 RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y nginx git-core logrotate python-pip locales gettext-base sudo npm nodejs-legacy\
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y nginx git-core logrotate python-pip locales gettext-base sudo build-essential apt-utils \
  && update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX \
  && locale-gen en_US.UTF-8 \
  && DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales \
  && rm -rf /var/lib/apt/lists/*
+
+RUN curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+RUN apt-get update && apt-get install -y nodejs
 
 COPY ./ ${GRLC_INSTALL_DIR}
 
