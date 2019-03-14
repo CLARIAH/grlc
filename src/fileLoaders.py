@@ -6,6 +6,7 @@ import requests
 from os import path
 from glob import glob
 from github import Github
+from github.GithubException import BadCredentialsException
 
 
 class BaseLoader:
@@ -55,7 +56,9 @@ class GithubLoader(BaseLoader):
         gh = Github(static.ACCESS_TOKEN)
         try:
             self.gh_repo = gh.get_repo(user + '/' + repo, lazy=False)
-        except:
+        except BadCredentialsException:
+            raise Exception('BadCredentials: have you set up github_access_token on config.ini ?')
+        except Exception as e:
             raise Exception('Repo not found: ' + user + '/' + repo)
 
     def fetchFiles(self):
@@ -122,7 +125,7 @@ class LocalLoader(BaseLoader):
     def fetchFiles(self):
         """Returns a list of file items contained on the local repo."""
         print("Fetching files from {}".format(self.baseDir))
-        files = glob(self.baseDir + '*')
+        files = glob(path.join(self.baseDir, '*'))
         filesDef = []
         for f in files:
             print("Found SPARQL file {}".format(f))

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/home/amp/src/grlc/bin/python2
 
 from grlc.server import app as grlc_app
 from grlc import static

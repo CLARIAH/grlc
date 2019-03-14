@@ -22,6 +22,7 @@ glogger = logging.getLogger(__name__)
 def turtleize(swag):
     """ Transforms a JSON swag object into a text/turtle LDA equivalent representation """
     swag_graph = Graph()
+    # TODO: load swag data onto graph
 
     return swag_graph.serialize(format='turtle')
 

@@ -66,6 +66,7 @@ setup_nginx() {
 
   rm -f /etc/nginx/sites-enabled/default
   mkdir -p ${GRLC_LOG_DIR}/nginx
+  nginx -t
   service nginx restart
 }
 
