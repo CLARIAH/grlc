@@ -3,8 +3,9 @@
 import unittest
 from mock import patch
 
-import grlc.utils # BUG: grlc.swagger will not import without this import first
+import grlc.utils  # BUG: grlc.swagger will not import without this import first
 from grlc.swagger import build_spec
+
 
 def mock_process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
     mockItem = {
@@ -13,6 +14,7 @@ def mock_process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMet
     }
     return mockItem
 
+
 filesInRepo = [
     {
         u'name': u'fakeFile1.rq',
@@ -20,9 +22,10 @@ filesInRepo = [
     }
 ]
 
+
 class TestSwagger(unittest.TestCase):
-    @patch('github.Github.get_repo')             # Corresponding patch object: mockGithubRepo
-    @patch('grlc.utils.GithubLoader.fetchFiles') # Corresponding patch object: mockLoaderFiles
+    @patch('github.Github.get_repo')  # Corresponding patch object: mockGithubRepo
+    @patch('grlc.utils.GithubLoader.fetchFiles')  # Corresponding patch object: mockLoaderFiles
     @patch('grlc.swagger.process_sparql_query_text', side_effect=mock_process_sparql_query_text)
     def test_github(self, mockQueryText, mockLoaderFiles, mockGithubRepo):
         mockLoaderFiles.return_value = filesInRepo
@@ -32,7 +35,8 @@ class TestSwagger(unittest.TestCase):
         repo = 'testrepo'
         spec = build_spec(user, repo)
 
-        self.assertEquals(len(spec), len(filesInRepo))
+        self.assertEqual(len(spec), len(filesInRepo))
+
 
 if __name__ == '__main__':
     unittest.main()
