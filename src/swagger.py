@@ -1,5 +1,5 @@
 import json
-import grlc.utils as utils
+import grlc.utils
 import grlc.gquery as gquery
 import grlc.pagination as pageUtils
 
@@ -106,7 +106,7 @@ def get_path_for_item(item):
 
 def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
     """Build grlc specification for the given github user / repo."""
-    loader = utils.getLoader(user, repo, sha=sha, prov=prov)
+    loader = grlc.utils.getLoader(user, repo, sha=sha, prov=prov)
 
     files = loader.fetchFiles()
     raw_repo_uri = loader.getRawRepoUri()
