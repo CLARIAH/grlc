@@ -59,6 +59,7 @@ class GithubLoader(BaseLoader):
         except BadCredentialsException:
             raise Exception('BadCredentials: have you set up github_access_token on config.ini ?')
         except Exception as e:
+            print(e)
             raise Exception('Repo not found: ' + user + '/' + repo)
 
     def fetchFiles(self):

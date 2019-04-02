@@ -96,6 +96,10 @@ def count_query_results(query, endpoint):
 
 def _getDictWithKey(key, dict_list):
     """ Returns the first dictionary in dict_list which contains the given key"""
+
+    if key in dict_list:
+        return dict_list
+
     for d in dict_list:
         if key in d:
             return d

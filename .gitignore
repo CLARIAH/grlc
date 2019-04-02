@@ -20,3 +20,6 @@ bin/
 share/
 .idea
 .pytest_cache
+__pycache__/
+
+config.ini
