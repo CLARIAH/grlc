@@ -1,0 +1,26 @@
+{
+  "proto": {
+    "id": "?id",
+    "class": "$rdf:type$required$var:?class",
+    "label": "$rdfs:label$required",
+    "o": "?o"
+  },
+  "$prefixes": {
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "dbo": "http://dbpedia.org/ontology/"
+  },
+  "$limit": 100,
+  "grlc": {
+    "summary": "Testing DBpedia endpoint",
+    "endpoint": "http://dbpedia.org/sparql",
+    "tags": [
+      "dbpedia"
+    ],
+    "method": "GET",
+    "pagination": 50,
+    "defaults": {
+      "type": "http://dbpedia.org/ontology/Band"
+    }
+  }
+}

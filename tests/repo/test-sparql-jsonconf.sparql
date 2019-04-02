@@ -1,0 +1,18 @@
+#+ {
+#+  "summary": "Different types of annotations Adding extra text Just because summaries can be long.",
+#+  "tags": [
+#+    "firstTag",
+#+    "secondTag"
+#+  ],
+#+  "endpoint": "http://example.com/sparql",
+#+  "method": "GET",
+#+  "pagination": 100,
+#+  "enumerate": [
+#+    "var1",
+#+    "var2"
+#+  ]
+#+ }
+SELECT * 
+WHERE {
+    ?s ?p ?o
+}
