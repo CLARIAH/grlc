@@ -112,15 +112,17 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
         ?__name The parameter name is optional.
         ?_name_iri The variable is substituted with the parameter value as a IRI (also: number or literal).
         ?_name_en The parameter value is considered as literal with the language 'en' (e.g., en,it,es, etc.).
-        ?_name_integer The parameter value is considered as literal and the XSD datatype 'integer' is added during substitution.
-        ?_name_prefix_datatype The parameter value is considered as literal and the datatype 'prefix:datatype' is added during substitution. The prefix must be specified according to the SPARQL syntax.
+        ?_name_integer The parameter value is considered as literal and the XSD datatype 'integer' is added during
+                        substitution.
+        ?_name_prefix_datatype The parameter value is considered as literal and the datatype 'prefix:datatype' is added
+                                during substitution. The prefix must be specified according to the SPARQL syntax.
     """
 
     # variables = translateQuery(Query.parseString(rq, parseAll=True)).algebra['_vars']
 
-    ## Aggregates
+    # Aggregates
     internal_matcher = re.compile("__agg_\d+__")
-    ## Basil-style variables
+    # Basil-style variables
     variable_matcher = re.compile(
         "(?P<required>[_]{1,2})(?P<name>[^_]+)_?(?P<type>[a-zA-Z0-9]+)?_?(?P<userdefined>[a-zA-Z0-9]+)?.*$")
 
@@ -181,6 +183,14 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
 
             glogger.info('Finished parsing the following parameters: {}'.format(parameters))
 
+    if '$lang' in query_metadata['original_query']:
+        parameters['lang'] = {
+            'original': 'lang',
+            'required': False,
+            'name': 'lang',
+            'type': 'string',
+            'default': query_metadata['original_query']['$lang']}
+
     return parameters
 
 
@@ -191,6 +201,7 @@ def get_defaults(rq, v, metadata):
     glogger.debug("Metadata with defaults: {}".format(metadata))
     if 'defaults' not in metadata:
         return None
+
     defaultsDict = _getDictWithKey(v, metadata['defaults'])
     if defaultsDict:
         return defaultsDict[v]
@@ -413,16 +424,21 @@ def rewrite_query(query, parameters, get_args):
             continue
 
         if isinstance(query, dict):  # json query (sparql transformer)
+            if pname == 'lang':
+                query['$lang'] = v
+                continue
+
             if '$values' not in query:
                 query['$values'] = {}
             values = query['$values']
 
-            if not p['original'] in values:
-                values[p['original']] = v
-            elif isinstance(values[p['original']], list):
-                values[p['original']].append(v)
+            var = p['original']
+            if not var in values:
+                values[var] = v
+            elif isinstance(values[var], list):
+                values[var].append(v)
             else:
-                values[p['original']] = [values[p['original']], v]
+                values[var] = [values[var], v]
 
             continue
 
