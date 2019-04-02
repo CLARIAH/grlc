@@ -22,9 +22,8 @@ server {
   add_header Strict-Transport-Security "max-age={{NGINX_HSTS_MAXAGE}};";
 
   ## Individual nginx logs for this grlc vhost, with custom log format inc cache info
-  log_format log_cache [$time_local] $remote_addr " - " '"$request"' " - " $upstream_cache_status " " $request_time " - "  $status " " $body_bytes_sent ' "$http_referer" "$http_user_agent"';
-  access_log  {{GRLC_LOG_DIR}}/nginx/grlc_access.log log_cache;
-  error_log   {{GRLC_LOG_DIR}}/nginx/grlc_error.log error;
+  access_log  {{GRLC_LOG_DIR}}/nginx/grlc_access.log;
+  error_log   {{GRLC_LOG_DIR}}/nginx/grlc_error.log;
 
   ## Enabling cache for this server
   proxy_cache my_zone;
