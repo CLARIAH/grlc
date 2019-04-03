@@ -13,9 +13,6 @@ import grlc.utils as utils
 app = Flask(__name__)
 
 # Set logging format
-log_level = logging.DEBUG if static.LOG_DEBUG_MODE else logging.INFO
-logging.basicConfig(level=log_level, format=static.LOG_FORMAT)
-app.debug_log_format = static.LOG_FORMAT
 glogger = logging.getLogger(__name__)
 
 
