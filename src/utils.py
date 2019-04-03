@@ -12,11 +12,15 @@ import re
 import requests
 import json
 import logging
-import SPARQLTransformer
 
 from rdflib import Graph
 
 glogger = logging.getLogger(__name__)
+
+try:
+    import SPARQLTransformer
+except:
+    glogger.info('SPARQLTransformer not suppored for Pytho2 -- executing queries with transformer will break service.')
 
 
 def turtleize(swag):

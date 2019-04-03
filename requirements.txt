@@ -15,7 +15,7 @@ rdflib-jsonld==0.4.0
 requests==2.20.0
 six==1.11.0
 SPARQLWrapper==1.8.2
-SPARQLTransformer==1.6.10
+SPARQLTransformer==1.6.10;python_version>="3"
 Werkzeug==0.14.1
 PyGithub==1.43.5
 pythonql==0.9.51;python_version<"3.5"
