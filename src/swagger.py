@@ -64,7 +64,8 @@ def get_repo_info(loader, sha, prov_g):
 def get_path_for_item(item):
     query = item['original_query']
     if isinstance(query, dict):
-        del query['grlc']
+        if 'grlc' in query:
+            del query['grlc']
         query = "\n" + json.dumps(query, indent=2) + "\n"
 
     description = item['description']
