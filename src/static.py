@@ -6,6 +6,7 @@ try:
     from ConfigParser import SafeConfigParser
 except:
     from configparser import SafeConfigParser
+import logging
 
 DEFAULT_HOST = None
 DEFAULT_PORT = 8088
@@ -20,10 +21,6 @@ mimetypes = {
     'html' : 'text/html; q=1.0, */*; q=0.1',
     'ttl' : 'text/turtle'
 }
-
-# Logging format (prettier than the ugly standard in Flask)
-LOG_FORMAT = '%(asctime)-15s [%(levelname)s] (%(module)s.%(funcName)s) %(message)s'
-LOG_DEBUG_MODE = True
 
 # GitHub base URLS
 GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/'
@@ -64,3 +61,16 @@ SERVER_NAME = config.get('defaults', 'server_name')
 
 # Pattern for INSERT query call names
 INSERT_PATTERN = "INSERT DATA { GRAPH ?_g_iri { <s> <p> <o> }}"
+
+# Logging format (prettier than the ugly standard in Flask)
+LOG_FORMAT = '%(asctime)-15s [%(levelname)s] (%(module)s.%(funcName)s) %(message)s'
+try:
+    LOG_DEBUG_MODE = config.getboolean('defaults', 'debug', fallback=True)
+except:
+    # fallback not supported in python2
+    try:
+        LOG_DEBUG_MODE = LOG_DEBUG_MODE = config.getboolean('defaults', 'debug')
+    except:
+        LOG_DEBUG_MODE = True
+log_level = logging.DEBUG if LOG_DEBUG_MODE else logging.INFO
+logging.basicConfig(level=log_level, format=LOG_FORMAT)
