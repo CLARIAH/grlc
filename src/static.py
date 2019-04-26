@@ -64,6 +64,13 @@ INSERT_PATTERN = "INSERT DATA { GRAPH ?_g_iri { <s> <p> <o> }}"
 
 # Logging format (prettier than the ugly standard in Flask)
 LOG_FORMAT = '%(asctime)-15s [%(levelname)s] (%(module)s.%(funcName)s) %(message)s'
-LOG_DEBUG_MODE = config.getboolean('defaults', 'debug', fallback=True)
+try:
+    LOG_DEBUG_MODE = config.getboolean('defaults', 'debug', fallback=True)
+except:
+    # fallback not supported in python2
+    try:
+        LOG_DEBUG_MODE = LOG_DEBUG_MODE = config.getboolean('defaults', 'debug')
+    except:
+        LOG_DEBUG_MODE = True
 log_level = logging.DEBUG if LOG_DEBUG_MODE else logging.INFO
 logging.basicConfig(level=log_level, format=LOG_FORMAT)
