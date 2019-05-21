@@ -17,7 +17,7 @@ SUPPORTED_MIME_FORMATS = defaultdict(
 )
 
 MIME_FORMAT = {
-    format: mime for mime, format in SUPPORTED_MIME_FORMATS.iteritems()
+    format: mime for mime, format in SUPPORTED_MIME_FORMATS.items()
 }
 
 def getResponseText(endpoint, query, requestedMimeType):
