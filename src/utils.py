@@ -17,11 +17,6 @@ from rdflib import Graph
 
 glogger = logging.getLogger(__name__)
 
-try:
-    import SPARQLTransformer
-except:
-    glogger.info('SPARQLTransformer not suppored for Pytho2 -- executing queries with transformer will break service.')
-
 
 def turtleize(swag):
     """ Transforms a JSON swag object into a text/turtle LDA equivalent representation """
@@ -209,7 +204,10 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
         headers['Link'] = headerLink
 
     if 'proto' in query_metadata:  # sparql transformer
-        resp = SPARQLTransformer.post_process(json.loads(resp), query_metadata['proto'], query_metadata['opt'])
+        # resp = SPARQLTransformer.post_process(json.loads(resp), query_metadata['proto'], query_metadata['opt'])
+        glogger.debug("=====================================================")
+        glogger.debug("SPARQLTransformer has been discontinued")
+        glogger.debug("=====================================================")
 
     headers['Server'] = 'grlc/' + grlc_version
     return resp, 200, headers

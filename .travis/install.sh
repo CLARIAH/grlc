@@ -10,7 +10,12 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
   fi
 fi
 
-virtualenv venv
-source venv/bin/activate
+if [[ $TRAVIS_BUILD_STAGE_NAME == 'Deploy' ]]; then
+  virtualenv venv -p python$PYENV_VERSION
+  source venv/bin/activate
+fi
+
+# Horrible hack -- but we should remove pythonql functionality soon anyway...
+pip install pythonql3
 pip install .
 pip install -r requirements-test.txt

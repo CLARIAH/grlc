@@ -21,10 +21,7 @@ glogger = logging.getLogger(__name__)
 
 XSD_PREFIX = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
 
-try:
-    import SPARQLTransformer
-except:
-    glogger.info('SPARQLTransformer not suppored for Pytho2 -- executing queries with transformer will break service.')
+
 
 def guess_endpoint_uri(rq, gh_repo):
     """
@@ -307,11 +304,14 @@ def get_metadata(rq, endpoint):
     query_metadata['original_query'] = rq
 
     if isinstance(rq, dict):  # json query (sparql transformer)
-        rq, proto, opt = SPARQLTransformer.pre_process(rq)
-        rq = rq.strip()
-        query_metadata['proto'] = proto
-        query_metadata['opt'] = opt
-        query_metadata['query'] = rq
+        # rq, proto, opt = SPARQLTransformer.pre_process(rq)
+        # rq = rq.strip()
+        # query_metadata['proto'] = proto
+        # query_metadata['opt'] = opt
+        # query_metadata['query'] = rq
+        glogger.debug("=====================================================")
+        glogger.debug("SPARQLTransformer has been discontinued")
+        glogger.debug("=====================================================")
 
     rq = enable_custom_function_prefix(rq, 'bif')
     rq = enable_custom_function_prefix(rq, 'sql')
@@ -447,8 +447,11 @@ def rewrite_query(query, parameters, get_args):
                 query = query.replace(p['original'], "\"{}\"".format(v))
 
     if isinstance(query, dict):  # json query (sparql transformer)
-        rq, proto, opt = SPARQLTransformer.pre_process(query)
-        query = rq.strip()
+        # rq, proto, opt = SPARQLTransformer.pre_process(query)
+        # query = rq.strip()
+        glogger.debug("=====================================================")
+        glogger.debug("SPARQLTransformer has been discontinued")
+        glogger.debug("=====================================================")
 
     if requireXSD and XSD_PREFIX not in query:
         query = query.replace('SELECT', XSD_PREFIX + '\n\nSELECT')
