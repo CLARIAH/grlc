@@ -27,6 +27,11 @@ def grlc():
 def query_local(query_name):
     return query(user=None, repo=None, query_name=query_name)
 
+# http://grlc.io/api/url
+# get/post: url-query:  https://api.druid.datalegend.net/datasets/IISG/iisg-kg/queries/rosa-luxemburg-gallery/1
+
+# http://grlc.io/api/url/exec
+
 
 @app.route('/api/<user>/<repo>/<query_name>', methods=['GET', 'POST'])
 @app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET', 'POST'])
