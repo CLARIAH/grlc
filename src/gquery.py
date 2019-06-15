@@ -444,11 +444,8 @@ def rewrite_query(query, parameters, get_args):
                 query = query.replace(p['original'], "\"{}\"".format(v))
 
     if isinstance(query, dict):  # json query (sparql transformer)
-        # rq, proto, opt = SPARQLTransformer.pre_process(query)
-        # query = rq.strip()
-        glogger.debug("=====================================================")
-        glogger.debug("SPARQLTransformer has been discontinued")
-        glogger.debug("=====================================================")
+        rq, proto, opt = SPARQLTransformer.pre_process(query)
+        query = rq.strip()
 
     if requireXSD and XSD_PREFIX not in query:
         query = query.replace('SELECT', XSD_PREFIX + '\n\nSELECT')
