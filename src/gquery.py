@@ -21,7 +21,7 @@ glogger = logging.getLogger(__name__)
 
 XSD_PREFIX = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
 
-
+import SPARQLTransformer
 
 def guess_endpoint_uri(rq, gh_repo):
     """
@@ -304,14 +304,11 @@ def get_metadata(rq, endpoint):
     query_metadata['original_query'] = rq
 
     if isinstance(rq, dict):  # json query (sparql transformer)
-        # rq, proto, opt = SPARQLTransformer.pre_process(rq)
-        # rq = rq.strip()
-        # query_metadata['proto'] = proto
-        # query_metadata['opt'] = opt
-        # query_metadata['query'] = rq
-        glogger.debug("=====================================================")
-        glogger.debug("SPARQLTransformer has been discontinued")
-        glogger.debug("=====================================================")
+        rq, proto, opt = SPARQLTransformer.pre_process(rq)
+        rq = rq.strip()
+        query_metadata['proto'] = proto
+        query_metadata['opt'] = opt
+        query_metadata['query'] = rq
 
     rq = enable_custom_function_prefix(rq, 'bif')
     rq = enable_custom_function_prefix(rq, 'sql')

@@ -205,18 +205,18 @@ class TestGQuery(unittest.TestCase):
             self.assertIn(
                 pValue['name'], rq_rw, 'Rewritten query should contain replacement parameter value')
 
-#    def test_sparql_transformer(self):
-#        rq, _ = self.loader.getTextForName('test-json')
-#
-#        endpoint, _ = gquery.guess_endpoint_uri(rq, self.loader)
-#        self.assertEqual('http://dbpedia.org/sparql', endpoint, 'Should match endpoint in test-json.json')
-#
-#        resp, status, headers = utils.dispatchSPARQLQuery(rq, self.loader, content=None, requestArgs={},
-#                                                          acceptHeader='application/json',
-#                                                          requestUrl='http://', formData={})
-#        self.assertEqual(status, 200)
-#        self.assertIsInstance(resp, list)
-#        self.assertIn('id', resp[0])
+    def test_sparql_transformer(self):
+        rq, _ = self.loader.getTextForName('test-json')
+
+        endpoint, _ = gquery.guess_endpoint_uri(rq, self.loader)
+        self.assertEqual('http://dbpedia.org/sparql', endpoint, 'Should match endpoint in test-json.json')
+
+        resp, status, headers = utils.dispatchSPARQLQuery(rq, self.loader, content=None, requestArgs={},
+                                                          acceptHeader='application/json',
+                                                          requestUrl='http://', formData={})
+        self.assertEqual(status, 200)
+        self.assertIsInstance(resp, list)
+        self.assertIn('id', resp[0])
 
 
 if __name__ == '__main__':
