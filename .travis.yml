@@ -15,14 +15,7 @@ jobs:
   include:
     - stage: Tests
       os: linux
-      python: '2.7'
-    - stage: Tests
-      os: linux
       python: '3.6'
-    - stage: Tests
-      os: osx
-      language: objective-c
-      env: PYENV_VERSION=2.7.12
     - stage: Tests
       os: osx
       language: objective-c

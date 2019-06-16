@@ -11,15 +11,15 @@ pyaml==18.11.0
 pyparsing==2.0.7
 PyYAML==4.2b1
 rdflib==4.2.2
-static==1.1.1
 rdflib-jsonld==0.4.0
 requests==2.20.0
 six==1.11.0
-SPARQLWrapper==1.8.2
+simplejson==3.16.0
+setuptools>=38.6.0
 SPARQLTransformer==1.6.10
+SPARQLWrapper==1.8.2
 Werkzeug==0.14.1
 PyGithub==1.43.5
-pythonql==0.9.51;python_version<"3.5"
-pythonql3==0.9.61;python_version>="3.5"
+pythonql3==0.9.61
 gunicorn==19.6.0; sys_platform!="win32"
 waitress==1.1.0; sys_platform=="win32"

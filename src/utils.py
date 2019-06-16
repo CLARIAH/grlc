@@ -17,11 +17,7 @@ from rdflib import Graph
 
 glogger = logging.getLogger(__name__)
 
-try:
-    import SPARQLTransformer
-except:
-    glogger.info('SPARQLTransformer not suppored for Pytho2 -- executing queries with transformer will break service.')
-
+import SPARQLTransformer
 
 def turtleize(swag):
     """ Transforms a JSON swag object into a text/turtle LDA equivalent representation """
