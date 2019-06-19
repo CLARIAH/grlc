@@ -58,7 +58,7 @@ class GithubLoader(BaseLoader):
             self.gh_repo = gh.get_repo(user + '/' + repo, lazy=False)
         except BadCredentialsException:
             raise Exception('BadCredentials: have you set up github_access_token on config.ini ?')
-        except Exception as e:
+        except Exception:
             raise Exception('Repo not found: ' + user + '/' + repo)
 
     def fetchFiles(self):
@@ -124,12 +124,11 @@ class LocalLoader(BaseLoader):
 
     def fetchFiles(self):
         """Returns a list of file items contained on the local repo."""
-        print("Fetching files from {}".format(self.baseDir))
         files = glob(path.join(self.baseDir, '*'))
         filesDef = []
+        baseDirSlash = path.join(self.baseDir, '')
         for f in files:
-            print("Found SPARQL file {}".format(f))
-            relative = f.replace(self.baseDir, '')
+            relative = f.replace(baseDirSlash, '')
             filesDef.append({
                 'download_url': relative,
                 'name': relative
@@ -145,7 +144,7 @@ class LocalLoader(BaseLoader):
         return self._getText(fileItem['download_url'])
 
     def _getText(self, filename):
-        targetFile = self.baseDir + filename
+        targetFile = path.join(self.baseDir, filename)
         if path.exists(targetFile):
             with open(targetFile, 'r') as f:
                 lines = f.readlines()

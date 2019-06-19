@@ -2,7 +2,7 @@ from mock import Mock
 from os import path
 from glob import glob
 
-base_url = 'tests/repo/'
+base_url = path.join('tests', 'repo')
 def buildEntry(entryName):
     entryName = entryName.replace(base_url, '')
     return {
@@ -11,7 +11,7 @@ def buildEntry(entryName):
          u'path': entryName,
          u'type': u'file'
     }
-mock_files = [ buildEntry(f) for f in glob(base_url + '*') ]
+mock_files = [ buildEntry(f) for f in glob(path.join(base_url, '*')) ]
 
 def mock_requestsGithub(uri, headers={}, params={}):
     if uri.endswith('contents'):
@@ -19,7 +19,7 @@ def mock_requestsGithub(uri, headers={}, params={}):
         return_value.json.return_value = mock_files
         return return_value
     else:
-        targetFile = uri.replace('https://raw.githubusercontent.com/fakeuser/fakerepo/master/', base_url)
+        targetFile = uri.replace('https://raw.githubusercontent.com/fakeuser/fakerepo/master/', path.join(base_url, ''))
         if path.exists(targetFile):
             f = open(targetFile, 'r')
             lines = f.readlines()
