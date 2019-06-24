@@ -77,7 +77,7 @@ pip install grlc
 grlc-server
 </pre>
 
-More details can be found at [grlc's PyPi page](https://pypi.python.org/pypi/grlc/1.0) (thanks to [c-martinez](https://github.com/c-martinez)!).
+More details can be found at [grlc's PyPi page](https://pypi.python.org/pypi/grlc) (thanks to [c-martinez](https://github.com/c-martinez)!).
 
 #### Flask application
 
