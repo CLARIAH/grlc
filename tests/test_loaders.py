@@ -1,6 +1,7 @@
 import unittest
 import six
 from mock import patch
+from os import path
 
 from grlc.fileLoaders import LocalLoader, GithubLoader
 from grlc.queryTypes import qType
@@ -77,7 +78,7 @@ class TestGithubLoader(unittest.TestCase):
 class TestLocalLoader(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        self.loader = LocalLoader('./tests/repo/')
+        self.loader = LocalLoader(path.join('tests', 'repo'))
 
     def test_fetchFiles(self):
         files = self.loader.fetchFiles()

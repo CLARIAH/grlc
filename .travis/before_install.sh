@@ -10,4 +10,6 @@ fi
 if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
   brew install pyenv
   pyenv install -s $PYENV_VERSION
+elif [[ $TRAVIS_OS_NAME == 'windows' ]]; then
+  choco install python
 fi
