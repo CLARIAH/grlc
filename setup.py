@@ -21,7 +21,7 @@ with codecs.open('requirements.txt', mode='r') as f:
 with codecs.open('requirements-test.txt', mode='r') as f:
     tests_require = f.read().splitlines()
 
-with codecs.open('README.md', mode='r') as f:
+with codecs.open('README.md', mode='r', encoding='utf-8') as f:
     long_description = f.read()
 
 setup(

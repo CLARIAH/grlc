@@ -9,6 +9,8 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     alias pip=pip3
   fi
   export PATH="/Users/travis/.pyenv/shims:${PATH}"
+elif [[ $TRAVIS_OS_NAME == 'windows' ]]; then
+  alias pip="pip --user"
 fi
 
 if [[ $TRAVIS_BUILD_STAGE_NAME == 'Deploy' ]]; then
