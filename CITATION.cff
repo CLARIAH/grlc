@@ -13,6 +13,7 @@ authors:
     affiliation: "Netherlands eScience Center"
     family-names: Martinez
     given-names: Carlos
+    orcid: "https://orcid.org/0000-0001-5565-7577"
   -
     affiliation: "International Institute of Social History"
     family-names: Zijdeman
@@ -24,4 +25,4 @@ license: MIT
 message: "If you use this software, please cite it as below."
 repository-code: "https://github.com/CLARIAH/grlc"
 title: grlc
-version: "1.2.1"
+version: "1.3.0"

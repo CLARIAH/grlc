@@ -12,12 +12,12 @@ import re
 import requests
 import json
 import logging
-import SPARQLTransformer
 
 from rdflib import Graph
 
 glogger = logging.getLogger(__name__)
 
+import SPARQLTransformer
 
 def turtleize(swag):
     """ Transforms a JSON swag object into a text/turtle LDA equivalent representation """

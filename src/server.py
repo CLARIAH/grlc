@@ -13,9 +13,6 @@ import grlc.utils as utils
 app = Flask(__name__)
 
 # Set logging format
-log_level = logging.DEBUG if static.LOG_DEBUG_MODE else logging.INFO
-logging.basicConfig(level=log_level, format=static.LOG_FORMAT)
-app.debug_log_format = static.LOG_FORMAT
 glogger = logging.getLogger(__name__)
 
 
@@ -29,6 +26,11 @@ def grlc():
 @app.route('/api/local/local/<query_name>', methods=['GET'])
 def query_local(query_name):
     return query(user=None, repo=None, query_name=query_name)
+
+# http://grlc.io/api/url
+# get/post: url-query:  https://api.druid.datalegend.net/datasets/IISG/iisg-kg/queries/rosa-luxemburg-gallery/1
+
+# http://grlc.io/api/url/exec
 
 
 @app.route('/api/<user>/<repo>/<query_name>', methods=['GET', 'POST'])

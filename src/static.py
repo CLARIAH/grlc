@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # static.py: static values for the grlc Server
-
+import os
 try:
     from ConfigParser import SafeConfigParser
 except:
@@ -47,8 +47,8 @@ config = SafeConfigParser(config_fallbacks)
 config.add_section('auth')
 config.add_section('defaults')
 config.add_section('local')
-
-config.read('config.ini')
+config_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.ini')
+config.read(config_filename)
 ACCESS_TOKEN = config.get('auth', 'github_access_token')
 
 # Default endpoint, if none specified elsewhere

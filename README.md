@@ -162,7 +162,6 @@ If you cannot code, that's no problem! There's still plenty you can contribute:
 - Share your experience at using grlc in Twitter (mention the handler **@grlcldapi**)
 - If you are good with HTML/CSS, [let us know](mailto:albert.merono@vu.nl)
 
-
 ## Related tools
 
 - [SPARQL2Git](https://github.com/albertmeronyo/SPARQL2Git) is a Web interface for editing SPARQL queries and saving them in GitHub as grlc APIs.
@@ -173,7 +172,6 @@ If you cannot code, that's no problem! There's still plenty you can contribute:
 
 - [Flavour your Linked Data with grlc](https://blog.esciencecenter.nl/flavour-your-linked-data-with-garlic-98bfbb358e06), by Carlos Martinez
 - [Egon Willighagen's blog](http://chem-bla-ics.blogspot.com/2018/07/converting-any-sparql-endpoint-to.html)
-
 
 ## Academic publications
 
