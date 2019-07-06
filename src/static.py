@@ -47,7 +47,7 @@ config = SafeConfigParser(config_fallbacks)
 config.add_section('auth')
 config.add_section('defaults')
 config.add_section('local')
-config_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.ini')
+config_filename = os.path.join(os.getcwd(), 'config.ini')
 config.read(config_filename)
 ACCESS_TOKEN = config.get('auth', 'github_access_token')
 
