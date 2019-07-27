@@ -2,6 +2,7 @@ import unittest
 import six
 import rdflib
 from mock import patch, Mock
+import json
 
 from grlc.fileLoaders import LocalLoader
 import grlc.gquery as gquery
@@ -205,18 +206,59 @@ class TestGQuery(unittest.TestCase):
             self.assertIn(
                 pValue['name'], rq_rw, 'Rewritten query should contain replacement parameter value')
 
-    def test_sparql_transformer(self):
+    @patch('requests.get')
+    def test_sparql_transformer(self, mock_get):
+        mock_json = {
+            "head": {},
+            "results": {
+                "bindings": [
+                    {
+                        "id": {
+                            "type": "uri",
+                            "value": "http://www.w3.org/2001/XMLSchema#anyURI"
+                        },
+                        "class": {
+                            "type": "uri",
+                            "value": "http://www.w3.org/2000/01/rdf-schema#Datatype"
+                        },
+                        "v2": {
+                            "type": "literal",
+                            "xml:lang": "en",
+                            "value": "xsd:anyURI"
+                        }
+                    },
+                    {
+                        "id": {
+                            "type": "uri",
+                            "value": "http://www.w3.org/2001/XMLSchema#boolean"
+                        },
+                        "class": {
+                            "type": "uri",
+                            "value": "http://www.w3.org/2000/01/rdf-schema#Datatype"
+                        },
+                        "v2": {
+                            "type": "literal",
+                            "xml:lang": "en",
+                            "value": "xsd:boolean"
+                        }
+                    }]
+            }
+        }
+
+        mock_get.return_value = Mock(ok=True)
+        mock_get.return_value.headers = {'Content-Type': 'application/json'}
+        mock_get.return_value.text = json.dumps(mock_json)
+
         rq, _ = self.loader.getTextForName('test-json')
 
-        endpoint, _ = gquery.guess_endpoint_uri(rq, self.loader)
-        self.assertEqual('http://dbpedia.org/sparql', endpoint, 'Should match endpoint in test-json.json')
+        self.assertIn('proto', rq)
 
         resp, status, headers = utils.dispatchSPARQLQuery(rq, self.loader, content=None, requestArgs={},
                                                           acceptHeader='application/json',
-                                                          requestUrl='http://', formData={})
+                                                          requestUrl='http://mock-endpoint/sparql', formData={})
         self.assertEqual(status, 200)
         self.assertIsInstance(resp, list)
-        self.assertIn('id', resp[0])
+        self.assertIn('http', resp[0]['id'])
 
 
 if __name__ == '__main__':

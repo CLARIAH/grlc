@@ -68,6 +68,14 @@ If you want to run grlc at system boot as a service, you can find example upstar
 
 Through these you'll miss some cool docker bundled features (like nginx-based caching). We provide these alternatives just for testing, development scenarios, or docker compatibility reasons.
 
+#### Prerequisites
+- Python3
+- development files:
+
+```bash
+sudo apt-get install libevent-dev python-all-dev
+```
+
 #### pip
 
 If you want to use grlc as a library, you'll find it useful to install via `pip`.
@@ -77,7 +85,7 @@ pip install grlc
 grlc-server
 </pre>
 
-More details can be found at [grlc's PyPi page](https://pypi.python.org/pypi/grlc/1.0) (thanks to [c-martinez](https://github.com/c-martinez)!).
+More details can be found at [grlc's PyPi page](https://pypi.python.org/pypi/grlc) (thanks to [c-martinez](https://github.com/c-martinez)!).
 
 #### Flask application
 

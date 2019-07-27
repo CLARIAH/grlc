@@ -28,6 +28,8 @@ class BaseLoader:
             if queryText:
                 if (queryType == qType['JSON']):
                     queryText = json.loads(queryText)
+                    if 'proto' not in queryText and '@graph' not in queryText:
+                        continue
                 return queryText, queryType
         # No query found...
         return '', None
