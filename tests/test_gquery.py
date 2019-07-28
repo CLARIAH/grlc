@@ -7,6 +7,7 @@ import json
 from grlc.fileLoaders import LocalLoader
 import grlc.gquery as gquery
 import grlc.utils as utils
+from tests.mock_data import mock_simpleSparqlResponse
 
 from flask import Flask
 
@@ -260,6 +261,30 @@ class TestGQuery(unittest.TestCase):
         self.assertIsInstance(resp, list)
         self.assertIn('http', resp[0]['id'])
 
+    @patch('requests.get')
+    def test_projection(self, mock_get):
+        mock_json = mock_simpleSparqlResponse
+
+        mock_get.return_value = Mock(ok=True)
+        mock_get.return_value.headers = {'Content-Type': 'application/json'}
+        mock_get.return_value.text = json.dumps(mock_json)
+
+        rq, _ = self.loader.getTextForName('test-projection')
+        resp, status, headers = utils.dispatchSPARQLQuery(rq, self.loader, content=None, requestArgs={'id': 'http://dbpedia.org/resource/Frida_Kahlo'},
+                                                          acceptHeader='application/json',
+                                                          requestUrl='http://mock-endpoint/sparql', formData={})
+
+        self.assertIsInstance(resp, list, 'Response should be a list')
+        self.assertEqual(len(resp), 5, 'Response should have 5 entries')
+        for item in resp:
+            self.assertTrue('id' in item, 'Response items should contain an id')
+            self.assertTrue('value' in item, 'Response items should contain a value')
+        ids = [ item['id'] for item in resp ]
+
+        values = [ item['value'] for item in resp ]
+
+        self.assertTrue(all(i in ids for i in ['p1', 'p2', 'p3', 'p4', 'p5']), 'Response should contain all known ids')
+        self.assertTrue(all(v in values for v in ['o1', 'o2', 'o3', 'o4', 'o5']), 'Response should contain all known values')
 
 if __name__ == '__main__':
     unittest.main()

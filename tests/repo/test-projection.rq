@@ -1,0 +1,10 @@
+#+ summary: Sample query for testing response transformation
+#+ endpoint: "http://test-endpoint/transform/sparql/"
+#+ transform: {
+#+     "id": "?p",
+#+     "value": "?o"
+#+   }
+
+select ?p ?o where {
+  ?_id_iri ?p ?o
+} LIMIT 5

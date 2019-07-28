@@ -31,6 +31,19 @@ def mock_requestsGithub(uri, headers={}, params={}):
             return_value = Mock(status_code=404)
             return return_value
 
+mock_simpleSparqlResponse = {
+    "head": { "link": [], "vars": ["p", "o"] },
+    "results": {
+        "bindings": [
+            { "p": { "type": "string", "value": "p1" }	, "o": { "type": "string", "value": "o1" }},
+            { "p": { "type": "string", "value": "p2" }	, "o": { "type": "string", "value": "o2" }},
+            { "p": { "type": "string", "value": "p3" }	, "o": { "type": "string", "value": "o3" }},
+            { "p": { "type": "string", "value": "p4" }	, "o": { "type": "string", "value": "o4" }},
+            { "p": { "type": "string", "value": "p5" }	, "o": { "type": "string", "value": "o5" }}
+        ]
+    }
+}
+
 mock_sparqlResponse = {
   "head": {
     "link": [],
