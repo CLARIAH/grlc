@@ -4,10 +4,9 @@ import grlc.gquery as gquery
 import grlc.pagination as pageUtils
 
 import traceback
-import logging
+import grlc.glogging as glogging
 
-glogger = logging.getLogger(__name__)
-
+glogger = glogging.getGrlcLogger(__name__)
 
 def get_blank_spec():
     """Creates the base (blank) structure of swagger specification."""

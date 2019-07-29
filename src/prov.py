@@ -3,15 +3,15 @@
 # prov.py: class generating grlc related W3C prov triples
 
 from rdflib import Graph, URIRef, Namespace, RDF, Literal
-import logging
 from datetime import datetime
 from subprocess import check_output
 from six import PY3
 
 # grlc modules
 import grlc.static as static
+import grlc.glogging as glogging
 
-glogger = logging.getLogger(__name__)
+glogger = glogging.getGrlcLogger(__name__)
 
 
 class grlcPROV():

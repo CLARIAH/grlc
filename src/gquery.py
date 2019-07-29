@@ -8,7 +8,6 @@ from rdflib.plugins.sparql.parser import Query, UpdateUnit
 from rdflib.plugins.sparql.processor import translateQuery
 from flask import request, has_request_context
 from pyparsing import ParseException
-import logging
 from pprint import pformat
 import traceback
 import re
@@ -16,8 +15,9 @@ import requests
 
 # grlc modules
 import grlc.static as static
+import grlc.glogging as glogging
 
-glogger = logging.getLogger(__name__)
+glogger = glogging.getGrlcLogger(__name__)
 
 XSD_PREFIX = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
 
