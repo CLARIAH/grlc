@@ -37,7 +37,8 @@ config_fallbacks = {
     'user': '',
     'password': '',
     'server_name': '',
-    'local_sparql_dir': ''
+    'local_sparql_dir': '',
+    'debug': False
 }
 config = SafeConfigParser(config_fallbacks)
 config.add_section('auth')
