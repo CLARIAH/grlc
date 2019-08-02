@@ -1,8 +1,9 @@
 #+ summary: Sample query for testing response transformation
 #+ endpoint: "http://test-endpoint/transform/sparql/"
 #+ transform: {
-#+     "id": "?p",
-#+     "value": "?o"
+#+     "key": "?p",
+#+     "value": "?o",
+#+     "$anchor": "key"
 #+   }
 
 select ?p ?o where {
