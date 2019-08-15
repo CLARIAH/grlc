@@ -2,11 +2,9 @@ import unittest
 import six
 import rdflib
 from mock import patch, Mock
-import json
 
 from grlc.fileLoaders import LocalLoader
 import grlc.gquery as gquery
-import grlc.utils as utils
 
 from flask import Flask
 
@@ -205,61 +203,6 @@ class TestGQuery(unittest.TestCase):
                 pValue['name'], rq, 'Original query should not contain replacement parameter value')
             self.assertIn(
                 pValue['name'], rq_rw, 'Rewritten query should contain replacement parameter value')
-
-    @patch('requests.get')
-    def test_sparql_transformer(self, mock_get):
-        mock_json = {
-            "head": {},
-            "results": {
-                "bindings": [
-                    {
-                        "id": {
-                            "type": "uri",
-                            "value": "http://www.w3.org/2001/XMLSchema#anyURI"
-                        },
-                        "class": {
-                            "type": "uri",
-                            "value": "http://www.w3.org/2000/01/rdf-schema#Datatype"
-                        },
-                        "v2": {
-                            "type": "literal",
-                            "xml:lang": "en",
-                            "value": "xsd:anyURI"
-                        }
-                    },
-                    {
-                        "id": {
-                            "type": "uri",
-                            "value": "http://www.w3.org/2001/XMLSchema#boolean"
-                        },
-                        "class": {
-                            "type": "uri",
-                            "value": "http://www.w3.org/2000/01/rdf-schema#Datatype"
-                        },
-                        "v2": {
-                            "type": "literal",
-                            "xml:lang": "en",
-                            "value": "xsd:boolean"
-                        }
-                    }]
-            }
-        }
-
-        mock_get.return_value = Mock(ok=True)
-        mock_get.return_value.headers = {'Content-Type': 'application/json'}
-        mock_get.return_value.text = json.dumps(mock_json)
-
-        rq, _ = self.loader.getTextForName('test-json')
-
-        self.assertIn('proto', rq)
-
-        resp, status, headers = utils.dispatchSPARQLQuery(rq, self.loader, content=None, requestArgs={},
-                                                          acceptHeader='application/json',
-                                                          requestUrl='http://mock-endpoint/sparql', formData={})
-        self.assertEqual(status, 200)
-        self.assertIsInstance(resp, list)
-        self.assertIn('http', resp[0]['id'])
-
 
 if __name__ == '__main__':
     unittest.main()

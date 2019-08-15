@@ -179,8 +179,6 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
 
     # If there's no mime type, the endpoint is an actual SPARQL endpoint
     else:
-        # requestedMimeType = static.mimetypes[content] if content else acceptHeader
-        # result, contentType = sparql.getResponseText(endpoint, query, requestedMimeType)
         reqHeaders = {'Accept': acceptHeader}
         if content:
             reqHeaders = {'Accept': static.mimetypes[content]}
@@ -206,6 +204,11 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
 
     if 'proto' in query_metadata:  # sparql transformer
         resp = SPARQLTransformer.post_process(json.loads(resp), query_metadata['proto'], query_metadata['opt'])
+
+    if 'transform' in query_metadata:  # sparql transformer
+        rq = { 'proto': query_metadata['transform'] }
+        _, _, opt = SPARQLTransformer.pre_process(rq)
+        resp = SPARQLTransformer.post_process(json.loads(resp), query_metadata['transform'], opt)
 
     headers['Server'] = 'grlc/' + grlc_version
     return resp, 200, headers
