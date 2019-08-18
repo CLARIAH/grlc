@@ -3,12 +3,13 @@
 # cache.py: grlc spec caching utilities
 import json
 import urllib.request, urllib.error, urllib.parse
-import logging
+import grlc.glogging as glogging
+
+glogger = glogging.getGrlcLogger(__name__)
 
 # Name of the cache json file
 CACHE_NAME = "db-cache.json"
 
-glogger = logging.getLogger(__name__)
 def init_cache():
     '''
     Initializes the grlc cache (json file)

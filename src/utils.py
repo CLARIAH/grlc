@@ -11,21 +11,14 @@ from grlc import __version__ as grlc_version
 import re
 import requests
 import json
-import logging
 
 from rdflib import Graph
 
-glogger = logging.getLogger(__name__)
-
 import SPARQLTransformer
 
-def turtleize(swag):
-    """ Transforms a JSON swag object into a text/turtle LDA equivalent representation """
-    swag_graph = Graph()
-    # TODO: load swag data onto graph
+import grlc.glogging as glogging
 
-    return swag_graph.serialize(format='turtle')
-
+glogger = glogging.getGrlcLogger(__name__)
 
 def getLoader(user, repo, sha=None, prov=None):
     """Build a fileLoader (LocalLoader or GithubLoader) for the given repository."""

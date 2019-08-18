@@ -3,18 +3,16 @@
 # server.py: the grlc server
 
 from flask import Flask, request, jsonify, render_template, make_response
-import logging
 
 # grlc modules
 import grlc.static as static
 import grlc.utils as utils
+import grlc.glogging as glogging
+
+glogger = glogging.getGrlcLogger(__name__)
 
 # The Flask app
 app = Flask(__name__)
-
-# Set logging format
-glogger = logging.getLogger(__name__)
-
 
 # Server routes
 @app.route('/')

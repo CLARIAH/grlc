@@ -1,12 +1,11 @@
-import logging
-
 from SPARQLWrapper import SPARQLWrapper, CSV, JSON
 from flask import jsonify
 from collections import defaultdict
 
 import static as static
+import grlc.glogging as glogging
 
-glogger = logging.getLogger(__name__)
+glogger = glogging.getGrlcLogger(__name__)
 
 # Default value is JSON
 SUPPORTED_MIME_FORMATS = defaultdict(
