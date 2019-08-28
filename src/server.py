@@ -32,11 +32,15 @@ def query_local(query_name):
 
 
 @app.route('/api/<user>/<repo>/<query_name>', methods=['GET', 'POST'])
+@app.route('/api/<user>/<repo>/<subdir>/<query_name>', methods=['GET', 'POST'])
 @app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET', 'POST'])
+@app.route('/api/<user>/<repo>/<subdir>/<query_name>.<content>', methods=['GET', 'POST'])
 @app.route('/api/<user>/<repo>/commit/<sha>/<query_name>', methods=['GET', 'POST'])
+@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/<query_name>', methods=['GET', 'POST'])
 @app.route('/api/<user>/<repo>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
-def query(user, repo, query_name, sha=None, content=None):
-    glogger.info("-----> Executing call name at /{}/{}/{} on commit {}".format(user, repo, query_name, sha))
+@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
+def query(user, repo, query_name, subdir=None, sha=None, content=None):
+    glogger.info("-----> Executing call name at /{}/{}/{}/{} on commit {}".format(user, repo, subdir, query_name, sha))
     glogger.debug("Request accept header: " + request.headers["Accept"])
 
     requestArgs = request.args
@@ -44,7 +48,7 @@ def query(user, repo, query_name, sha=None, content=None):
     requestUrl = request.url
     formData = request.form
 
-    query_response, status, headers = utils.dispatch_query(user, repo, query_name,
+    query_response, status, headers = utils.dispatch_query(user, repo, query_name, subdir,
                                                            sha=sha, content=content, requestArgs=requestArgs,
                                                            acceptHeader=acceptHeader,
                                                            requestUrl=requestUrl, formData=formData)
@@ -66,19 +70,24 @@ def swagger_spec_local():
 
 
 @app.route('/api/<user>/<repo>', strict_slashes=False)
+@app.route('/api/<user>/<repo>/<subdir>', strict_slashes=False)
 @app.route('/api/<user>/<repo>/api-docs')
 @app.route('/api/<user>/<repo>/commit/<sha>')
 @app.route('/api/<user>/<repo>/commit/<sha>/api-docs')
-def api_docs(user, repo, sha=None):
-    return render_template('api-docs.html', user=user, repo=repo, sha=sha)
+@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>')
+@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/api-docs')
+def api_docs(user, repo, subdir=None, sha=None):
+    return render_template('api-docs.html', user=user, repo=repo, subdir=subdir, sha=sha)
 
 
 @app.route('/api/<user>/<repo>/spec', methods=['GET'])
+@app.route('/api/<user>/<repo>/<subdir>/spec', methods=['GET'])
 @app.route('/api/<user>/<repo>/commit/<sha>/spec')
-def swagger_spec(user, repo, sha=None, content=None):
-    glogger.info("-----> Generating swagger spec for /{}/{} on commit {}".format(user, repo, sha))
+@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/spec')
+def swagger_spec(user, repo, subdir=None, sha=None, content=None):
+    glogger.info("-----> Generating swagger spec for /{}/{} on commit {}".format(user, repo, subdir, sha))
 
-    swag = utils.build_swagger_spec(user, repo, sha, static.SERVER_NAME)
+    swag = utils.build_swagger_spec(user, repo, subdir, sha, static.SERVER_NAME)
 
     if 'text/turtle' in request.headers['Accept']:
         resp_spec = make_response(utils.turtleize(swag))
@@ -89,9 +98,15 @@ def swagger_spec(user, repo, sha=None, content=None):
 
     resp_spec.headers['Cache-Control'] = static.CACHE_CONTROL_POLICY  # Caching JSON specs for 15 minutes
 
-    glogger.info("-----> API spec generation for /{}/{} on commit {} complete".format(user, repo, sha))
+    glogger.info("-----> API spec generation for /{}/{} on commit {} complete".format(user, repo, subdir, sha))
     return resp_spec
 
 
 if __name__ == '__main__':
-    app.run(host=static.DEFAULT_HOST, port=static.DEFAULT_PORT, debug=static.LOG_DEBUG_MODE)
+    print("foo")
+    print("bar")
+    print("LOG DEBUG MODE is: " + str(static.LOG_DEBUG_MODE))
+    print("API KEY: " + str(static.ACCESS_TOKEN))
+    glogger.debug("yo")
+    app.run(host=static.DEFAULT_HOST, port=static.DEFAULT_PORT, debug=True)
+    glogger.debug("YO")

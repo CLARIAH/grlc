@@ -20,22 +20,22 @@ import grlc.glogging as glogging
 
 glogger = glogging.getGrlcLogger(__name__)
 
-def getLoader(user, repo, sha=None, prov=None):
+def getLoader(user, repo, subdir=None, sha=None, prov=None):
     """Build a fileLoader (LocalLoader or GithubLoader) for the given repository."""
     if user is None and repo is None:
         loader = LocalLoader()
     else:
-        loader = GithubLoader(user, repo, sha, prov)
+        loader = GithubLoader(user, repo, subdir, sha, prov)
     return loader
 
 
-def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
+def build_spec(user, repo, subdir, sha=None, prov=None, extraMetadata=[]):
     glogger.warning("grlc.utils.build_spec is deprecated and will " \
                     "be removed in the future. Use grlc.swagger.build_spec instead.")
-    return swagger.build_spec(user, repo, sha, prov, extraMetadata)
+    return swagger.build_spec(user, repo, subdir, sha, prov, extraMetadata)
 
 
-def build_swagger_spec(user, repo, sha, serverName):
+def build_swagger_spec(user, repo, subdir, sha, serverName):
     """Build grlc specification for the given github user / repo in swagger format """
     if user and repo:
         # Init provenance recording
@@ -47,7 +47,7 @@ def build_swagger_spec(user, repo, sha, serverName):
     swag['host'] = serverName
 
     try:
-        loader = getLoader(user, repo, sha, prov_g)
+        loader = getLoader(user, repo, subdir, sha, prov_g)
     except Exception as e:
         # If repo does not exits
         swag['info'] = {
@@ -63,9 +63,11 @@ def build_swagger_spec(user, repo, sha, serverName):
     swag['next_commit'] = next_commit
     swag['info'] = info
     swag['basePath'] = basePath
+    if subdir:
+        swag['basePath'] = basePath + subdir
 
     # TODO: can we pass loader to build_spec ?
-    spec = swagger.build_spec(user, repo, sha, prov_g)
+    spec = swagger.build_spec(user, repo, subdir, sha, prov_g)
     for item in spec:
         swag['paths'][item['call_name']] = swagger.get_path_for_item(item)
 
@@ -75,10 +77,10 @@ def build_swagger_spec(user, repo, sha, serverName):
     return swag
 
 
-def dispatch_query(user, repo, query_name, sha=None, content=None, requestArgs={}, acceptHeader='application/json',
+def dispatch_query(user, repo, query_name, subdir=None, sha=None, content=None, requestArgs={}, acceptHeader='application/json',
                    requestUrl='http://', formData={}):
-    loader = getLoader(user, repo, sha=sha, prov=None)
-    query, q_type = loader.getTextForName(query_name)
+    loader = getLoader(user, repo, subdir, sha=sha, prov=None)
+    query, q_type = loader.getTextForName(query_name, subdir)
 
     # Call name implemented with SPARQL query
     if q_type == qType['SPARQL'] or q_type == qType['JSON']:

@@ -10,7 +10,7 @@ from github.GithubException import BadCredentialsException
 
 
 class BaseLoader:
-    def getTextForName(self, query_name):
+    def getTextForName(self, query_name, subdir):
         # The URIs of all candidates
         rq_name = query_name + '.rq'
         sparql_name = query_name + '.sparql'
@@ -24,7 +24,7 @@ class BaseLoader:
         ]
 
         for queryFullName, queryType in candidates:
-            queryText = self._getText(queryFullName)
+            queryText = self._getText(queryFullName, subdir)
             if queryText:
                 if (queryType == qType['JSON']):
                     queryText = json.loads(queryText)
@@ -50,9 +50,10 @@ class BaseLoader:
 
 
 class GithubLoader(BaseLoader):
-    def __init__(self, user, repo, sha, prov):
+    def __init__(self, user, repo, subdir, sha, prov):
         self.user = user
         self.repo = repo
+        self.subdir = subdir
         self.sha = sha
         self.prov = prov
         gh = Github(static.ACCESS_TOKEN)
@@ -65,6 +66,8 @@ class GithubLoader(BaseLoader):
 
     def fetchFiles(self):
         api_repo_content_uri = static.GITHUB_API_BASE_URL + self.user + '/' + self.repo + '/contents'
+        if self.subdir:
+            api_repo_content_uri += '/' + str(self.subdir)
         params = {
             'ref': 'master' if self.sha is None else self.sha
         }
@@ -84,17 +87,20 @@ class GithubLoader(BaseLoader):
             raw_repo_uri += '/{}/'.format(self.sha)
         return raw_repo_uri
 
-    def getTextFor(self, fileItem):
+    def getTextFor(self, fileItem, subdir=None):
         raw_query_uri = fileItem['download_url']
-        resp = self._getText(raw_query_uri)
+        resp = self._getText(raw_query_uri, subdir)
 
         # Add query URI as used entity by the logged activity
         if self.prov is not None:
             self.prov.add_used_entity(raw_query_uri)
         return resp
 
-    def _getText(self, query_name):
+    def _getText(self, query_name, subdir=None):
         query_uri = self.getRawRepoUri() + query_name
+        if subdir:
+            query_uri = self.getRawRepoUri() + subdir + '/' + query_name
+        print("Requesting query at " + str(query_uri))
         req = requests.get(query_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)})
         if req.status_code == 200:
             return req.text

@@ -103,9 +103,9 @@ def get_path_for_item(item):
     return item_path
 
 
-def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
+def build_spec(user, repo, subdir, sha=None, prov=None, extraMetadata=[]):
     """Build grlc specification for the given github user / repo."""
-    loader = grlc.utils.getLoader(user, repo, sha=sha, prov=prov)
+    loader = grlc.utils.getLoader(user, repo, subdir, sha=sha, prov=prov)
 
     files = loader.fetchFiles()
     raw_repo_uri = loader.getRawRepoUri()
