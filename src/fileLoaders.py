@@ -44,8 +44,9 @@ class BaseLoader:
 
     def getLicenceURL(self):
         for f in self.fetchFiles():
-            if f['name'].lower() == 'license' or f['name'].lower() == 'licence':
-                return f['download_url']
+            if 'name' in f:
+                if f['name'].lower() == 'license' or f['name'].lower() == 'licence':
+                    return f['download_url']
         return None
 
 
@@ -145,6 +146,7 @@ class LocalLoader(BaseLoader):
 
     def getRawRepoUri(self):
         """Returns the root url of the local repo."""
+        # Maybe return something like 'file:///path/to/local/queries' ?
         return ''
 
     def getTextFor(self, fileItem):
@@ -174,7 +176,65 @@ class LocalLoader(BaseLoader):
         return ['local']
 
     def getFullName(self):
-        return 'local/local'
+        return 'local/'
 
     def getRepoURI(self):
         return 'local-file-system'
+
+class ParamLoader(BaseLoader):
+    def __init__(self, query_urls):
+        # Implement the list of queries with a list of dicts {'name', 'download_url'}
+        self.query_urls = []
+        for q in query_urls:
+            name = q.split('/')[-1]
+            download_url = q
+            self.query_urls.append({'name': name, 'download_url': download_url})
+
+    def fetchFiles(self):
+        """ Returns a list of {'name', 'download_url'} queries passed as parameter in the first request """
+        return self.query_urls
+
+    def getTextFor(self, item):
+        """Returns the contents of the given query in the list of param queries """
+        return self._getText(item['name'])
+
+    def _getText(self, item_name):
+        query_url = self.query_urls[0]['download_url']
+        for q in self.query_urls:
+            if q['name'] == item_name:
+                query_url = q['download_url']
+
+        # TODO: this is where most implementations will differ, push for text/plain or own protocol
+        headers = {'Accept' : 'text/plain'}
+        req = requests.get(query_url, headers=headers)
+        if req.status_code == 200:
+            return req.text
+        else:
+            return None
+
+
+    def getRawRepoUri(self):
+        """ Returns the root url of the remote repo"""
+        # TODO: What should this be?
+        return ''
+
+    def getRepoTitle(self):
+        return 'Remote queries by parameter'
+
+    def getContactName(self):
+        return 'Anonymous'
+
+    def getContactUrl(self):
+        return ''
+
+    def getCommitList(self):
+        return ['param']
+
+    def getFullName(self):
+        return 'api/url'
+
+    def getRepoURI(self):
+        return 'param'
+
+    def getLicenceURL(self):
+        return ''

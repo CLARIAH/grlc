@@ -89,7 +89,8 @@
     <script src="{{url_for('.static', filename='js/grlc-api.js')}}"></script>
 
     <script>
-      url = "{{url_for('swagger_spec', user=user, repo=repo, subdir=subdir, sha=sha)}}";
+      console.log("{{query_urls}}");
+      url = "{{url_for('swagger_spec', user=user, repo=repo, subdir=subdir, query_urls=[query_urls], sha=sha)}}";
       window.onload = grlcOnLoad(url);
       $('#prev-commit').hide();
       $('#next-commit').hide();

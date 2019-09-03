@@ -3,7 +3,7 @@ import grlc.gquery as gquery
 import grlc.pagination as pageUtils
 import grlc.swagger as swagger
 from grlc.prov import grlcPROV
-from grlc.fileLoaders import GithubLoader, LocalLoader
+from grlc.fileLoaders import GithubLoader, LocalLoader, ParamLoader
 from grlc.queryTypes import qType
 from grlc.projection import project
 from grlc import __version__ as grlc_version
@@ -20,10 +20,12 @@ import grlc.glogging as glogging
 
 glogger = glogging.getGrlcLogger(__name__)
 
-def getLoader(user, repo, subdir=None, sha=None, prov=None):
-    """Build a fileLoader (LocalLoader or GithubLoader) for the given repository."""
-    if user is None and repo is None:
+def getLoader(user, repo, subdir=None, query_urls=[], sha=None, prov=None):
+    """Build a fileLoader (LocalLoader, GithubLoader, ParamLoader) for the given parameters."""
+    if user is None and repo is None and not query_urls:
         loader = LocalLoader()
+    elif query_urls:
+        loader = ParamLoader(query_urls)
     else:
         loader = GithubLoader(user, repo, subdir, sha, prov)
     return loader
@@ -35,7 +37,7 @@ def build_spec(user, repo, subdir, sha=None, prov=None, extraMetadata=[]):
     return swagger.build_spec(user, repo, subdir, sha, prov, extraMetadata)
 
 
-def build_swagger_spec(user, repo, subdir, sha, serverName):
+def build_swagger_spec(user, repo, subdir, query_urls, sha, serverName):
     """Build grlc specification for the given github user / repo in swagger format """
     if user and repo:
         # Init provenance recording
@@ -47,7 +49,7 @@ def build_swagger_spec(user, repo, subdir, sha, serverName):
     swag['host'] = serverName
 
     try:
-        loader = getLoader(user, repo, subdir, sha, prov_g)
+        loader = getLoader(user, repo, subdir, query_urls, sha, prov_g)
     except Exception as e:
         # If repo does not exits
         swag['info'] = {
@@ -66,8 +68,8 @@ def build_swagger_spec(user, repo, subdir, sha, serverName):
     if subdir:
         swag['basePath'] = basePath + subdir
 
-    # TODO: can we pass loader to build_spec ?
-    spec = swagger.build_spec(user, repo, subdir, sha, prov_g)
+    # TODO: can we pass loader to build_spec ? --> Ideally yes!
+    spec = swagger.build_spec(user, repo, subdir, query_urls, sha, prov_g)
     for item in spec:
         swag['paths'][item['call_name']] = swagger.get_path_for_item(item)
 
