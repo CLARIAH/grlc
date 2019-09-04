@@ -44,9 +44,8 @@ class BaseLoader:
 
     def getLicenceURL(self):
         for f in self.fetchFiles():
-            if 'name' in f:
-                if f['name'].lower() == 'license' or f['name'].lower() == 'licence':
-                    return f['download_url']
+            if f['name'].lower() == 'license' or f['name'].lower() == 'licence':
+                return f['download_url']
         return None
 
 
