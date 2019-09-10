@@ -1,5 +1,4 @@
 import json
-import grlc.utils
 import grlc.gquery as gquery
 import grlc.pagination as pageUtils
 
