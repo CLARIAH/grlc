@@ -45,6 +45,7 @@ config.add_section('auth')
 config.add_section('defaults')
 config.add_section('local')
 config_filename = os.path.join(os.getcwd(), 'config.ini')
+print('Reading config file: ', config_filename)
 config.read(config_filename)
 ACCESS_TOKEN = config.get('auth', 'github_access_token')
 

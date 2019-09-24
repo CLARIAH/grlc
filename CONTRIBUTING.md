@@ -24,16 +24,25 @@ To get started with hacking grlc, follow these steps to create a local testing e
 1. `docker pull clariah/grlc:latest`
 2. `git clone https://github.com/CLARIAH/grlc`
 3. `cd grlc`
-4. `cp docker-compose.default.yml docker-compose.yml`
-5. Use your favorite editor to append these lines at the end of the file `docker-compose.yml` (replace `<GRLC_CLONE_PATH>` with the absolute path where you cloned grlc in step 2):
-
+4. Create a `docker-compose.yml` which matches your needs. For example:
 ```
-    volumes:
-     - <GRLC_CLONE_PATH>:/home/grlc/grlc
+version: '2'
+services:
+  grlc:
+    build: ./
+    restart: unless-stopped
+    ports:
+     - "8001:80"
+    environment:
+     - DEBUG=true
+     - USERMAP_GID=1000
+     - USERMAP_UID=1000
+     - GRLC_GITHUB_ACCESS_TOKEN=xxx
+     - GRLC_SERVER_NAME=grlc.io
 ```
 
-6. `docker-compose up`
-7. Your local grlc instance should be available at http://localhost:8001 and should respond to code modifications you make on `<GRLC_CLONE_PATH>`
+5. `docker-compose up`
+6. Your local grlc instance should be available at http://localhost:8001 and should respond to code modifications you make on `<GRLC_CLONE_PATH>`
 
 You're good to pick any issue at the  [issue tracker](https://github.com/CLARIAH/grlc/issues) marked as **enhancement** and start implementing it :)
 
