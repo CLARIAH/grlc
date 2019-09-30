@@ -31,7 +31,7 @@ def getLoader(user, repo, subdir=None, query_urls=[], sha=None, prov=None):
     return loader
 
 
-def build_spec(user, repo, subdir, sha=None, prov=None, extraMetadata=[]):
+def build_spec(user, repo, subdir=None, sha=None, prov=None, extraMetadata=[]):
     glogger.warning("grlc.utils.build_spec is deprecated and will " \
                     "be removed in the future. Use grlc.swagger.build_spec instead.")
     return swagger.build_spec(user, repo, subdir, sha, prov, extraMetadata)
