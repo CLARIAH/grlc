@@ -82,7 +82,7 @@ def build_swagger_spec(user, repo, subdir, query_urls, sha, serverName):
 def dispatch_query(user, repo, query_name, subdir=None, sha=None, content=None, requestArgs={}, acceptHeader='application/json',
                    requestUrl='http://', formData={}):
     loader = getLoader(user, repo, subdir, sha=sha, prov=None)
-    query, q_type = loader.getTextForName(query_name, subdir)
+    query, q_type = loader.getTextForName(query_name)
 
     # Call name implemented with SPARQL query
     if q_type == qType['SPARQL'] or q_type == qType['JSON']:
