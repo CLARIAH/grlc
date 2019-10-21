@@ -26,7 +26,7 @@ jobs:
       language: shell
       env:
         - PATH=/c/Python37:/c/Python37/Scripts:$PATH
-        - PYENV_VERSION=3.5.2
+        - PYENV_VERSION=3.7.5
     - stage: deploy
       # deploy automatically to pypi
       before_deploy:
