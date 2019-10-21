@@ -66,17 +66,7 @@ class TestUtils(unittest.TestCase):
         self.assertIsInstance(resp, list)
         self.assertIn('http', resp[0]['id'])
 
-    @patch('requests.get')
-    def test_projection(self, mock_get):
-        mock_get.return_value = Mock(ok=True)
-        mock_get.return_value.headers = {'Content-Type': 'application/json'}
-        mock_get.return_value.text = json.dumps(mock_simpleSparqlResponse)
-
-        rq, _ = self.loader.getTextForName('test-projection')
-        resp, status, headers = utils.dispatchSPARQLQuery(rq, self.loader, content=None, requestArgs={'id': 'http://dbpedia.org/resource/Frida_Kahlo'},
-                                                          acceptHeader='application/json',
-                                                          requestUrl='http://mock-endpoint/sparql', formData={})
-
+    def validateTestResponse(self, resp):
         self.assertIsInstance(resp, list, 'Response should be a list')
         self.assertEqual(len(resp), 5, 'Response should have 5 entries')
         for item in resp:
@@ -87,3 +77,33 @@ class TestUtils(unittest.TestCase):
 
         self.assertTrue(all(k in keys for k in ['p1', 'p2', 'p3', 'p4', 'p5']), 'Response should contain all known keys')
         self.assertTrue(all(v in values for v in ['o1', 'o2', 'o3', 'o4', 'o5']), 'Response should contain all known values')
+
+
+    def setMockGetResponse(self):
+        return_value = Mock(ok=True)
+        return_value.headers = {'Content-Type': 'application/json'}
+        return_value.text = json.dumps(mock_simpleSparqlResponse)
+        return return_value
+
+
+    @patch('requests.get')
+    def test_projection(self, mock_get):
+        mock_get.return_value = self.setMockGetResponse()
+
+        rq, _ = self.loader.getTextForName('test-projection')
+        resp, status, headers = utils.dispatchSPARQLQuery(rq, self.loader, content=None, requestArgs={'id': 'http://dbpedia.org/resource/Frida_Kahlo'},
+                                                          acceptHeader='application/json',
+                                                          requestUrl='http://mock-endpoint/sparql', formData={})
+        self.validateTestResponse(resp)
+
+
+    @patch('grlc.utils.getLoader')
+    @patch('requests.get')
+    def test_dispatch_query(self, mock_get, mock_loader):
+        mock_get.return_value = self.setMockGetResponse()
+        mock_loader.return_value = self.loader
+
+        resp, status, headers = utils.dispatch_query(None, None, 'test-projection', requestArgs={'id': 'http://dbpedia.org/resource/Frida_Kahlo'})
+
+        self.validateTestResponse(resp)
+        self.assertNotEqual(status, 404)

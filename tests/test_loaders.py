@@ -22,7 +22,7 @@ class TestGithubLoader(unittest.TestCase):
     def setUpClass(self, github_get_repo_patch):
         self.user = 'fakeuser'
         self.repo = 'fakerepo'
-        self.loader = GithubLoader(self.user, self.repo, None, None)
+        self.loader = GithubLoader(self.user, self.repo, subdir=None, sha=None, prov=None)
 
     def test_fetchFiles(self):
         files = self.loader.fetchFiles()
@@ -31,7 +31,7 @@ class TestGithubLoader(unittest.TestCase):
         self.assertIsInstance(files, list, "Should return a list of file items")
 
         # Should have N files (where N=8)
-        self.assertEquals(len(files), 8, "Should return correct number of files")
+        self.assertEqual(len(files), 8, "Should return correct number of files")
 
         # File items should have a download_url
         for fItem in files:
@@ -61,7 +61,7 @@ class TestGithubLoader(unittest.TestCase):
             self.assertGreater(len(text), 0, "Should be non-empty")
 
         # Should raise exception for invalid file items
-        with self.assertRaises(Exception, message="Should raise exception for invalid file items"):
+        with self.assertRaises(Exception, msg="Should raise exception for invalid file items"):
             text = self.loader.getTextFor({})
 
     def test_getTextForName(self):
@@ -87,7 +87,7 @@ class TestLocalLoader(unittest.TestCase):
         self.assertIsInstance(files, list, "Should return a list of file items")
 
         # Should have N files (where N=8)
-        self.assertEquals(len(files), 8, "Should return correct number of files")
+        self.assertEqual(len(files), 8, "Should return correct number of files")
 
         # File items should have a download_url
         for fItem in files:
@@ -116,7 +116,7 @@ class TestLocalLoader(unittest.TestCase):
             self.assertGreater(len(text), 0, "Should be non-empty")
 
         # Should raise exception for invalid file items
-        with self.assertRaises(Exception, message="Should raise exception for invalid file items"):
+        with self.assertRaises(Exception, msg="Should raise exception for invalid file items"):
             text = self.loader.getTextFor({})
 
     def test_getTextForName(self):

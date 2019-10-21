@@ -31,7 +31,7 @@ def getLoader(user, repo, subdir=None, query_urls=[], sha=None, prov=None):
     return loader
 
 
-def build_spec(user, repo, subdir, sha=None, prov=None, extraMetadata=[]):
+def build_spec(user, repo, subdir=None, sha=None, prov=None, extraMetadata=[]):
     glogger.warning("grlc.utils.build_spec is deprecated and will " \
                     "be removed in the future. Use grlc.swagger.build_spec instead.")
     return swagger.build_spec(user, repo, subdir, sha, prov, extraMetadata)
@@ -82,7 +82,7 @@ def build_swagger_spec(user, repo, subdir, query_urls, sha, serverName):
 def dispatch_query(user, repo, query_name, subdir=None, sha=None, content=None, requestArgs={}, acceptHeader='application/json',
                    requestUrl='http://', formData={}):
     loader = getLoader(user, repo, subdir, sha=sha, prov=None)
-    query, q_type = loader.getTextForName(query_name, subdir)
+    query, q_type = loader.getTextForName(query_name)
 
     # Call name implemented with SPARQL query
     if q_type == qType['SPARQL'] or q_type == qType['JSON']:

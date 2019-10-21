@@ -2,10 +2,7 @@
 
 # static.py: static values for the grlc Server
 import os
-try:
-    from ConfigParser import SafeConfigParser
-except:
-    from configparser import SafeConfigParser
+from configparser import ConfigParser
 
 DEFAULT_HOST = None
 DEFAULT_PORT = 8088
@@ -40,7 +37,7 @@ config_fallbacks = {
     'local_sparql_dir': '',
     'debug': 'False'
 }
-config = SafeConfigParser(config_fallbacks)
+config = ConfigParser(config_fallbacks)
 config.add_section('auth')
 config.add_section('defaults')
 config.add_section('local')
