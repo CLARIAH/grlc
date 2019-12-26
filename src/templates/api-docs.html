@@ -83,13 +83,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jQuery-linkify/1.1.7/jquery.linkify.js" type='text/javascript'></script>
     <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.0/clipboard.min.js"></script>
 
-    <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
 
     <script src="{{url_for('.static', filename='js/grlc-layout.js')}}"></script>
     <script src="{{url_for('.static', filename='js/grlc-api.js')}}"></script>
 
     <script>
-      url = "{{url_for('swagger_spec', user=user, repo=repo, sha=sha)}}";
+      console.log("{{query_urls}}");
+      url = "{{url_for('swagger_spec', user=user, repo=repo, subdir=subdir, query_urls=[query_urls], sha=sha)}}";
       window.onload = grlcOnLoad(url);
       $('#prev-commit').hide();
       $('#next-commit').hide();

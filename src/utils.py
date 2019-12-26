@@ -3,7 +3,7 @@ import grlc.gquery as gquery
 import grlc.pagination as pageUtils
 import grlc.swagger as swagger
 from grlc.prov import grlcPROV
-from grlc.fileLoaders import GithubLoader, LocalLoader
+from grlc.fileLoaders import GithubLoader, LocalLoader, ParamLoader
 from grlc.queryTypes import qType
 from grlc.projection import project
 from grlc import __version__ as grlc_version
@@ -11,38 +11,33 @@ from grlc import __version__ as grlc_version
 import re
 import requests
 import json
-import logging
 
 from rdflib import Graph
 
-glogger = logging.getLogger(__name__)
-
 import SPARQLTransformer
 
-def turtleize(swag):
-    """ Transforms a JSON swag object into a text/turtle LDA equivalent representation """
-    swag_graph = Graph()
-    # TODO: load swag data onto graph
+import grlc.glogging as glogging
 
-    return swag_graph.serialize(format='turtle')
+glogger = glogging.getGrlcLogger(__name__)
 
-
-def getLoader(user, repo, sha=None, prov=None):
-    """Build a fileLoader (LocalLoader or GithubLoader) for the given repository."""
-    if user is None and repo is None:
+def getLoader(user, repo, subdir=None, query_urls=[], sha=None, prov=None):
+    """Build a fileLoader (LocalLoader, GithubLoader, ParamLoader) for the given parameters."""
+    if user is None and repo is None and not query_urls:
         loader = LocalLoader()
+    elif query_urls:
+        loader = ParamLoader(query_urls)
     else:
-        loader = GithubLoader(user, repo, sha, prov)
+        loader = GithubLoader(user, repo, subdir, sha, prov)
     return loader
 
 
-def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
+def build_spec(user, repo, subdir=None, sha=None, prov=None, extraMetadata=[]):
     glogger.warning("grlc.utils.build_spec is deprecated and will " \
                     "be removed in the future. Use grlc.swagger.build_spec instead.")
-    return swagger.build_spec(user, repo, sha, prov, extraMetadata)
+    return swagger.build_spec(user, repo, subdir, sha, prov, extraMetadata)
 
 
-def build_swagger_spec(user, repo, sha, serverName):
+def build_swagger_spec(user, repo, subdir, query_urls, sha, serverName):
     """Build grlc specification for the given github user / repo in swagger format """
     if user and repo:
         # Init provenance recording
@@ -54,7 +49,7 @@ def build_swagger_spec(user, repo, sha, serverName):
     swag['host'] = serverName
 
     try:
-        loader = getLoader(user, repo, sha, prov_g)
+        loader = getLoader(user, repo, subdir, query_urls, sha, prov_g)
     except Exception as e:
         # If repo does not exits
         swag['info'] = {
@@ -70,9 +65,11 @@ def build_swagger_spec(user, repo, sha, serverName):
     swag['next_commit'] = next_commit
     swag['info'] = info
     swag['basePath'] = basePath
+    if subdir:
+        swag['basePath'] = basePath + subdir
 
-    # TODO: can we pass loader to build_spec ?
-    spec = swagger.build_spec(user, repo, sha, prov_g)
+    # TODO: can we pass loader to build_spec ? --> Ideally yes!
+    spec = swagger.build_spec(user, repo, subdir, query_urls, sha, prov_g)
     for item in spec:
         swag['paths'][item['call_name']] = swagger.get_path_for_item(item)
 
@@ -82,9 +79,9 @@ def build_swagger_spec(user, repo, sha, serverName):
     return swag
 
 
-def dispatch_query(user, repo, query_name, sha=None, content=None, requestArgs={}, acceptHeader='application/json',
+def dispatch_query(user, repo, query_name, subdir=None, sha=None, content=None, requestArgs={}, acceptHeader='application/json',
                    requestUrl='http://', formData={}):
-    loader = getLoader(user, repo, sha=sha, prov=None)
+    loader = getLoader(user, repo, subdir, sha=sha, prov=None)
     query, q_type = loader.getTextForName(query_name)
 
     # Call name implemented with SPARQL query
@@ -179,8 +176,6 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
 
     # If there's no mime type, the endpoint is an actual SPARQL endpoint
     else:
-        # requestedMimeType = static.mimetypes[content] if content else acceptHeader
-        # result, contentType = sparql.getResponseText(endpoint, query, requestedMimeType)
         reqHeaders = {'Accept': acceptHeader}
         if content:
             reqHeaders = {'Accept': static.mimetypes[content]}
@@ -206,6 +201,11 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
 
     if 'proto' in query_metadata:  # sparql transformer
         resp = SPARQLTransformer.post_process(json.loads(resp), query_metadata['proto'], query_metadata['opt'])
+
+    if 'transform' in query_metadata:  # sparql transformer
+        rq = { 'proto': query_metadata['transform'] }
+        _, _, opt = SPARQLTransformer.pre_process(rq)
+        resp = SPARQLTransformer.post_process(json.loads(resp), query_metadata['transform'], opt)
 
     headers['Server'] = 'grlc/' + grlc_version
     return resp, 200, headers

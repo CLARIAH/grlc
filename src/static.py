@@ -2,10 +2,7 @@
 
 # static.py: static values for the grlc Server
 import os
-try:
-    from ConfigParser import SafeConfigParser
-except:
-    from configparser import SafeConfigParser
+from configparser import ConfigParser
 
 DEFAULT_HOST = None
 DEFAULT_PORT = 8088
@@ -20,10 +17,6 @@ mimetypes = {
     'html' : 'text/html; q=1.0, */*; q=0.1',
     'ttl' : 'text/turtle'
 }
-
-# Logging format (prettier than the ugly standard in Flask)
-LOG_FORMAT = '%(asctime)-15s [%(levelname)s] (%(module)s.%(funcName)s) %(message)s'
-LOG_DEBUG_MODE = True
 
 # GitHub base URLS
 GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/'
@@ -41,13 +34,15 @@ config_fallbacks = {
     'user': '',
     'password': '',
     'server_name': '',
-    'local_sparql_dir': ''
+    'local_sparql_dir': '',
+    'debug': 'False'
 }
-config = SafeConfigParser(config_fallbacks)
+config = ConfigParser(config_fallbacks)
 config.add_section('auth')
 config.add_section('defaults')
 config.add_section('local')
-config_filename = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.ini')
+config_filename = os.path.join(os.getcwd(), 'config.ini')
+print('Reading config file: ', config_filename)
 config.read(config_filename)
 ACCESS_TOKEN = config.get('auth', 'github_access_token')
 
@@ -61,6 +56,10 @@ LOCAL_SPARQL_DIR = config.get('local', 'local_sparql_dir')
 
 # server name, used by the Flask app and in the swagger spec
 SERVER_NAME = config.get('defaults', 'server_name')
+
+# Logging format (prettier than the ugly standard in Flask)
+LOG_FORMAT = '%(asctime)-15s [%(levelname)s] (%(module)s.%(funcName)s) %(message)s'
+LOG_DEBUG_MODE = config.getboolean('defaults', 'debug')
 
 # Pattern for INSERT query call names
 INSERT_PATTERN = "INSERT DATA { GRAPH ?_g_iri { <s> <p> <o> }}"

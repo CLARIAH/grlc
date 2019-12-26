@@ -25,7 +25,7 @@ case ${1} in
         # configure default sparql endpoint
         sed -i "s|http://dbpedia.org/sparql|${GRLC_SPARQL_ENDPOINT}|" config.ini
 
-        gunicorn -c gunicorn_config.py src.server:app
+        grlc-server --port=8088
         # migrate_database
         # rm -rf /var/run/supervisor.sock
         # exec /usr/bin/supervisord -nc /etc/supervisor/supervisord.conf

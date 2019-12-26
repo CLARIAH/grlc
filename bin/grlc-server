@@ -1,15 +1,24 @@
-#!/home/amp/src/grlc/bin/python2
+#!/usr/bin/env python
+"""Grlc server.
 
+Usage:
+  grlc-server [--port=PORT]
+
+Options:
+  --port=PORT   Port the server runs on [default: 8088].
+"""
+from docopt import docopt
 from grlc.server import app as grlc_app
+from grlc import __version__ as grlc_version
 from grlc import static
 from sys import platform
 
 
-def runViaWaitress():
+def runViaWaitress(port=8088):
     from waitress import serve
-    serve(grlc_app, listen='*:8088')
+    serve(grlc_app, listen='*:%d'%port)
 
-def runViaGunicorn():
+def runViaGunicorn(port=8088):
     from gunicorn.app.base import BaseApplication
     from gunicorn.six import iteritems
     class StandaloneApplication(BaseApplication):
@@ -28,14 +37,17 @@ def runViaGunicorn():
             return self.application
 
     options = {
-        'bind': '%s:%d' % ('0.0.0.0', 8088),
+        'bind': '%s:%d' % ('0.0.0.0', port),
         'workers': 20,
         'debug': static.LOG_DEBUG_MODE
     }
     StandaloneApplication(grlc_app, options).run()
 
 if __name__ == '__main__':
+    args = docopt(__doc__, version='Grlc %s server'%grlc_version)
+    port = int(args['--port'])
+
     if platform=='win32':
-        runViaWaitress()
+        runViaWaitress(port)
     else:
-        runViaGunicorn()
+        runViaGunicorn(port)

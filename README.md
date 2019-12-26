@@ -43,24 +43,66 @@ For a quick usage tutorial check out our wiki walkthrough [here](https://github.
 
 ## Install and run
 
-Running via [docker](https://www.docker.com/) is the easiest and preferred form of deploying grlc. You'll need a working installation of [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/). To deploy grlc, just pull the latest image from Docker hub, and run docker compose with a `docker-compose.yml` that suits your needs (an [example](docker-compose.default.yml) is provided in the root directory):
+### grlc.io
+The easiest way to use grlc is by visiting [grlc.io/](http://grlc.io/) and using this service to convert SPARQL queries on your github repo into a RESTful API.
 
-<pre>
-git clone https://github.com/CLARIAH/grlc
-cd grlc
-docker pull clariah/grlc
-docker-compose -f docker-compose.default.yml up
-</pre>
+### Pip
+If you want to run grlc locally or use it as a library, you can install grlc on your machine. Grlc is [registered in PyPi](https://pypi.org/project/grlc/) so you can install it using pip.
 
-To run directly from Docker Hub it is sufficient to do:
+#### Prerequisites
+- Python3
+- development files:
+```bash
+sudo apt-get install libevent-dev python-all-dev
 ```
-docker run --rm -p 8088:80 -e GRLC_SERVER_NAME=grlc.io -e GRLC_GITHUB_ACCESS_TOKEN=xxx -e GRLC_SPARQL_ENDPOINT=http://dbpedia.org/sparql -e DEBUG=true clariah/grlc
+
+#### pip install
+```bash
+pip install grlc
 ```
 
-(You can omit the first two commands if you just copy [this file](docker-compose.default.yml) somehwere in your filesystem)
-If you use the supplied `docker-compose.default.yml` your grlc instance will be available at http://localhost:8001
+Grlc includes a command line tool which you can use to start your own grlc server:
+```bash
+grlc-server
+```
 
-If you want your grlc instance to forward queries to a different service than `grlc.io`, edit the `GRLC_SERVER_NAME` variable in your `docker-compose.yml` or `docker-compose.default.yml` file.
+#### Using gunicorn
+You can run grlc using gunicorn as follows:
+```bash
+gunicorn grlc.server:app
+```
+
+If you want to use your own gunicorn configuration, for example `gunicorn_config.py`:
+```
+workers = 5
+worker_class = 'gevent'
+bind = '0.0.0.0:8088'
+```
+Then you can run it as:
+```bash
+gunicorn -c gunicorn_config.py grlc.server:app
+```
+
+**Note:** Since `gunicorn` does not work under Windows, you can use `waitress` instead:
+```bash
+waitress-serve --port=8088 grlc.server:app
+```
+
+#### Grlc library
+You can use grlc as a library directly from your own python script. See the [usage example](https://github.com/CLARIAH/grlc/blob/master/doc/notebooks/GrlcFromNotebook.ipynb) to find out more.
+
+### Docker
+To run grlc via [docker](https://www.docker.com/), you'll need a working installation of docker. To deploy grlc, just pull the [latest image from Docker hub](https://hub.docker.com/r/clariah/grlc/). :
+```bash
+docker run -it --rm -p 8088:80 clariah/grlc
+```
+
+The docker image allows you to setup several environment variable such as `GRLC_SERVER_NAME` `GRLC_GITHUB_ACCESS_TOKEN` and `GRLC_SPARQL_ENDPOINT`:
+```bash
+docker run -it --rm -p 8088:80 -e GRLC_SERVER_NAME=grlc.io -e GRLC_GITHUB_ACCESS_TOKEN=xxx -e GRLC_SPARQL_ENDPOINT=http://dbpedia.org/sparql -e DEBUG=true clariah/grlc
+```
+
+## Access token
 
 In order for grlc to communicate with GitHub, you'll need to tell grlc what your access token is:
 
@@ -69,43 +111,6 @@ In order for grlc to communicate with GitHub, you'll need to tell grlc what your
 3. Edit your `docker-compose.yml` or `docker-compose.default.yml` file, and paste this token as value of the environment variable GRLC_GITHUB_ACCESS_TOKEN
 
 If you want to run grlc at system boot as a service, you can find example upstart scripts at [upstart/](upstart/grlc-docker.conf)
-
-### Alternative install methods
-
-Through these you'll miss some cool docker bundled features (like nginx-based caching). We provide these alternatives just for testing, development scenarios, or docker compatibility reasons.
-
-#### Prerequisites
-- Python3
-- development files:
-
-```bash
-sudo apt-get install libevent-dev python-all-dev
-```
-
-#### pip
-
-If you want to use grlc as a library, you'll find it useful to install via `pip`.
-
-<pre>
-pip install grlc
-grlc-server
-</pre>
-
-More details can be found at [grlc's PyPi page](https://pypi.python.org/pypi/grlc) (thanks to [c-martinez](https://github.com/c-martinez)!).
-
-#### Flask application
-
-You can run grlc natively as follows:
-```
-gunicorn -c gunicorn_config.py src.server:app
-```
-
-**Note:** Since `gunicorn` does not work under Windows, you can use `waitress` instead:
-```
-waitress-serve --port=8088 src.server:app
-```
-
-You can also find an example [here](https://github.com/CLARIAH/grlc/blob/master/docker-assets/entrypoint.sh#L24)
 
 ## Usage
 

@@ -4,10 +4,9 @@ import grlc.gquery as gquery
 import grlc.pagination as pageUtils
 
 import traceback
-import logging
+import grlc.glogging as glogging
 
-glogger = logging.getLogger(__name__)
-
+glogger = glogging.getGrlcLogger(__name__)
 
 def get_blank_spec():
     """Creates the base (blank) structure of swagger specification."""
@@ -104,9 +103,9 @@ def get_path_for_item(item):
     return item_path
 
 
-def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
+def build_spec(user, repo, subdir=None, query_urls=None, sha=None, prov=None, extraMetadata=[]):
     """Build grlc specification for the given github user / repo."""
-    loader = grlc.utils.getLoader(user, repo, sha=sha, prov=prov)
+    loader = grlc.utils.getLoader(user, repo, subdir, query_urls, sha=sha, prov=prov)
 
     files = loader.fetchFiles()
     raw_repo_uri = loader.getRawRepoUri()
@@ -116,9 +115,10 @@ def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
 
     allowed_ext = ["rq", "sparql", "json", "tpf"]
     for c in files:
+        glogger.debug(files)
         glogger.debug('>>>>>>>>>>>>>>>>>>>>>>>>>c_name: {}'.format(c['name']))
         extension = c['name'].split('.')[-1]
-        if extension in allowed_ext:
+        if extension in allowed_ext or query_urls: # parameter provided queries may not have extension
             call_name = c['name'].split('.')[0]
 
             # Retrieve extra metadata from the query decorators
@@ -128,7 +128,7 @@ def build_spec(user, repo, sha=None, prov=None, extraMetadata=[]):
             if extension == "json":
                 query_text = json.loads(query_text)
 
-            if extension in ["rq", "sparql", "json"]:
+            if extension in ["rq", "sparql", "json"] or query_urls:
                 glogger.debug("===================================================================")
                 glogger.debug("Processing SPARQL query: {}".format(c['name']))
                 glogger.debug("===================================================================")
@@ -208,6 +208,7 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
     endpoint_in_url = query_metadata['endpoint_in_url'] if 'endpoint_in_url' in query_metadata else True
 
     projection = loader.getProjectionForQueryName(call_name)
+    glogger.debug('Projection: '.format(projection))
 
     # Processing of the parameters
     params = []

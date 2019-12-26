@@ -1,8 +1,9 @@
-import logging
 from pythonql.parser.Preprocessor import makeProgramFromString
 from six import PY3
 
-glogger = logging.getLogger(__name__)
+import grlc.glogging as glogging
+
+glogger = glogging.getGrlcLogger(__name__)
 
 def project(dataIn, projectionScript):
     '''Programs may make use of data in the `dataIn` variable and should

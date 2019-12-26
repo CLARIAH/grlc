@@ -28,6 +28,8 @@ class BaseLoader:
             if queryText:
                 if (queryType == qType['JSON']):
                     queryText = json.loads(queryText)
+                    if 'proto' not in queryText and '@graph' not in queryText:
+                        continue
                 return queryText, queryType
         # No query found...
         return '', None
@@ -48,9 +50,10 @@ class BaseLoader:
 
 
 class GithubLoader(BaseLoader):
-    def __init__(self, user, repo, sha, prov):
+    def __init__(self, user, repo, subdir, sha, prov):
         self.user = user
         self.repo = repo
+        self.subdir = subdir
         self.sha = sha
         self.prov = prov
         gh = Github(static.ACCESS_TOKEN)
@@ -63,6 +66,8 @@ class GithubLoader(BaseLoader):
 
     def fetchFiles(self):
         api_repo_content_uri = static.GITHUB_API_BASE_URL + self.user + '/' + self.repo + '/contents'
+        if self.subdir:
+            api_repo_content_uri += '/' + str(self.subdir)
         params = {
             'ref': 'master' if self.sha is None else self.sha
         }
@@ -93,6 +98,9 @@ class GithubLoader(BaseLoader):
 
     def _getText(self, query_name):
         query_uri = self.getRawRepoUri() + query_name
+        if self.subdir:
+            query_uri = self.getRawRepoUri() + self.subdir + '/' + query_name
+        print("Requesting query at " + str(query_uri))
         req = requests.get(query_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)})
         if req.status_code == 200:
             return req.text
@@ -137,6 +145,7 @@ class LocalLoader(BaseLoader):
 
     def getRawRepoUri(self):
         """Returns the root url of the local repo."""
+        # Maybe return something like 'file:///path/to/local/queries' ?
         return ''
 
     def getTextFor(self, fileItem):
@@ -166,7 +175,65 @@ class LocalLoader(BaseLoader):
         return ['local']
 
     def getFullName(self):
-        return 'local/local'
+        return 'local/'
 
     def getRepoURI(self):
         return 'local-file-system'
+
+class ParamLoader(BaseLoader):
+    def __init__(self, query_urls):
+        # Implement the list of queries with a list of dicts {'name', 'download_url'}
+        self.query_urls = []
+        for q in query_urls:
+            name = q.split('/')[-1]
+            download_url = q
+            self.query_urls.append({'name': name, 'download_url': download_url})
+
+    def fetchFiles(self):
+        """ Returns a list of {'name', 'download_url'} queries passed as parameter in the first request """
+        return self.query_urls
+
+    def getTextFor(self, item):
+        """Returns the contents of the given query in the list of param queries """
+        return self._getText(item['name'])
+
+    def _getText(self, item_name):
+        query_url = self.query_urls[0]['download_url']
+        for q in self.query_urls:
+            if q['name'] == item_name:
+                query_url = q['download_url']
+
+        # TODO: this is where most implementations will differ, push for text/plain or own protocol
+        headers = {'Accept' : 'text/plain'}
+        req = requests.get(query_url, headers=headers)
+        if req.status_code == 200:
+            return req.text
+        else:
+            return None
+
+
+    def getRawRepoUri(self):
+        """ Returns the root url of the remote repo"""
+        # TODO: What should this be?
+        return ''
+
+    def getRepoTitle(self):
+        return 'Remote queries by parameter'
+
+    def getContactName(self):
+        return 'Anonymous'
+
+    def getContactUrl(self):
+        return ''
+
+    def getCommitList(self):
+        return ['param']
+
+    def getFullName(self):
+        return 'api/url'
+
+    def getRepoURI(self):
+        return 'param'
+
+    def getLicenceURL(self):
+        return ''

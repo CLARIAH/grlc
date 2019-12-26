@@ -8,8 +8,8 @@ if [[ $TRAVIS_BUILD_STAGE_NAME == 'Deploy' ]]; then
 fi
 
 if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
-  brew install pyenv
-  pyenv install -s $PYENV_VERSION
+  brew install openssl pyenv
+  CONFIGURE_OPTS="--with-openssl=$(brew --prefix openssl)" pyenv install -s $PYENV_VERSION 
 elif [[ $TRAVIS_OS_NAME == 'windows' ]]; then
-  choco install python
+  choco install python --version $PYENV_VERSION
 fi
