@@ -21,6 +21,5 @@ SPARQLTransformer==1.7.0
 SPARQLWrapper==1.8.2
 werkzeug>=0.15.3
 PyGithub==1.43.5
-pythonql3==0.9.61
 gunicorn==19.6.0; sys_platform!="win32"
 waitress==1.1.0; sys_platform=="win32"

@@ -25,4 +25,4 @@ license: MIT
 message: "If you use this software, please cite it as below."
 repository-code: "https://github.com/CLARIAH/grlc"
 title: grlc
-version: "1.3.0"
+version: "1.3.1"
