@@ -7,6 +7,12 @@
 
 grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor, automatically builds Web APIs using SPARQL queries stored in git repositories. http://grlc.io/
 
+> A cool project that can convert a random SPARQL endpoint into an OpenAPI endpoint
+
+> It enables us to quickly integrate any new API requirements in a matter of seconds, without having to worry about configuration or deployment of the system
+
+> You can store your SPARQL queries on GitHub and then you can run your queries on your favourite programming language (Python, Javascript, etc.) using a Web API (including swagger documentation) just as easily as loading data from a web page
+
 **Contributors:**	[Albert Meroño](https://github.com/albertmeronyo), [Rinke Hoekstra](https://github.com/RinkeHoekstra), [Carlos Martínez](https://github.com/c-martinez)
 
 **Copyright:**	Albert Meroño, VU University Amsterdam  
