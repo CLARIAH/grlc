@@ -19,7 +19,7 @@ jobs:
     - stage: Tests
       os: osx
       language: objective-c
-      env: PYENV_VERSION=3.5.2
+      env: PYENV_VERSION=3.7.5
       # command to install dependencies
     - stage: Tests
       os: windows
