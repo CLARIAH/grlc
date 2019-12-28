@@ -87,7 +87,7 @@ class TestUtils(unittest.TestCase):
 
 
     @patch('requests.get')
-    def test_projection(self, mock_get):
+    def test_dispatch_SPARQL_query(self, mock_get):
         mock_get.return_value = self.setMockGetResponse()
 
         rq, _ = self.loader.getTextForName('test-projection')

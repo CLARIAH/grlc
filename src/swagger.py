@@ -68,8 +68,8 @@ def get_path_for_item(item):
 
     description = item['description']
     description += '\n\n```{}```'.format(query)
-    description += '\n\nSPARQL projection:\n```pythonql\n{}```'.format(
-        item['projection']) if 'projection' in item else ''
+    description += '\n\nSPARQL transformation:\n```json\n{}```'.format(
+        item['transform']) if 'transform' in item else ''
 
     item_path = {
         item['method']: {
@@ -98,8 +98,6 @@ def get_path_for_item(item):
             }
         }
     }
-    if 'projection' in item:
-        item_path['projection'] = item['projection']
     return item_path
 
 
@@ -207,9 +205,6 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
 
     endpoint_in_url = query_metadata['endpoint_in_url'] if 'endpoint_in_url' in query_metadata else True
 
-    projection = loader.getProjectionForQueryName(call_name)
-    glogger.debug('Projection: '.format(projection))
-
     # Processing of the parameters
     params = []
 
@@ -294,13 +289,12 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
         glogger.warning("Query of type {} is currently unsupported! Skipping".format(query_metadata['type']))
 
     # Finally: main structure of the callname spec
-    item = packItem('/' + call_name, method, tags, summary, description, params, query_metadata, extraMetadata,
-                    projection)
+    item = packItem('/' + call_name, method, tags, summary, description, params, query_metadata, extraMetadata)
 
     return item
 
 
-def packItem(call_name, method, tags, summary, description, params, query_metadata, extraMetadata, projection=None):
+def packItem(call_name, method, tags, summary, description, params, query_metadata, extraMetadata):
     item = {
         'call_name': call_name,
         'method': method,
@@ -308,13 +302,10 @@ def packItem(call_name, method, tags, summary, description, params, query_metada
         'summary': summary,
         'description': description,
         'params': params,
-        'item_properties': None,  # From projection variables, only SelectQuery
+        'item_properties': None,
         'query': query_metadata['query'],
         'original_query': query_metadata.get('original_query', query_metadata['query'])
     }
-
-    if projection:
-        item['projection'] = projection  # SPARQL projection PyQL file is available
 
     for extraField in extraMetadata:
         if extraField in query_metadata:
