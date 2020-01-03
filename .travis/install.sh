@@ -19,8 +19,5 @@ if [[ $TRAVIS_BUILD_STAGE_NAME == 'Deploy' ]]; then
 fi
 
 pip install --upgrade pip
-
-# Horrible hack -- but we should remove pythonql functionality soon anyway...
-pip install pythonql3
 pip install .
 pip install -r requirements-test.txt

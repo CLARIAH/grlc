@@ -34,14 +34,6 @@ class BaseLoader:
         # No query found...
         return '', None
 
-    def getProjectionForQueryName(self, query_name):
-        """ TODO: DOCUMENT !!
-        Returns None if no such projection exists
-        """
-        projectionFileName = query_name + '.pyql'
-        projectionText = self._getText(projectionFileName)
-        return projectionText
-
     def getLicenceURL(self):
         for f in self.fetchFiles():
             if f['name'].lower() == 'license' or f['name'].lower() == 'licence':
