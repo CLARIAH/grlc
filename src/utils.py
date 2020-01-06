@@ -5,7 +5,6 @@ import grlc.swagger as swagger
 from grlc.prov import grlcPROV
 from grlc.fileLoaders import GithubLoader, LocalLoader, ParamLoader
 from grlc.queryTypes import qType
-from grlc.projection import project
 from grlc import __version__ as grlc_version
 
 import re
@@ -90,11 +89,8 @@ def dispatch_query(user, repo, query_name, subdir=None, sha=None, content=None, 
                                                     requestUrl)
 
         if acceptHeader == 'application/json':
-            projection = loader.getProjectionForQueryName(query_name)
-            if projection:
-                dataIn = json.loads(resp)
-                dataOut = project(dataIn, projection)
-                resp = json.dumps(dataOut)
+            # TODO: transform JSOn result if suitable
+            pass
 
         return resp, status, headers
     # Call name implemented with TPF query
