@@ -43,9 +43,9 @@ def swagger_spec_param():
     return swagger_spec(user=None, repo=None, query_urls=eval(query_urls))
 
 @app.route('/api/url/exec/<query_name>')
-def query_param():
+def query_param(query_name):
     query_urls = request.values.getlist('queryUrl')
-    glogger.info("Params as provided: ".format(query_urls))
+    glogger.debug("Params as provided: ".format(query_urls))
     return query(user=None, repo=None, query_name=query_name, query_urls=query_urls)
 
 ### GitHub routes ###
@@ -124,10 +124,4 @@ def swagger_spec(user, repo, subdir=None, query_urls=[], sha=None, content=None)
 
 
 if __name__ == '__main__':
-    print("foo")
-    print("bar")
-    print("LOG DEBUG MODE is: " + str(static.LOG_DEBUG_MODE))
-    print("API KEY: " + str(static.ACCESS_TOKEN))
-    glogger.debug("yo")
     app.run(host=static.DEFAULT_HOST, port=static.DEFAULT_PORT, debug=True)
-    glogger.debug("YO")
