@@ -2,6 +2,7 @@ import json
 import grlc.utils
 import grlc.gquery as gquery
 import grlc.pagination as pageUtils
+from grlc.fileLoaders import GithubLoader, LocalLoader, ParamLoader
 
 import traceback
 import grlc.glogging as glogging
@@ -54,8 +55,16 @@ def get_repo_info(loader, sha, prov_g):
         }
     }
 
-    basePath = '/api/' + user_repo + '/'
-    basePath += ('commit/' + sha + '/') if sha else ''
+    if type(loader) is GithubLoader:
+        basePath = '/api-git/' + user_repo + '/'
+        basePath += ('commit/' + sha + '/') if sha else ''
+    elif type(loader) is LocalLoader:
+        basePath = '/api-local/'
+    elif type(loader) is ParamLoader:
+        basePath = '/api-url/'
+    else:
+        # TODO: raise error
+        glogger.error('Cannot set basePath, loader type unkown')
 
     return prev_commit, next_commit, info, basePath
 
