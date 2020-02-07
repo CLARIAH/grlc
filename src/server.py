@@ -25,6 +25,31 @@ def grlc():
 def query_local(query_name):
     return query(user=None, repo=None, query_name=query_name)
 
+### Routes for APIs built using remote queries prvided by parameter ###
+
+@app.route('/api/url', methods=['POST', 'GET'])
+def api_docs_param():
+    # Get queries provided by params
+    query_urls = request.values.getlist('queryUrl')
+    glogger.info("Params as provided: ".format(query_urls))
+    return api_docs(user='param', repo='param', subdir=None, query_urls=query_urls, sha=None)
+
+@app.route('/api/param/param/spec', methods=['GET'])
+def swagger_spec_param():
+    query_urls = request.args['query_urls']
+    # user = request.args['user']
+    glogger.info("query_urls: ".format(query_urls))
+    # glogger.info("user: ".format(user))
+    return swagger_spec(user=None, repo=None, query_urls=eval(query_urls))
+
+@app.route('/api/url/exec/<query_name>')
+def query_param():
+    query_urls = request.values.getlist('queryUrl')
+    glogger.info("Params as provided: ".format(query_urls))
+    return query(user=None, repo=None, query_name=query_name, query_urls=query_urls)
+
+### GitHub routes ###
+
 @app.route('/api/<user>/<repo>/<query_name>', methods=['GET', 'POST'])
 @app.route('/api/<user>/<repo>/<subdir>/<query_name>', methods=['GET', 'POST'])
 @app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET', 'POST'])
@@ -33,7 +58,7 @@ def query_local(query_name):
 @app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/<query_name>', methods=['GET', 'POST'])
 @app.route('/api/<user>/<repo>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
 @app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
-def query(user, repo, query_name, subdir=None, sha=None, content=None):
+def query(user, repo, query_name, subdir=None, query_urls=None, sha=None, content=None):
     glogger.info("-----> Executing call name at /{}/{}/{}/{} on commit {}".format(user, repo, subdir, query_name, sha))
     glogger.debug("Request accept header: " + request.headers["Accept"])
 
@@ -42,7 +67,7 @@ def query(user, repo, query_name, subdir=None, sha=None, content=None):
     requestUrl = request.url
     formData = request.form
 
-    query_response, status, headers = utils.dispatch_query(user, repo, query_name, subdir,
+    query_response, status, headers = utils.dispatch_query(user, repo, query_name, subdir, query_urls,
                                                            sha=sha, content=content, requestArgs=requestArgs,
                                                            acceptHeader=acceptHeader,
                                                            requestUrl=requestUrl, formData=formData)
@@ -62,27 +87,7 @@ def api_docs_local():
 def swagger_spec_local():
     return swagger_spec(user=None, repo=None, sha=None, content=None)
 
-### Routes for APIs built using remote queries prvided by parameter ###
 
-@app.route('/api/url', methods=['POST', 'GET'])
-def api_docs_param():
-    # Get queries provided by params
-    query_urls = request.values.getlist('queryUrl')
-    glogger.info("Params as provided: ".format(query_urls))
-    return api_docs(user='param', repo='param', subdir=None, query_urls=query_urls, sha=None)
-
-@app.route('/api/param/param/spec', methods=['GET'])
-def swagger_spec_param():
-    query_urls = request.args['query_urls']
-    # user = request.args['user']
-    glogger.info("query_urls: ".format(query_urls))
-    # glogger.info("user: ".format(user))
-    return swagger_spec(user=None, repo=None, query_urls=eval(query_urls))
-
-@app.route('/api/url/exec')
-def query_param():
-    # TODO: exec call names by parameter
-    return None
 
 
 @app.route('/api/<user>/<repo>', strict_slashes=False)

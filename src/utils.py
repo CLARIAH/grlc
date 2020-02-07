@@ -78,9 +78,9 @@ def build_swagger_spec(user, repo, subdir, query_urls, sha, serverName):
     return swag
 
 
-def dispatch_query(user, repo, query_name, subdir=None, sha=None, content=None, requestArgs={}, acceptHeader='application/json',
+def dispatch_query(user, repo, query_name, subdir=None, query_urls=None, sha=None, content=None, requestArgs={}, acceptHeader='application/json',
                    requestUrl='http://', formData={}):
-    loader = getLoader(user, repo, subdir, sha=sha, prov=None)
+    loader = getLoader(user, repo, subdir, query_urls, sha=sha, prov=None)
     query, q_type = loader.getTextForName(query_name)
 
     # Call name implemented with SPARQL query
