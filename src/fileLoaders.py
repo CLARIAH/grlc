@@ -183,11 +183,8 @@ class URLLoader(BaseLoader):
          - Save specURL on this instance.
         '''
         headers = {'Accept' : 'text/yaml'}
-        print('Requesting YML from ', specURL)
         resp = requests.get(specURL, headers=headers)
-        print('YML: ', resp)
         if resp.status_code == 200:
-            print('YML: ', resp.text)
             self.spec = yaml.load(resp.text)
             self.spec['url'] = specURL
             self.spec['files'] = {}
@@ -226,7 +223,6 @@ class URLLoader(BaseLoader):
             itemUrl = self.spec['files'][itemName]['download_url']
             headers = {'Accept' : 'text/txt'}
             resp = requests.get(itemUrl, headers=headers)
-            print('text: ', type(resp.text))
             if resp.status_code == 200:
                 return resp.text
             else:

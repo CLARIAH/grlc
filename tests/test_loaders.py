@@ -132,11 +132,19 @@ class TestLocalLoader(unittest.TestCase):
 
 class TestURLLoader(unittest.TestCase):
     @classmethod
+    def setUp(self):
+        self.patcher = patch('grlc.fileLoaders.requests.get', side_effect=mock_requestsUrl)
+        self.patcher.start()
+
+    @classmethod
+    def tearDown(self):
+        self.patcher.stop()
+
+    @classmethod
     @patch('requests.get', side_effect=mock_requestsUrl)
     def setUpClass(self, x):
         self.specURL = 'http://example.org/url.yml'
         self.loader = URLLoader(self.specURL)
-        print('Starting loader...')
 
     def test_fetchFiles(self):
         files = self.loader.fetchFiles()
@@ -151,17 +159,7 @@ class TestURLLoader(unittest.TestCase):
         for fItem in files:
             self.assertIn('download_url', fItem, "File items should have a download_url")
 
-    def test_getRawRepoUri(self):
-        repoUri = self.loader.getRawRepoUri()
-
-        # Should be a string
-        self.assertIsInstance(repoUri, six.string_types, "Should be a string")
-
-        # Should be the same one we used to create the repo
-        self.assertIn(self.specURL, repoUri, "Should be the same URL it was initialized with")
-
-    @patch('requests.get', side_effect=mock_requestsUrl)
-    def test_getTextFor(self, x):
+    def test_getTextFor(self):
         files = self.loader.fetchFiles()
 
         # the contents of each file
@@ -177,6 +175,15 @@ class TestURLLoader(unittest.TestCase):
         # Should raise exception for invalid file items
         with self.assertRaises(Exception, msg="Should raise exception for invalid file items"):
             text = self.loader.getTextFor({})
+
+    def test_getRawRepoUri(self):
+        repoUri = self.loader.getRawRepoUri()
+
+        # Should be a string
+        self.assertIsInstance(repoUri, six.string_types, "Should be a string")
+
+        # Should be the same one we used to create the repo
+        self.assertIn(self.specURL, repoUri, "Should be the same URL it was initialized with")
 
     def test_getTextForName(self):
         testableNames = [

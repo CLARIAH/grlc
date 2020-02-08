@@ -32,7 +32,6 @@ def mock_requestsGithub(uri, headers={}, params={}):
             return return_value
 
 def mock_requestsUrl(url, headers={}, params={}):
-    print('Mocking requests.get: ', url)
     url = url.replace('http://example.org/', 'tests/repo/')
     f = open(url, 'r')
     lines = f.readlines()
