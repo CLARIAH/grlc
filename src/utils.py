@@ -19,12 +19,16 @@ import grlc.glogging as glogging
 
 glogger = glogging.getGrlcLogger(__name__)
 
-def getLoader(user, repo, subdir=None, query_urls=[], sha=None, prov=None):
+def getLoader(user, repo, subdir=None, query_url=None, sha=None, prov=None):
     """Build a fileLoader (LocalLoader, GithubLoader, ParamLoader) for the given parameters."""
-    if user is None and repo is None and not query_urls:
+    if user is None and repo is None and not query_url:
         loader = LocalLoader()
-    elif query_urls:
-        loader = ParamLoader(query_urls)
+    elif query_url:
+        # Here we de-reference the spec URL to get a list of query URLs and construct the loader
+        r = requests.get(query_url)
+        query_urls = r.text.split()
+        glogger.debug("Creating ParamLoader with URLs: {}".format(query_urls))
+        loader = ParamLoader(query_url, query_urls)
     else:
         loader = GithubLoader(user, repo, subdir, sha, prov)
     return loader
@@ -36,7 +40,7 @@ def build_spec(user, repo, subdir=None, sha=None, prov=None, extraMetadata=[]):
     return swagger.build_spec(user, repo, subdir, sha, prov, extraMetadata)
 
 
-def build_swagger_spec(user, repo, subdir, query_urls, sha, serverName):
+def build_swagger_spec(user, repo, subdir, query_url, sha, serverName):
     """Build grlc specification for the given github user / repo in swagger format """
     if user and repo:
         # Init provenance recording
@@ -48,7 +52,7 @@ def build_swagger_spec(user, repo, subdir, query_urls, sha, serverName):
     swag['host'] = serverName
 
     try:
-        loader = getLoader(user, repo, subdir, query_urls, sha, prov_g)
+        loader = getLoader(user, repo, subdir, query_url, sha, prov_g)
     except Exception as e:
         # If repo does not exits
         swag['info'] = {
@@ -68,7 +72,7 @@ def build_swagger_spec(user, repo, subdir, query_urls, sha, serverName):
         swag['basePath'] = basePath + subdir
 
     # TODO: can we pass loader to build_spec ? --> Ideally yes!
-    spec = swagger.build_spec(user, repo, subdir, query_urls, sha, prov_g)
+    spec = swagger.build_spec(user, repo, subdir, query_url, sha, prov_g)
     for item in spec:
         swag['paths'][item['call_name']] = swagger.get_path_for_item(item)
 
@@ -78,9 +82,9 @@ def build_swagger_spec(user, repo, subdir, query_urls, sha, serverName):
     return swag
 
 
-def dispatch_query(user, repo, query_name, subdir=None, query_urls=None, sha=None, content=None, requestArgs={}, acceptHeader='application/json',
+def dispatch_query(user, repo, query_name, subdir=None, query_url=None, sha=None, content=None, requestArgs={}, acceptHeader='application/json',
                    requestUrl='http://', formData={}):
-    loader = getLoader(user, repo, subdir, query_urls, sha=sha, prov=None)
+    loader = getLoader(user, repo, subdir, query_url, sha=sha, prov=None)
     query, q_type = loader.getTextForName(query_name)
 
     # Call name implemented with SPARQL query
