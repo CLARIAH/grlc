@@ -49,7 +49,7 @@ def query_local(query_name):
 def query_param(query_name):
     spec_url = request.args['specUrl']
     glogger.debug("Spec URL: ".format(spec_url))
-    return query(user=None, repo=None, query_name=query_name, query_url=spec_url)
+    return query(user=None, repo=None, query_name=query_name, spec_url=spec_url)
 
 # Spec generation, front-end
 @app.route('/api-url', methods=['POST', 'GET'], strict_slashes=False)
@@ -64,8 +64,8 @@ def api_docs_param():
 def swagger_spec_param():
     spec_url = request.args['specUrl']
     glogger.info("Spec URL: ".format(spec_url))
-    return swagger_spec(user=None, repo=None, query_url=spec_url)
-    
+    return swagger_spec(user=None, repo=None, spec_url=spec_url)
+
 
 ##############################
 ### Routes for GitHub APIs ###
@@ -80,7 +80,7 @@ def swagger_spec_param():
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/<query_name>', methods=['GET', 'POST'])
 @app.route('/api-git/<user>/<repo>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
-def query(user, repo, query_name, subdir=None, query_url=None, sha=None, content=None):
+def query(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=None):
     glogger.info("-----> Executing call name at /{}/{}/{}/{} on commit {}".format(user, repo, subdir, query_name, sha))
     glogger.debug("Request accept header: " + request.headers["Accept"])
 
@@ -89,7 +89,7 @@ def query(user, repo, query_name, subdir=None, query_url=None, sha=None, content
     requestUrl = request.url
     formData = request.form
 
-    query_response, status, headers = utils.dispatch_query(user, repo, query_name, subdir, query_url,
+    query_response, status, headers = utils.dispatch_query(user, repo, query_name, subdir, spec_url,
                                                            sha=sha, content=content, requestArgs=requestArgs,
                                                            acceptHeader=acceptHeader,
                                                            requestUrl=requestUrl, formData=formData)
@@ -107,7 +107,7 @@ def query(user, repo, query_name, subdir=None, query_url=None, sha=None, content
 @app.route('/api-git/<user>/<repo>/commit/<sha>/api-docs')
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>')
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/api-docs')
-def api_docs(user, repo, subdir=None, query_url=None, sha=None):
+def api_docs(user, repo, subdir=None, spec_url=None, sha=None):
     swagger_url = '/api-git/{}/{}'.format(user, repo)
     if subdir:
         swagger_url += '/{}'.format(subdir)
@@ -121,10 +121,10 @@ def api_docs(user, repo, subdir=None, query_url=None, sha=None):
 @app.route('/api-git/<user>/<repo>/<subdir>/swagger', methods=['GET'])
 @app.route('/api-git/<user>/<repo>/commit/<sha>/swagger')
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/swagger')
-def swagger_spec(user, repo, subdir=None, query_url=None, sha=None, content=None):
-    glogger.info("-----> Generating swagger spec for /{}/{}, subdir {}, params {}, on commit {}".format(user, repo, subdir, query_url, sha))
+def swagger_spec(user, repo, subdir=None, spec_url=None, sha=None, content=None):
+    glogger.info("-----> Generating swagger spec for /{}/{}, subdir {}, params {}, on commit {}".format(user, repo, subdir, spec_url, sha))
 
-    swag = utils.build_swagger_spec(user, repo, subdir, query_url, sha, static.SERVER_NAME)
+    swag = utils.build_swagger_spec(user, repo, subdir, spec_url, sha, static.SERVER_NAME)
 
     if 'text/turtle' in request.headers['Accept']:
         resp_spec = make_response(utils.turtleize(swag))
@@ -135,7 +135,7 @@ def swagger_spec(user, repo, subdir=None, query_url=None, sha=None, content=None
 
     resp_spec.headers['Cache-Control'] = static.CACHE_CONTROL_POLICY  # Caching JSON specs for 15 minutes
 
-    glogger.info("-----> API spec generation for /{}/{}, subdir {}, params {}, on commit {} complete".format(user, repo, subdir, query_url, sha))
+    glogger.info("-----> API spec generation for /{}/{}, subdir {}, params {}, on commit {} complete".format(user, repo, subdir, spec_url, sha))
     return resp_spec
 
 

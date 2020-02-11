@@ -2,7 +2,7 @@ import json
 import grlc.utils
 import grlc.gquery as gquery
 import grlc.pagination as pageUtils
-from grlc.fileLoaders import GithubLoader, LocalLoader, ParamLoader
+from grlc.fileLoaders import GithubLoader, LocalLoader, URLLoader
 
 import traceback
 import grlc.glogging as glogging
@@ -60,7 +60,7 @@ def get_repo_info(loader, sha, prov_g):
         basePath += ('commit/' + sha + '/') if sha else ''
     elif type(loader) is LocalLoader:
         basePath = '/api-local/'
-    elif type(loader) is ParamLoader:
+    elif type(loader) is URLLoader:
         basePath = '/api-url/'
     else:
         # TODO: raise error
@@ -262,13 +262,13 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
         params.append(endpoint_param)
 
     # If this is a URL generated spec we need to force API calls with the specUrl parameter set
-    if type(loader) is ParamLoader:
+    if type(loader) is URLLoader:
         specUrl_param = {}
         specUrl_param['name'] = "specUrl"
         specUrl_param['type'] = "string"
         specUrl_param['in'] = "query"
         specUrl_param['description'] = "URL of the API specification"
-        specUrl_param['default'] = loader.getSpecUrl()
+        specUrl_param['default'] = loader.getRawRepoUri()
         params.append(specUrl_param)
 
     if query_metadata['type'] == 'SelectQuery':
