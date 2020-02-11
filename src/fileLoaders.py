@@ -173,8 +173,9 @@ class LocalLoader(BaseLoader):
         return 'local-file-system'
 
 class ParamLoader(BaseLoader):
-    def __init__(self, query_urls):
+    def __init__(self, specUrl, query_urls):
         # Implement the list of queries with a list of dicts {'name', 'download_url'}
+        self.specUrl = specUrl
         self.query_urls = []
         for q in query_urls:
             name = q.split('/')[-1]
@@ -203,6 +204,9 @@ class ParamLoader(BaseLoader):
         else:
             return None
 
+    def getSpecUrl(self):
+        """ Returns the original spec URL"""
+        return self.specUrl
 
     def getRawRepoUri(self):
         """ Returns the root url of the remote repo"""
