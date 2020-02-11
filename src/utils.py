@@ -3,7 +3,7 @@ import grlc.gquery as gquery
 import grlc.pagination as pageUtils
 import grlc.swagger as swagger
 from grlc.prov import grlcPROV
-from grlc.fileLoaders import GithubLoader, LocalLoader, ParamLoader
+from grlc.fileLoaders import GithubLoader, LocalLoader, URLLoader
 from grlc.queryTypes import qType
 from grlc import __version__ as grlc_version
 
@@ -21,10 +21,12 @@ glogger = glogging.getGrlcLogger(__name__)
 
 def getLoader(user, repo, subdir=None, query_urls=[], sha=None, prov=None):
     """Build a fileLoader (LocalLoader, GithubLoader, ParamLoader) for the given parameters."""
+    '''TODO: Add URL loader to these options. Get rid of ParamLoader
+    '''
     if user is None and repo is None and not query_urls:
         loader = LocalLoader()
-    elif query_urls:
-        loader = ParamLoader(query_urls)
+    # elif query_urls:
+    #    loader = URLLoader(query_urls)
     else:
         loader = GithubLoader(user, repo, subdir, sha, prov)
     return loader
