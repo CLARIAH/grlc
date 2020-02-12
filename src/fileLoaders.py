@@ -177,10 +177,7 @@ class LocalLoader(BaseLoader):
 class URLLoader(BaseLoader):
     def __init__(self, spec_url):
         '''
-        TODO:
-         - Load URL's from spec_url
-         - Save them on a list in this instance.
-         - Save spec_url on this instance.
+        TODO: Document.
         '''
         headers = {'Accept' : 'text/yaml'}
         resp = requests.get(spec_url, headers=headers)
@@ -222,11 +219,14 @@ class URLLoader(BaseLoader):
         if itemName in self.spec['files']:
             itemUrl = self.spec['files'][itemName]['download_url']
             headers = {'Accept' : 'text/txt'}
-            resp = requests.get(itemUrl, headers=headers)
-            if resp.status_code == 200:
-                return resp.text
-            else:
-                raise Exception(resp.text)
+            try:
+                resp = requests.get(itemUrl, headers=headers)
+                if resp.status_code == 200:
+                    return resp.text
+                else:
+                    raise Exception(resp.text)
+            except:
+                return None
         else:
             return None
 
