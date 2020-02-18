@@ -221,7 +221,7 @@ class URLLoader(BaseLoader):
     def _getText(self, itemName):
         if itemName in self.spec['files']:
             itemUrl = self.spec['files'][itemName]['download_url']
-            headers = {'Accept' : 'text/txt'}
+            headers = {'Accept' : 'text/plain'}
             resp = requests.get(itemUrl, headers=headers)
             if resp.status_code == 200:
                 return resp.text
