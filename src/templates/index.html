@@ -8,12 +8,12 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="grlc generates RESTful APIs using SPARQL queries stored in GitHub repositories">
     <meta name="author" content="Albert Meroño Peñuela">
-    <link rel="shortcut icon" href="{{url_for('.static', filename='favicon.ico')}}">
+    <link rel="shortcut icon" href="{{ url_for('.static', filename='favicon.ico', _external=True)}}">
 
     <title>grlc</title>
 
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{{url_for('.static', filename='css/grlc.css')}}" rel="stylesheet">
+    <link href="{{ url_for('.static', filename='css/grlc.css', _external=True)}}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -55,7 +55,7 @@
           </div>
 
           <div class="inner cover" style="margin-top: 30px">
-	    <img src="{{url_for('.static', filename='grlc_logo_01.png')}}" >
+	    <img src="{{ url_for('.static', filename='grlc_logo_01.png', _external=True)}}" >
             <p class="lead"> <b>grlc</b> makes all your <a href="https://www.w3.org/DesignIssues/LinkedData.html" target="_blank">Linked Data</a> accessible to the Web by automatically converting your SPARQL queries into RESTful APIs. With (almost) no effort! Simply: </p>
 	    <p class="lead circ-number">1</p>
 	    <p class="lead smaller">Create a GitHub repository, and store all your SPARQL queries in there (like in <a href="https://github.com/CEDAR-project/Queries" target="_blank">this example</a>). If you don't have a GitHub account, <a href="https://github.com/join">go get one</a>. You can also just write down the username and the repository name of somebody else :-)</p>
