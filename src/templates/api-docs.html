@@ -5,7 +5,7 @@
     <title>grlc</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.17.1/swagger-ui.css" >
-    <link rel="icon" href="{{url_for('.static', filename='favicon.ico')}}">
+    <link rel="icon" href="{{url_for('.static', filename='favicon.ico', _external=True)}}">
     <style>
       html
       {
@@ -44,7 +44,7 @@
       <div class="swagger-ui">
         <div class="topbar">
           <a class="link" href="https://github.com/CLARIAH/grlc">
-            <img height="50" width="50"  alt="grlc" src="{{url_for('.static', filename='grlc_logo_02.png')}}">
+            <img height="50" width="50"  alt="grlc" src="{{url_for('.static', filename='grlc_logo_02.png', _external=True)}}">
             <span>grlc</span>
           </a>
         </div>
@@ -85,8 +85,8 @@
 
     <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
 
-    <script src="{{url_for('.static', filename='js/grlc-layout.js')}}"></script>
-    <script src="{{url_for('.static', filename='js/grlc-api.js')}}"></script>
+    <script src="{{url_for('.static', filename='js/grlc-layout.js', _external=True)}}"></script>
+    <script src="{{url_for('.static', filename='js/grlc-api.js', _external=True)}}"></script>
 
     <script>
       console.log("{{query_urls}}");

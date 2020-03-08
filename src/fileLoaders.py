@@ -177,10 +177,7 @@ class LocalLoader(BaseLoader):
 class URLLoader(BaseLoader):
     def __init__(self, spec_url):
         '''
-        TODO:
-         - Load URL's from spec_url
-         - Save them on a list in this instance.
-         - Save spec_url on this instance.
+        TODO: Document.
         '''
         headers = {'Accept' : 'text/yaml'}
         resp = requests.get(spec_url, headers=headers)
