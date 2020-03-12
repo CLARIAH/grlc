@@ -95,10 +95,16 @@ function grlcProvToggle(e){
  * Called when window is fully loaded. It then triggers creation of SwaggerUIBundle.
  *
  */
-function grlcOnLoad(url) {
+function grlcOnLoad() {
   // Build a system
+  let url = document.location.pathname;
+  if( ! url.endsWith("/")) {
+    url += "/";
+  }
+  swagger_url = url + "swagger" + document.location.search;
+  console.log('swagger_url: ' + swagger_url);
   const ui = SwaggerUIBundle({
-    url: url,
+    url: swagger_url,
     dom_id: '#swagger-ui',
     deepLinking: true,
     presets: [

@@ -27,7 +27,7 @@ def grlc():
 # Spec generation, front-end
 @app.route('/api-local', methods=['GET'], strict_slashes=False)
 def api_docs_local():
-    return render_template('api-docs.html', swagger_url='/api-local/swagger')
+    return render_template('api-docs.html', relative_path=relative_path())
 
 # Spec generation, JSON
 @app.route('/api-local/swagger', methods=['GET'])
@@ -57,7 +57,7 @@ def api_docs_param():
     # Get queries provided by params
     spec_url = request.args['specUrl']
     glogger.info("Spec URL: ".format(spec_url))
-    return render_template('api-docs.html', swagger_url='/api-url/swagger?specUrl=' + spec_url)
+    return render_template('api-docs.html', relative_path=relative_path())
 
 # Spec generation, JSON
 @app.route('/api-url/swagger', methods=['GET'])
@@ -108,13 +108,7 @@ def query(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>')
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/api-docs')
 def api_docs(user, repo, subdir=None, spec_url=None, sha=None):
-    swagger_url = '/api-git/{}/{}'.format(user, repo)
-    if subdir:
-        swagger_url += '/{}'.format(subdir)
-    if sha:
-        swagger_url += '/commit/{}'.format(sha)
-    swagger_url += '/swagger'
-    return render_template('api-docs.html', swagger_url=swagger_url)
+    return render_template('api-docs.html', relative_path=relative_path())
 
 # Spec generation, JSON
 @app.route('/api-git/<user>/<repo>/swagger', methods=['GET'])
@@ -138,6 +132,10 @@ def swagger_spec(user, repo, subdir=None, spec_url=None, sha=None, content=None)
     glogger.info("-----> API spec generation for /{}/{}, subdir {}, params {}, on commit {} complete".format(user, repo, subdir, spec_url, sha))
     return resp_spec
 
+def relative_path():
+    path = request.path
+    path = '.' + '/..' * (path.count('/') - 1)
+    return path
 
 
 # Main thread
