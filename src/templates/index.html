@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -8,12 +7,12 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="grlc generates RESTful APIs using SPARQL queries stored in GitHub repositories">
     <meta name="author" content="Albert Meroño Peñuela">
-    <link rel="shortcut icon" href="{{ url_for('.static', filename='favicon.ico', _external=True)}}">
+    <link rel="shortcut icon" href=".{{ url_for('.static', filename='favicon.ico')}}">
 
     <title>grlc</title>
 
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{{ url_for('.static', filename='css/grlc.css', _external=True)}}" rel="stylesheet">
+    <link href=".{{ url_for('.static', filename='css/grlc.css')}}" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -55,7 +54,7 @@
           </div>
 
           <div class="inner cover" style="margin-top: 30px">
-	    <img src="{{ url_for('.static', filename='grlc_logo_01.png', _external=True)}}" >
+	    <img src=".{{ url_for('.static', filename='grlc_logo_01.png')}}" >
             <p class="lead"> <b>grlc</b> makes all your <a href="https://www.w3.org/DesignIssues/LinkedData.html" target="_blank">Linked Data</a> accessible to the Web by automatically converting your SPARQL queries into RESTful APIs. With (almost) no effort! Simply: </p>
 	    <p class="lead circ-number">1</p>
 	    <p class="lead smaller">Create a GitHub repository, and store all your SPARQL queries in there (like in <a href="https://github.com/CEDAR-project/Queries" target="_blank">this example</a>). If you don't have a GitHub account, <a href="https://github.com/join">go get one</a>. You can also just write down the username and the repository name of somebody else :-)</p>
@@ -63,7 +62,7 @@
 	    <p class="lead smaller"> Go to the address bar of this page, and append <b>/api/github_username/repository_name</b> to it. So if I want the API derived from GitHub's username <i>foo</i> and repository <i>bar</i>, I append <i>/api/foo/bar/</i> to the domain name (<i>/api/foo/bar/api-docs</i> will work too). Now hit enter. Done!</p>
             <p class="lead">
 	      <a href="https://github.com/albertmeronyo/lodapi/" class="btn btn-md btn-block btn-default">Show me an example SPARQL repo</a>
-              <a href="/api-git/albertmeronyo/lodapi/" class="btn btn-md btn-block btn-default">Show me the equivalent API</a>
+              <a href="./api-git/albertmeronyo/lodapi/" class="btn btn-md btn-block btn-default">Show me the equivalent API</a>
             </p>
           </div>
 
