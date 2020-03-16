@@ -11,7 +11,12 @@ from github.GithubException import BadCredentialsException
 
 
 class BaseLoader:
+    """Base class for File Loaders"""
     def getTextForName(self, query_name):
+        """Return the query text and query type for the given query name.
+        Note that file extention is not part of the query name. For example,
+        for `query_name='query1'` would return the content of file `query1.rq`
+        from the loader's source (assuming such file exists)."""
         # The URIs of all candidates
         rq_name = query_name + '.rq'
         sparql_name = query_name + '.sparql'
@@ -36,6 +41,7 @@ class BaseLoader:
         return '', None
 
     def getLicenceURL(self):
+        """Returns the URL of the license file in this repository if one exists."""
         for f in self.fetchFiles():
             if f['name'].lower() == 'license' or f['name'].lower() == 'licence':
                 return f['download_url']

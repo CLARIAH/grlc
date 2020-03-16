@@ -128,21 +128,22 @@ def query_param(query_name):
 
 # Spec generation, front-end
 @app.route('/api-git/<user>/<repo>', strict_slashes=False)
-@app.route('/api-git/<user>/<repo>/<subdir>', strict_slashes=False)
+@app.route('/api-git/<user>/<repo>/subdir/<subdir>', strict_slashes=False)
 @app.route('/api-git/<user>/<repo>/api-docs')
 @app.route('/api-git/<user>/<repo>/commit/<sha>')
 @app.route('/api-git/<user>/<repo>/commit/<sha>/api-docs')
-@app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>')
-@app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/api-docs')
+@app.route('/api-git/<user>/<repo>/subdir/<subdir>/commit/<sha>')
+@app.route('/api-git/<user>/<repo>/subdir/<subdir>/commit/<sha>/api-docs')
 def api_docs_git(user, repo, subdir=None, spec_url=None, sha=None):
     """Grlc API page for specifications loaded from a Github repo."""
+    print('api_docs_git >> ')
     return api_docs_template()
 
 # Spec generation, JSON
 @app.route('/api-git/<user>/<repo>/swagger', methods=['GET'])
-@app.route('/api-git/<user>/<repo>/<subdir>/swagger', methods=['GET'])
+@app.route('/api-git/<user>/<repo>/subdir/<subdir>/swagger', methods=['GET'])
 @app.route('/api-git/<user>/<repo>/commit/<sha>/swagger')
-@app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/swagger')
+@app.route('/api-git/<user>/<repo>/subdir/<subdir>/commit/<sha>/swagger')
 def swagger_spec_git(user, repo, subdir=None, spec_url=None, sha=None, content=None):
     """Swagger spec for specifications loaded from a Github repo."""
     return swagger_spec(user, repo, subdir=None, spec_url=None, sha=None, content=None)
