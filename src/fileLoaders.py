@@ -47,9 +47,28 @@ class BaseLoader:
                 return f['download_url']
         return None
 
+    def _getText(self, queryFullName):
+        """To be implemented by sub-classes"""
+        raise NotImplementedError("Subclasses must override _getText()!")
+
+    def fetchFiles(self):
+        """To be implemented by sub-classes"""
+        raise NotImplementedError("Subclasses must override fetchFiles()!")
+
 
 class GithubLoader(BaseLoader):
-    def __init__(self, user, repo, subdir, sha, prov):
+    """Github based File Loader. Retrieves information from specified Github 
+    repository to construct a grlc specification."""
+
+    def __init__(self, user, repo, subdir=None, sha=None, prov=None):
+        """Create a new GithubLoader.
+
+        Keyword arguments:
+        user -- Github user name of the target github repo.
+        repo -- Repository name of the target github repo.
+        subdir -- Target subdirectory within the given repo. (default: None).
+        sha -- Github commit identifier hash (default: None).
+        prov -- grlcPROV object for tracking provenance (default: None)."""
         self.user = user
         self.repo = repo
         self.subdir = subdir
@@ -64,6 +83,7 @@ class GithubLoader(BaseLoader):
             raise Exception('Repo not found: ' + user + '/' + repo)
 
     def fetchFiles(self):
+        """Returns a list of file items contained on the github repo."""
         api_repo_content_uri = static.GITHUB_API_BASE_URL + self.user + '/' + self.repo + '/contents'
         if self.subdir:
             api_repo_content_uri += '/' + str(self.subdir)
@@ -79,6 +99,7 @@ class GithubLoader(BaseLoader):
             raise Exception(resp.text)
 
     def getRawRepoUri(self):
+        """Returns the root url of the github repo."""
         raw_repo_uri = static.GITHUB_RAW_BASE_URL + self.user + '/' + self.repo
         if self.sha is None:
             raw_repo_uri += '/master/'
@@ -87,6 +108,7 @@ class GithubLoader(BaseLoader):
         return raw_repo_uri
 
     def getTextFor(self, fileItem):
+        """Returns the contents of the given file item on the github repo."""
         raw_query_uri = fileItem['download_url']
         if '/' in raw_query_uri:
             raw_query_uri = raw_query_uri.split('/')[-1]
@@ -98,6 +120,7 @@ class GithubLoader(BaseLoader):
         return resp
 
     def _getText(self, query_name):
+        """Return the content of the specified file contained in the github repo."""
         query_uri = self.getRawRepoUri() + query_name
         if self.subdir:
             query_uri = self.getRawRepoUri() + self.subdir + '/' + query_name
@@ -109,26 +132,39 @@ class GithubLoader(BaseLoader):
             return None
 
     def getRepoTitle(self):
+        """Return the title of the github repo."""
         return self.gh_repo.name
 
     def getContactName(self):
+        """Return the name of the owner of the github repo."""
         return self.gh_repo.owner.login
 
     def getContactUrl(self):
+        """Return the home page of the owner of the github repo."""
         return self.gh_repo.owner.html_url
 
     def getCommitList(self):
+        """Return a list of commits on the github repo."""
         return [c.sha for c in self.gh_repo.get_commits()]
 
     def getFullName(self):
+        """Return the full name of the github repo (user/repo)."""
         return self.gh_repo.full_name
 
     def getRepoURI(self):
+        """Return the full URI of the github repo."""
         return static.GITHUB_API_BASE_URL + self.gh_repo.full_name
 
 
 class LocalLoader(BaseLoader):
+    """Local file system file loader. Retrieves information to construct 
+    a grlc specification from a local folder."""
+
     def __init__(self, baseDir=static.LOCAL_SPARQL_DIR):
+        """Create a new LocalLoader.
+
+        Keyword arguments:
+        baseDir -- Local file system path where files are loaded from."""
         self.baseDir = baseDir
 
     def fetchFiles(self):
@@ -154,6 +190,7 @@ class LocalLoader(BaseLoader):
         return self._getText(fileItem['download_url'])
 
     def _getText(self, filename):
+        """Return the content of the specified file contained in the local repo."""
         targetFile = path.join(self.baseDir, filename)
         if path.exists(targetFile):
             with open(targetFile, 'r') as f:
@@ -164,29 +201,39 @@ class LocalLoader(BaseLoader):
             return None
 
     def getRepoTitle(self):
+        """Return the title of the local repo."""
         return 'local'
 
     def getContactName(self):
+        """Return the name of the owner of the local repo."""
         return ''
 
     def getContactUrl(self):
+        """Return the home page of the owner of the local repo."""
         return ''
 
     def getCommitList(self):
+        """Return a list of commits (always a single commit) on the local repo."""
         return ['local']
 
     def getFullName(self):
+        """Return the user/repo equivalent for the local repo."""
         return 'local/'
 
     def getRepoURI(self):
+        """Return the full URI of the local repo."""
         return 'local-file-system'
 
 
 class URLLoader(BaseLoader):
+    """URL specification loader. Retrieves information to construct a grlc 
+    specification from a specification YAML file located on a remote server."""
+    
     def __init__(self, spec_url):
-        '''
-        TODO: Document.
-        '''
+        """Create a new URLLoader.
+
+        Keyword arguments:
+        spec_url -- URL where the specification YAML file is located."""
         headers = {'Accept' : 'text/yaml'}
         resp = requests.get(spec_url, headers=headers)
         if resp.status_code == 200:
@@ -224,6 +271,7 @@ class URLLoader(BaseLoader):
         return self._getText(nameExt)
 
     def _getText(self, itemName):
+        """Return the content of the specified item in the specification."""
         if itemName in self.spec['files']:
             itemUrl = self.spec['files'][itemName]['download_url']
             headers = {'Accept' : 'text/plain'}
@@ -236,22 +284,29 @@ class URLLoader(BaseLoader):
             return None
 
     def getRepoTitle(self):
+        """Return the title contained on the specification."""
         return self.spec['title']
 
     def getContactName(self):
+        """Return the name of the contact person for the specification."""
         return self.spec['contact']['name'] if self.spec['contact']['name'] else ''
 
     def getContactUrl(self):
+        """Return the home page defined in the specification."""
         return self.spec['contact']['url'] if self.spec['contact']['url'] else ''
 
     def getCommitList(self):
+        """Return a list of commits (always a single commit) for the specification."""
         return ['param']
 
     def getFullName(self):
+        """Return the user/repo equivalent for the specification."""
         return self.getContactName()
 
     def getRepoURI(self):
+        """Return the full URI of the specification."""
         return self.getRawRepoUri()
 
     def getLicenceURL(self):
+        """Returns the URL of the license file in the specification."""
         return self.spec['licence'] if self.spec['licence'] else ''
