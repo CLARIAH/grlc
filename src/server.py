@@ -103,7 +103,7 @@ def api_docs_param():
     """Grlc API page for specifications loaded via http."""
     # Get queries provided by params
     spec_url = request.args['specUrl']
-    glogger.info("Spec URL: ".format(spec_url))
+    glogger.info("Spec URL: {}".format(spec_url))
     return api_docs_template()
 
 # Spec generation, JSON
@@ -111,7 +111,7 @@ def api_docs_param():
 def swagger_spec_param():
     """Swagger spec for specifications loaded via http."""
     spec_url = request.args['specUrl']
-    glogger.info("Spec URL: ".format(spec_url))
+    glogger.info("Spec URL: {}".format(spec_url))
     return swagger_spec(user=None, repo=None, spec_url=spec_url)
 
 # Callname execution
@@ -119,7 +119,7 @@ def swagger_spec_param():
 def query_param(query_name):
     """SPARQL query execution for specifications loaded via http."""
     spec_url = request.args['specUrl']
-    glogger.debug("Spec URL: ".format(spec_url))
+    glogger.debug("Spec URL: {}".format(spec_url))
     return query(user=None, repo=None, query_name=query_name, spec_url=spec_url)
 
 ##############################
@@ -136,7 +136,6 @@ def query_param(query_name):
 @app.route('/api-git/<user>/<repo>/subdir/<subdir>/commit/<sha>/api-docs')
 def api_docs_git(user, repo, subdir=None, spec_url=None, sha=None):
     """Grlc API page for specifications loaded from a Github repo."""
-    print('api_docs_git >> ')
     return api_docs_template()
 
 # Spec generation, JSON

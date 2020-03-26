@@ -20,16 +20,17 @@ MIME_FORMAT = {
 }
 
 def getResponseText(endpoint, query, requestedMimeType):
-    '''
+    """Returns the result and mimetype of executing the given query against 
+    the given endpoint.
+
+    Keyword arguments:
     endpoint - URL of sparql endpoint
     query    - SPARQL query to be executed
     requestedMimeType  Type of content requested. can be:
                 'text/csv; q=1.0, */*; q=0.1'
                 'application/json'
                 etc.
-
-    Returns result + mimetype
-    '''
+    """
     retFormat = _mimeTypeToSparqlFormat(requestedMimeType)
 
     client = SPARQLWrapper(endpoint)

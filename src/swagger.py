@@ -70,6 +70,8 @@ def get_repo_info(loader, sha, prov_g):
 
 
 def get_path_for_item(item):
+    """Builds the swagger definition for a specific path, based on 
+    the given item."""
     query = item['original_query']
     if isinstance(query, dict):
         if 'grlc' in query:
@@ -155,6 +157,7 @@ def build_spec(user, repo, subdir=None, query_url=None, sha=None, prov=None, ext
 
 
 def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
+    """Generates a swagger specification item based on the given TPF query file."""
     query_metadata = gquery.get_yaml_decorators(query_text)
 
     tags = query_metadata['tags'] if 'tags' in query_metadata else []
@@ -187,9 +190,9 @@ def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
 
 
 def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
+    """Generates a swagger specification item based on the given SPARQL query file."""
     # We get the endpoint name first, since some query metadata fields (eg enums) require it
-
-    endpoint, auth = gquery.guess_endpoint_uri(query_text, loader)
+    endpoint, _ = gquery.guess_endpoint_uri(query_text, loader)
     glogger.debug("Read query endpoint: {}".format(endpoint))
 
     try:
@@ -230,15 +233,14 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
         # As per #3, prefetching IRIs via SPARQL and filling enum
         parameters = query_metadata['parameters']
 
-        for v, p in list(parameters.items()):
+        for _, p in list(parameters.items()):
             param = {}
             param['name'] = p['name']
             param['type'] = p['type']
             param['required'] = p['required']
             param['in'] = "query"
-            param['description'] = "A value of type {} that will substitute {} in the original query".format(p['type'],
-                                                                                                             p[
-                                                                                                                 'original'])
+            param['description'] = "A value of type {} that will substitute {} in the original query".format(
+                    p['type'],  p['original'])
             if 'lang' in p:
                 param['description'] = "A value of type {}@{} that will substitute {} in the original query".format(
                     p['type'], p['lang'], p['original'])
@@ -315,6 +317,7 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
 
 
 def packItem(call_name, method, tags, summary, description, params, query_metadata, extraMetadata):
+    """Generate a swagger specification item using all the given parameters."""
     item = {
         'call_name': call_name,
         'method': method,
