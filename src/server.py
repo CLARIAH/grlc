@@ -26,16 +26,19 @@ def grlc():
 
 # Spec generation, front-end
 @app.route('/api-local', methods=['GET'], strict_slashes=False)
+@app.route('/api/local/local', methods=['GET'], strict_slashes=False)
 def api_docs_local():
     return render_template('api-docs.html', relative_path=relative_path())
 
 # Spec generation, JSON
 @app.route('/api-local/swagger', methods=['GET'])
+@app.route('/api/local/local/swagger', methods=['GET'], strict_slashes=False)
 def swagger_local():
     return swagger_spec(user=None, repo=None, sha=None, content=None)
 
 # Callname execution
 @app.route('/api-local/<query_name>', methods=['GET'])
+@app.route('/api/local/local/<query_name>', methods=['GET'], strict_slashes=False)
 def query_local(query_name):
     return query(user=None, repo=None, query_name=query_name)
 
