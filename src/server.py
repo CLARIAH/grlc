@@ -3,6 +3,7 @@
 # server.py: the grlc server
 
 from flask import Flask, request, jsonify, render_template, make_response
+from flask_cors import CORS
 
 # grlc modules
 import grlc.static as static
@@ -13,6 +14,7 @@ glogger = glogging.getGrlcLogger(__name__)
 
 ### The Flask app ###
 app = Flask(__name__)
+CORS(app)
 
 ### Server routes ###
 @app.route('/')
