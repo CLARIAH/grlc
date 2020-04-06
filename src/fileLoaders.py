@@ -82,6 +82,8 @@ class GithubLoader(BaseLoader):
 
     def getTextFor(self, fileItem):
         raw_query_uri = fileItem['download_url']
+        if '/' in raw_query_uri:
+            raw_query_uri = raw_query_uri.split('/')[-1]
         resp = self._getText(raw_query_uri)
 
         # Add query URI as used entity by the logged activity
