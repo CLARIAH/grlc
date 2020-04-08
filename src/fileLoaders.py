@@ -3,6 +3,7 @@ from grlc.queryTypes import qType
 
 import json
 import requests
+import yaml
 from os import path
 from glob import glob
 from github import Github
@@ -81,6 +82,8 @@ class GithubLoader(BaseLoader):
 
     def getTextFor(self, fileItem):
         raw_query_uri = fileItem['download_url']
+        if '/' in raw_query_uri:
+            raw_query_uri = raw_query_uri.split('/')[-1]
         resp = self._getText(raw_query_uri)
 
         # Add query URI as used entity by the logged activity
@@ -172,60 +175,77 @@ class LocalLoader(BaseLoader):
     def getRepoURI(self):
         return 'local-file-system'
 
-class ParamLoader(BaseLoader):
-    def __init__(self, query_urls):
-        # Implement the list of queries with a list of dicts {'name', 'download_url'}
-        self.query_urls = []
-        for q in query_urls:
-            name = q.split('/')[-1]
-            download_url = q
-            self.query_urls.append({'name': name, 'download_url': download_url})
+
+class URLLoader(BaseLoader):
+    def __init__(self, spec_url):
+        '''
+        TODO: Document.
+        '''
+        headers = {'Accept' : 'text/yaml'}
+        resp = requests.get(spec_url, headers=headers)
+        if resp.status_code == 200:
+            self.spec = yaml.load(resp.text)
+            self.spec['url'] = spec_url
+            self.spec['files'] = {}
+            for queryUrl in self.spec['queries']:
+                queryNameExt = path.basename(queryUrl)
+                queryName = path.splitext(queryNameExt)[0] # Remove extention
+                item = {
+                    'name': queryName,
+                    'download_url': queryUrl
+                }
+                self.spec['files'][queryNameExt] = item
+            del self.spec['queries']
+        else:
+            raise Exception(resp.text)
+
 
     def fetchFiles(self):
-        """ Returns a list of {'name', 'download_url'} queries passed as parameter in the first request """
-        return self.query_urls
+        """Returns a list of file items contained on specification."""
+        files = [
+            v for k,v in self.spec['files'].items()
+        ]
+        return files
 
-    def getTextFor(self, item):
-        """Returns the contents of the given query in the list of param queries """
-        return self._getText(item['name'])
+    def getRawRepoUri(self):
+        """Returns the root url of the specification."""
+        return self.spec['url']
 
-    def _getText(self, item_name):
-        query_url = self.query_urls[0]['download_url']
-        for q in self.query_urls:
-            if q['name'] == item_name:
-                query_url = q['download_url']
+    def getTextFor(self, fileItem):
+        """Returns the contents of the given file item on the specification."""
+        # TODO: tiene sentido esto? O es un hack horrible ?
+        nameExt = path.basename(fileItem['download_url'])
+        return self._getText(nameExt)
 
-        # TODO: this is where most implementations will differ, push for text/plain or own protocol
-        headers = {'Accept' : 'text/plain'}
-        req = requests.get(query_url, headers=headers)
-        if req.status_code == 200:
-            return req.text
+    def _getText(self, itemName):
+        if itemName in self.spec['files']:
+            itemUrl = self.spec['files'][itemName]['download_url']
+            headers = {'Accept' : 'text/plain'}
+            resp = requests.get(itemUrl, headers=headers)
+            if resp.status_code == 200:
+                return resp.text
+            else:
+                raise Exception(resp.text)
         else:
             return None
 
-
-    def getRawRepoUri(self):
-        """ Returns the root url of the remote repo"""
-        # TODO: What should this be?
-        return ''
-
     def getRepoTitle(self):
-        return 'Remote queries by parameter'
+        return self.spec['title']
 
     def getContactName(self):
-        return 'Anonymous'
+        return self.spec['contact']['name'] if self.spec['contact']['name'] else ''
 
     def getContactUrl(self):
-        return ''
+        return self.spec['contact']['url'] if self.spec['contact']['url'] else ''
 
     def getCommitList(self):
         return ['param']
 
     def getFullName(self):
-        return 'api/url'
+        return self.getContactName()
 
     def getRepoURI(self):
-        return 'param'
+        return self.getRawRepoUri()
 
     def getLicenceURL(self):
-        return ''
+        return self.spec['licence'] if self.spec['licence'] else ''

@@ -31,6 +31,16 @@ def mock_requestsGithub(uri, headers={}, params={}):
             return_value = Mock(status_code=404)
             return return_value
 
+def mock_requestsUrl(url, headers={}, params={}):
+    url = url.replace('http://example.org/', 'tests/repo/')
+    f = open(url, 'r')
+    lines = f.readlines()
+    text = ''.join(lines)
+    return_value = Mock(status_code=200)
+    return_value.text = text
+
+    return return_value
+
 mock_simpleSparqlResponse = {
     "head": { "link": [], "vars": ["p", "o"] },
     "results": {

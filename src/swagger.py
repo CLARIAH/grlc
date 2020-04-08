@@ -2,6 +2,7 @@ import json
 import grlc.utils
 import grlc.gquery as gquery
 import grlc.pagination as pageUtils
+from grlc.fileLoaders import GithubLoader, LocalLoader, URLLoader
 
 import traceback
 import grlc.glogging as glogging
@@ -54,8 +55,16 @@ def get_repo_info(loader, sha, prov_g):
         }
     }
 
-    basePath = '/api/' + user_repo + '/'
-    basePath += ('commit/' + sha + '/') if sha else ''
+    if type(loader) is GithubLoader:
+        basePath = '/api-git/' + user_repo + '/'
+        basePath += ('commit/' + sha + '/') if sha else ''
+    elif type(loader) is LocalLoader:
+        basePath = '/api-local/'
+    elif type(loader) is URLLoader:
+        basePath = '/api-url/'
+    else:
+        # TODO: raise error
+        glogger.error('Cannot set basePath, loader type unkown')
 
     return prev_commit, next_commit, info, basePath
 
@@ -63,7 +72,8 @@ def get_repo_info(loader, sha, prov_g):
 def get_path_for_item(item):
     query = item['original_query']
     if isinstance(query, dict):
-        del query['grlc']
+        if 'grlc' in query:
+            del query['grlc']
         query = "\n" + json.dumps(query, indent=2) + "\n"
 
     description = item['description']
@@ -101,9 +111,9 @@ def get_path_for_item(item):
     return item_path
 
 
-def build_spec(user, repo, subdir=None, query_urls=None, sha=None, prov=None, extraMetadata=[]):
+def build_spec(user, repo, subdir=None, query_url=None, sha=None, prov=None, extraMetadata=[]):
     """Build grlc specification for the given github user / repo."""
-    loader = grlc.utils.getLoader(user, repo, subdir, query_urls, sha=sha, prov=prov)
+    loader = grlc.utils.getLoader(user, repo, subdir, query_url, sha=sha, prov=prov)
 
     files = loader.fetchFiles()
     raw_repo_uri = loader.getRawRepoUri()
@@ -113,10 +123,10 @@ def build_spec(user, repo, subdir=None, query_urls=None, sha=None, prov=None, ex
 
     allowed_ext = ["rq", "sparql", "json", "tpf"]
     for c in files:
-        glogger.debug(files)
+        # glogger.debug(files)
         glogger.debug('>>>>>>>>>>>>>>>>>>>>>>>>>c_name: {}'.format(c['name']))
         extension = c['name'].split('.')[-1]
-        if extension in allowed_ext or query_urls: # parameter provided queries may not have extension
+        if extension in allowed_ext or query_url: # parameter provided queries may not have extension
             call_name = c['name'].split('.')[0]
 
             # Retrieve extra metadata from the query decorators
@@ -126,7 +136,7 @@ def build_spec(user, repo, subdir=None, query_urls=None, sha=None, prov=None, ex
             if extension == "json":
                 query_text = json.loads(query_text)
 
-            if extension in ["rq", "sparql", "json"] or query_urls:
+            if extension in ["rq", "sparql", "json"] or query_url:
                 glogger.debug("===================================================================")
                 glogger.debug("Processing SPARQL query: {}".format(c['name']))
                 glogger.debug("===================================================================")
@@ -251,6 +261,16 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
         endpoint_param['description'] = "Alternative endpoint for SPARQL query"
         endpoint_param['default'] = endpoint
         params.append(endpoint_param)
+
+    # If this is a URL generated spec we need to force API calls with the specUrl parameter set
+    if type(loader) is URLLoader:
+        specUrl_param = {}
+        specUrl_param['name'] = "specUrl"
+        specUrl_param['type'] = "string"
+        specUrl_param['in'] = "query"
+        specUrl_param['description'] = "URL of the API specification"
+        specUrl_param['default'] = loader.getRawRepoUri()
+        params.append(specUrl_param)
 
     if query_metadata['type'] == 'SelectQuery':
         # Fill in the spec for SELECT

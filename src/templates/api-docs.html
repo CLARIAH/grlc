@@ -5,7 +5,7 @@
     <title>grlc</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/3.17.1/swagger-ui.css" >
-    <link rel="icon" href="{{url_for('.static', filename='favicon.ico')}}">
+    <link rel="icon" href="{{ relative_path + url_for('.static', filename='favicon.ico')}}">
     <style>
       html
       {
@@ -44,7 +44,7 @@
       <div class="swagger-ui">
         <div class="topbar">
           <a class="link" href="https://github.com/CLARIAH/grlc">
-            <img height="50" width="50"  alt="grlc" src="{{url_for('.static', filename='grlc_logo_02.png')}}">
+            <img height="50" width="50"  alt="grlc" src="{{ relative_path + url_for('.static', filename='grlc_logo_02.png')}}">
             <span>grlc</span>
           </a>
         </div>
@@ -85,13 +85,11 @@
 
     <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
 
-    <script src="{{url_for('.static', filename='js/grlc-layout.js')}}"></script>
-    <script src="{{url_for('.static', filename='js/grlc-api.js')}}"></script>
+    <script src="{{ relative_path + url_for('.static', filename='js/grlc-layout.js')}}"></script>
+    <script src="{{ relative_path + url_for('.static', filename='js/grlc-api.js')}}"></script>
 
     <script>
-      console.log("{{query_urls}}");
-      url = "{{url_for('swagger_spec', user=user, repo=repo, subdir=subdir, query_urls=[query_urls], sha=sha)}}";
-      window.onload = grlcOnLoad(url);
+      window.onload = grlcOnLoad();
       $('#prev-commit').hide();
       $('#next-commit').hide();
       $('#ohyeahdiv').hide();
