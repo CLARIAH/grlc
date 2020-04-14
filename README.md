@@ -11,35 +11,12 @@ grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor
 grlc is a lightweight server that takes SPARQL queries (stored in a GitHub repository, local file storage or listed in a URL), and translates them to Linked Data Web APIs. This enables universal access to Linked Data. Users are not required to know SPARQL to query their data, but instead can access a web API.
 
 ## Quick tutorial
-For a quick usage tutorial check out our wiki walkthrough [here](https://github.com/CLARIAH/grlc/wiki/Quick-tutorial).
-
-## Features
-TODO:
- - Move features full list of features to wiki.
- - Proof-read list of features.
- - Point each feature to an example.
-
-- Request parameter mappings into SPARQL: grlc is compliant with [BASIL's convention](https://github.com/the-open-university/basil/wiki/SPARQL-variable-name-convention-for-WEB-API-parameters-mapping) on how to map GET/POST request parameters into SPARQL
-- Automatic, user customizable population of parameter values in swagger-ui's dropdown menus via SPARQL triple pattern querying
-- Parameter values as enumerations (i.e. closed lists of values that will fill a dropdown in the UI) can now also be specified in the query decorators to save endpoint requests (see [this example](https://github.com/albertmeronyo/lodapi/blob/master/houseType_params.rq))
-- Parameter default values can now also be indicated through decorators (see [this example](https://github.com/albertmeronyo/lodapi/blob/master/dbpedia_test.rq))
-- URL-based content negotiation: you can request for specific content types by attaching them to the operation request URL, e.g. [http://localhost:8088/CEDAR-project/Queries/residenceStatus_all.csv](http://localhost:8088/CEDAR-project/Queries/residenceStatus_all.csv) will request for results in CSV
-- Pagination of API results, as per the `pagination` decorator and [GitHub's API Pagination Traversal](https://developer.github.com/guides/traversing-with-pagination/)
-- Docker images in Docker Hub for easy deployment
-- Compatibility with [Linked Data Fragments](http://linkeddatafragments.org/) servers, RDF dumps, and HTML+RDFa files
-- grlc integrates now [SPARQLTransformer](https://github.com/D2KLab/py-sparql-transformer), allowing the use of queries in JSON (see [this example](https://github.com/albertmeronyo/lodapi/blob/master/dbpedia_test_json.json)).
-- Generation of provenance in [PROV](https://www.w3.org/TR/prov-primer/) of both the repo history (via [Git2PROV](https://github.com/IDLabResearch/Git2PROV)) and grlc's activity additions
-- Commit-based API versioning that's coherent with the repo versioning with git hashes
-- SPARQL endpoint address can be set at the query level, repository level, and now also as a query **parameter**. This makes your APIs endpoint agnostic, and enables for generic and transposable queries!
-- CONSTRUCT queries are now mapped automatically to GET requests, accept parameters in the WHERE clause, and return content in ``text/turtle`` or ``application/ld+json``
-- INSERT DATA queries are now mapped automatically to POST requests. Support is limited to queries with no WHERE clause, and parameters are always expected to be values for ``g`` (named graph where to insert the data) and ``data`` (with the triples to insert, in ``ntriples`` format). The INSERT query pattern is so far static, as defined in [static.py](https://github.com/CLARIAH/grlc/blob/master/src/static.py#L61). Only tested with Virtuoso.
+For a quick usage tutorial check out our wiki [walkthrough](https://github.com/CLARIAH/grlc/wiki/Quick-tutorial) and [list of features](https://github.com/CLARIAH/grlc/wiki/Features).
 
 ## Usage
-
 grlc assumes that you have a collection of SPARQL queries as .rq files (like in [this one](https://github.com/CEDAR-project/Queries)). grlc will create an API operation per such a SPARQL query/.rq file. Your queries can include special [decorators](#decorator-syntax) to add extra functionality to your API.
 
 ### Query location
-
 grlc can load your query collection from different locations. Each type of location has specific functionality features are accessible via different paths. However all location types produce the same beautiful API's.
 
 #### From a Github repository
@@ -53,7 +30,7 @@ For example, assuming your queries are stored on a Github repo: `https://github.
 
 grlc can make use of Github version control mechanism to generate an API based on a specific version of queries in the repository. This can be done by including the commit sha in the URL path (`http://grlc-server/api-git/<user>/<repo>/commit/<sha>`), for example: `http://grlc.io/api-git/albertmeronyo/lodapi/commit/321b9c9889128d21e9ae76b1884a81fc50dbf34f`
 
-grlc can also use a subdirectory inside your Github repo. This can be done by including a subdirectory in the URL path (`http://grlc-server/api-git/<user>/<repo>/subdir/<subdir>`) **TODO: include an example.**
+grlc can also use a subdirectory inside your Github repo. This can be done by including a subdirectory in the URL path (`http://grlc-server/api-git/<user>/<repo>/subdir/<subdir>`).
 
 #### From local storage
 > API path: 
@@ -70,7 +47,26 @@ grlc can generate an API from a yaml specification file accessible on the web.
 For example, ssuming your queries are listed on spec file: `https://raw.githubusercontent.com/albertmeronyo/lodapi/master/urls.yml`, point your browser to the following location
 `http://grlc.io/api-url?specUrl=https://raw.githubusercontent.com/albertmeronyo/lodapi/master/urls.yml`
 
-**TODO: insert syntax of spec file here or point to section with details of the specification file.**
+##### Specification file synax
+A grlc API specification file is a YAML file which includes all necessary information to create a grlc API. This file should contain the following fields
+
+ - `title`: Title of my API
+ - `contact`: Contact details of the API owner. This should include the `name` and `url` properties.
+ - `licence`: A URL pointing to the licence file for the API.
+ - `queries`: A list of URLs of SPARQL queries (with header decorators).
+
+For example:
+```YAML
+title: Title of my API
+contact:
+  name: Contact Name
+  url: https://www.mywebsite.org
+licence: http://example.org/licence.html
+queries:
+  - https://www.mywebsite.org/query1.rq
+  - https://www.mywebsite.org/query2.rq
+  - https://www.otherwebsite.org/query3.rq
+```
 
 ### Grlc generated API
 
