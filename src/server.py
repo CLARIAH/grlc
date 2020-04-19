@@ -28,16 +28,19 @@ def grlc():
 
 # Spec generation, front-end
 @app.route('/api-local', methods=['GET'], strict_slashes=False)
+@app.route('/api/local/local', methods=['GET'], strict_slashes=False)  # backward compatibility route
 def api_docs_local():
     return render_template('api-docs.html', relative_path=relative_path())
 
 # Spec generation, JSON
 @app.route('/api-local/swagger', methods=['GET'])
+@app.route('/api/local/local/swagger', methods=['GET'], strict_slashes=False)  # backward compatibility route
 def swagger_local():
     return swagger_spec(user=None, repo=None, sha=None, content=None)
 
 # Callname execution
 @app.route('/api-local/<query_name>', methods=['GET'])
+@app.route('/api/local/local/<query_name>', methods=['GET'], strict_slashes=False)  # backward compatibility route
 def query_local(query_name):
     return query(user=None, repo=None, query_name=query_name)
 
@@ -82,6 +85,14 @@ def swagger_spec_param():
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/<query_name>', methods=['GET', 'POST'])
 @app.route('/api-git/<user>/<repo>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
+@app.route('/api/<user>/<repo>/<query_name>', methods=['GET', 'POST'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>/<query_name>', methods=['GET', 'POST'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET', 'POST'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>/<query_name>.<content>', methods=['GET', 'POST'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/commit/<sha>/<query_name>', methods=['GET', 'POST'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/<query_name>', methods=['GET', 'POST'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])  # backward compatibility route
 def query(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=None):
     glogger.info("-----> Executing call name at /{}/{}/{}/{} on commit {}".format(user, repo, subdir, query_name, sha))
     glogger.debug("Request accept header: " + request.headers["Accept"])
@@ -109,6 +120,13 @@ def query(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=
 @app.route('/api-git/<user>/<repo>/commit/<sha>/api-docs')
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>')
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/api-docs')
+@app.route('/api/<user>/<repo>', strict_slashes=False)  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>', strict_slashes=False)  # backward compatibility route
+@app.route('/api/<user>/<repo>/api-docs')  # backward compatibility route
+@app.route('/api/<user>/<repo>/commit/<sha>')  # backward compatibility route
+@app.route('/api/<user>/<repo>/commit/<sha>/api-docs')  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>')  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/api-docs')  # backward compatibility route
 def api_docs(user, repo, subdir=None, spec_url=None, sha=None):
     return render_template('api-docs.html', relative_path=relative_path())
 
@@ -117,6 +135,10 @@ def api_docs(user, repo, subdir=None, spec_url=None, sha=None):
 @app.route('/api-git/<user>/<repo>/<subdir>/swagger', methods=['GET'])
 @app.route('/api-git/<user>/<repo>/commit/<sha>/swagger')
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/swagger')
+@app.route('/api-git/<user>/<repo>/swagger', methods=['GET'])  # backward compatibility route
+@app.route('/api-git/<user>/<repo>/<subdir>/swagger', methods=['GET'])  # backward compatibility route
+@app.route('/api-git/<user>/<repo>/commit/<sha>/swagger')  # backward compatibility route
+@app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/swagger')  # backward compatibility route
 def swagger_spec(user, repo, subdir=None, spec_url=None, sha=None, content=None):
     glogger.info("-----> Generating swagger spec for /{}/{}, subdir {}, params {}, on commit {}".format(user, repo, subdir, spec_url, sha))
 
