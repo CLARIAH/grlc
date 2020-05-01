@@ -104,6 +104,9 @@ function grlcProvToggle(e){
 function grlcOnLoad() {
   // Generate the swagger url
   let url = document.location.pathname;
+  if(url.endsWith("/api-docs")) {
+    url = url.replace('/api-docs', '');
+  }
   if( ! url.endsWith("/")) {
     url += "/";
   }

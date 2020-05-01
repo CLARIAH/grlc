@@ -77,18 +77,21 @@ def grlc():
 
 # Spec generation, front-end
 @app.route('/api-local', methods=['GET'], strict_slashes=False)
+@app.route('/api/local/local', methods=['GET'], strict_slashes=False)  # backward compatibility route
 def api_docs_local():
     """Grlc API page for local routes."""
     return api_docs_template()
 
 # Spec generation, JSON
 @app.route('/api-local/swagger', methods=['GET'])
+@app.route('/api/local/local/swagger', methods=['GET'], strict_slashes=False)  # backward compatibility route
 def swagger_spec_local():
     """Swagger spec for local routes."""
     return swagger_spec(user=None, repo=None, sha=None, content=None)
 
 # Callname execution
 @app.route('/api-local/<query_name>', methods=['GET'])
+@app.route('/api/local/local/<query_name>', methods=['GET'], strict_slashes=False)  # backward compatibility route
 def query_local(query_name):
     """SPARQL query execution for local routes."""
     return query(user=None, repo=None, query_name=query_name)
@@ -126,14 +129,37 @@ def query_param(query_name):
 ### Routes for GitHub APIs ###
 ##############################
 
+# Callname execution
+
+def query(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=None):
+    glogger.info("-----> Executing call name at /{}/{}/{}/{} on commit {}".format(user, repo, subdir, query_name, sha))
+    glogger.debug("Request accept header: " + request.headers["Accept"])
+
+    requestArgs = request.args
+    acceptHeader = request.headers['Accept']
+    requestUrl = request.url
+    formData = request.form
+
+    query_response, status, headers = utils.dispatch_query(user, repo, query_name, subdir, spec_url,
+                                                           sha=sha, content=content, requestArgs=requestArgs,
+                                                           acceptHeader=acceptHeader,
+                                                           requestUrl=requestUrl, formData=formData)
+
+    if isinstance(query_response, list):
+        query_response = jsonify(query_response)
+
+    return make_response(query_response, status, headers)
+
 # Spec generation, front-end
-@app.route('/api-git/<user>/<repo>', strict_slashes=False)
-@app.route('/api-git/<user>/<repo>/subdir/<subdir>', strict_slashes=False)
-@app.route('/api-git/<user>/<repo>/api-docs')
-@app.route('/api-git/<user>/<repo>/commit/<sha>')
-@app.route('/api-git/<user>/<repo>/commit/<sha>/api-docs')
-@app.route('/api-git/<user>/<repo>/subdir/<subdir>/commit/<sha>')
-@app.route('/api-git/<user>/<repo>/subdir/<subdir>/commit/<sha>/api-docs')
+@app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>')
+@app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/api-docs')
+@app.route('/api/<user>/<repo>', strict_slashes=False)  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>', strict_slashes=False)  # backward compatibility route
+@app.route('/api/<user>/<repo>/api-docs')  # backward compatibility route
+@app.route('/api/<user>/<repo>/commit/<sha>')  # backward compatibility route
+@app.route('/api/<user>/<repo>/commit/<sha>/api-docs')  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>')  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/api-docs')  # backward compatibility route
 def api_docs_git(user, repo, subdir=None, spec_url=None, sha=None):
     """Grlc API page for specifications loaded from a Github repo."""
     return api_docs_template()
@@ -143,9 +169,19 @@ def api_docs_git(user, repo, subdir=None, spec_url=None, sha=None):
 @app.route('/api-git/<user>/<repo>/subdir/<subdir>/swagger', methods=['GET'])
 @app.route('/api-git/<user>/<repo>/commit/<sha>/swagger')
 @app.route('/api-git/<user>/<repo>/subdir/<subdir>/commit/<sha>/swagger')
+@app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/swagger')
+@app.route('/api-git/<user>/<repo>/swagger', methods=['GET'])  # backward compatibility route
+@app.route('/api-git/<user>/<repo>/<subdir>/swagger', methods=['GET'])  # backward compatibility route
+@app.route('/api-git/<user>/<repo>/commit/<sha>/swagger')  # backward compatibility route
+@app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/swagger')  # backward compatibility route
 def swagger_spec_git(user, repo, subdir=None, spec_url=None, sha=None, content=None):
     """Swagger spec for specifications loaded from a Github repo."""
     return swagger_spec(user, repo, subdir=None, spec_url=None, sha=None, content=None)
+
+def relative_path():
+    path = request.path
+    path = '.' + '/..' * (path.count('/') - 1)
+    return path
 
 # Callname execution
 @app.route('/api-git/<user>/<repo>/<query_name>', methods=['GET', 'POST'])
@@ -156,6 +192,14 @@ def swagger_spec_git(user, repo, subdir=None, spec_url=None, sha=None, content=N
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/<query_name>', methods=['GET', 'POST'])
 @app.route('/api-git/<user>/<repo>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
+@app.route('/api/<user>/<repo>/<query_name>', methods=['GET', 'POST'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>/<query_name>', methods=['GET', 'POST'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET', 'POST'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>/<query_name>.<content>', methods=['GET', 'POST'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/commit/<sha>/<query_name>', methods=['GET', 'POST'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/<query_name>', methods=['GET', 'POST'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])  # backward compatibility route
 def query_git(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=None):
     """SPARQL query execution for specifications loaded from a Github repo."""
     return query(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=None)
