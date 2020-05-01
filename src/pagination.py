@@ -1,7 +1,7 @@
 import re
 
 def getSwaggerPaginationDef(resultsPerPage):
-    '''Build swagger spec section for pagination'''
+    """Build swagger spec section for pagination"""
     return {
         "name":  "page",
         "type":  "int",
@@ -10,7 +10,7 @@ def getSwaggerPaginationDef(resultsPerPage):
     }
 
 def buildPaginationHeader(resultCount, resultsPerPage, pageArg, url):
-    '''Build link header for result pagination'''
+    """Build link header for result pagination"""
     lastPage = resultCount / resultsPerPage
 
     if pageArg:

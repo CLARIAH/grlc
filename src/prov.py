@@ -15,9 +15,14 @@ glogger = glogging.getGrlcLogger(__name__)
 
 
 class grlcPROV():
+    """Record provenance of the grlc specification constructed."""
+
     def __init__(self, user, repo):
-        """
-        Default constructor
+        """Default constructor.
+
+        Keyword arguments:
+        user -- Github user.
+        repo -- Github repo.
         """
         self.user = user
         self.repo = repo
