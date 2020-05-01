@@ -28,7 +28,7 @@ Domain experts usually face the challenge having to learn SPARQL, when all they 
 
 `grlc` is a lightweight server that takes SPARQL queries (stored in a GitHub repository, local file storage or listed in a URL), and translates them to Linked Data Web APIs. This enables universal access to Linked Data. Users are not required to know SPARQL to query their data, but instead can access a web API. In this way, `grlc` enables researchers to easily access knowledge represented in RDF format.
 
-`grlc` has been used in a number of scientific publications [@Merono_ISWC2016,@Merono_ISWC2017,@Merono_ESWC2017] and PhD thesis [@Singh2019].
+`grlc` has been used in a number of scientific publications [@Merono_ISWC2016,@Merono_ISWC2017,@Merono_ESWC2017,@Merono_ISWC2019] and PhD thesis [@Singh2019].
 
 # Acknowledgements
 
