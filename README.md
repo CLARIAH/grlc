@@ -25,10 +25,10 @@ grlc can load your query collection from different locations. Each type of locat
 
 grlc can build an API from any Github repository, specified by the github user name of the owner and repository name.
 
-For example, assuming your queries are stored on a Github repo: `https://github.com/albertmeronyo/lodapi/`, point your browser to the following location
-`http://grlc.io/api-git/albertmeronyo/lodapi/`
+For example, assuming your queries are stored on a Github repo: `https://github.com/CLARIAH/grlc-queries/`, point your browser to the following location
+`http://grlc.io/api-git/CLARIAH/grlc-queries/`
 
-grlc can make use of Github version control mechanism to generate an API based on a specific version of queries in the repository. This can be done by including the commit sha in the URL path (`http://grlc-server/api-git/<user>/<repo>/commit/<sha>`), for example: `http://grlc.io/api-git/albertmeronyo/lodapi/commit/321b9c9889128d21e9ae76b1884a81fc50dbf34f`
+grlc can make use of Github version control mechanism to generate an API based on a specific version of queries in the repository. This can be done by including the commit sha in the URL path (`http://grlc-server/api-git/<user>/<repo>/commit/<sha>`), for example: `http://grlc.io/api-git/CLARIAH/grlc-queries/commit/79ceef2ee814a12e2ec572ffaa2f8212a22bae23`
 
 grlc can also use a subdirectory inside your Github repo. This can be done by including a subdirectory in the URL path (`http://grlc-server/api-git/<user>/<repo>/subdir/<subdir>`).
 
@@ -44,8 +44,8 @@ grlc can generate an API from a local directory in the computer where your grlc 
 
 grlc can generate an API from a yaml specification file accessible on the web.
 
-For example, ssuming your queries are listed on spec file: `https://raw.githubusercontent.com/albertmeronyo/lodapi/master/urls.yml`, point your browser to the following location
-`http://grlc.io/api-url?specUrl=https://raw.githubusercontent.com/albertmeronyo/lodapi/master/urls.yml`
+For example, ssuming your queries are listed on spec file: `https://raw.githubusercontent.com/CLARIAH/grlc-queries/master/urls.yml`, point your browser to the following location
+`http://grlc.io/api-url?specUrl=https://raw.githubusercontent.com/CLARIAH/grlc-queries/master/urls.yml`
 
 ##### Specification file synax
 A grlc API specification file is a YAML file which includes all necessary information to create a grlc API. This file should contain the following fields
@@ -72,7 +72,7 @@ queries:
 
 The API paths of all location types point o the generated swagger-ui style API documentation. On the API documentation page, you can explore available API calls and execute individual API calls.
 
-You can also view the swagger spec of your API, by visiting `<API-path>/spec/`, for example: `http://grlc.io/api-git/albertmeronyo/lodapi/spec/`
+You can also view the swagger spec of your API, by visiting `<API-path>/spec/`, for example: `http://grlc.io/api-git/CLARIAH/grlc-queries/spec/`
 
 ### Grlc query execution
 When you call an API endpoint, grlc executes the SPARQL query for that endpoint.
@@ -99,50 +99,97 @@ SELECT * WHERE {
 ```
 The following is a list of available decorators and their function:
 
-### `summary` 
-Creates a summary of your query/operation. Example: `#+ summary: This is the summary of my query/operation`
+### `summary`
+Creates a summary of your query/operation. This is shown next to your operation name in the swagger-ui.
+
+Syntax:
+```
+#+ summary: This is the summary of my query/operation
+```
+
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/summary.rq) and the equivalent (API operation)[http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_summary].
+
+### `description`
+Creates a description of your query/operation. This is shown as the description of your operation in the swagger-ui.
+
+Syntax:
+```
+#+ description: Extended description of my query/operation.
+```
+
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/description.rq) and the equivalent (API operation)[http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_description].
 
 ### `endpoint`
-Specifies a query-specific endpoint. Example: `#+ endpoint: http://example.com/sparql`
+Specifies a query-specific endpoint.
+
+Syntax:
+```
+#+ endpoint: http://example.com/sparql
+```
+
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/endpoint.rq) and the equivalent (API operation)[http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_endpoint].
 
 ### `pagination`
-Paginates the results in groups of (for example) 100. Example: `#+ pagination: 100`
+Paginates the results in groups of (for example) 100.
+
+Syntax:
+```
+#+ pagination: 100
+```
+
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/pagination.rq) and the equivalent (API operation)[http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_pagination].
 
 ### `method`
-Indicates the HTTP request method (`GET` and `POST` are supported). Example: `#+ method: GET`.
+Indicates the HTTP request method (`GET` and `POST` are supported).
+
+Syntax:
+```
+#+ method: GET
+```
+
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/method.rq) and the equivalent (API operation)[http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/post_method].
 
 ### `tags`
-Assign tags to your query/operation. Query/operations with the same tag are grouped together in the swagger-ui. Example:
+Assign tags to your query/operation. Query/operations with the same tag are grouped together in the swagger-ui. 
+
+Syntax:
 ```
 #+ tags:
 #+   - firstTag
 #+   - secondTag
 ```
 
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/tags.rq) and the equivalent (API operation)[http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/group1/get_tags].
+
 ### `enumerate`
-Indicates which parameters of your query/operation should get enumerations (and get dropdown menus in the swagger-ui) using the given values from the SPARQL endpoint. For example:
-```
-#+ enumerate:
-#+   - var1
-#+   - var2
-```
-The values for each enumeration variable can also be specified into the query decorators to save endpoint requests and speed up the API generation. For example:
+Indicates which parameters of your query/operation should get enumerations (and get dropdown menus in the swagger-ui) using the given values from the SPARQL endpoint. The values for each enumeration variable can also be specified into the query decorators to save endpoint requests and speed up the API generation. 
+
+Syntax:
 ```
 #+ enumerate:
 #+   - var1:
 #+     - value1
 #+     - value2
 ```
+
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/enumerate.rq) and the equivalent (API operation)[http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_enumerate].
+
 Notice that these should be plain variable names without SPARQL/BASIL conventions (so `var1` instead of `?_var1_iri`)
 
 ###  `endpoint_in_url`
-Allows/disallows the `endpoint` parameter from being provided as a URL parameter (allowed by default). Example:
+Allows/disallows the `endpoint` parameter from being provided as a URL parameter (allowed by default).
+
+Syntax:
 ```
 #+ endpoint_in_url: False
 ```
 
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/endpoint_url.rq) and the equivalent (API operation)[http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_endpoint_url].
+
 ###  `transform`
-Allows  query results to be converted to the specified JSON structure, by using [SPARQLTransformer](https://github.com/D2KLab/py-sparql-transformer) syntax. Example: 
+Allows  query results to be converted to the specified JSON structure, by using [SPARQLTransformer](https://github.com/D2KLab/py-sparql-transformer) syntax.
+
+Syntax: 
 ```
 #+ transform: {
 #+     "key": "?p",
@@ -151,15 +198,16 @@ Allows  query results to be converted to the specified JSON structure, by using 
 #+   }
 ```
 
-See examples at [https://github.com/albertmeronyo/lodapi](https://github.com/albertmeronyo/lodapi).
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/transform.rq) and the equivalent (API operation)[http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_transform].
 
 ### Example APIs
 
 Check these out:
-
-- http://grlc.io/api/CLARIAH/wp4-queries-hisco/
-- http://grlc.io/api/albertmeronyo/lodapi/
-- http://grlc.io/api/albertmeronyo/lsq-api
+- http://grlc.io/api-git/CLARIAH/grlc-queries
+- http://grlc.io/api-url?specUrl=https://raw.githubusercontent.com/CLARIAH/grlc-queries/master/urls.yml
+- http://grlc.io/api-git/CLARIAH/wp4-queries-hisco
+- http://grlc.io/api-git/albertmeronyo/lodapi
+- http://grlc.io/api-git/albertmeronyo/lsq-api
 
 You'll find the sources of these and many more in [GitHub](https://github.com/search?o=desc&q=endpoint+summary+language%3ASPARQL&s=indexed&type=Code&utf8=%E2%9C%93)
 
