@@ -33,12 +33,8 @@ def swagger_spec(user, repo, subdir=None, spec_url=None, sha=None, content=None)
 
     swag = utils.build_swagger_spec(user, repo, subdir, spec_url, sha, static.SERVER_NAME)
 
-    if 'text/turtle' in request.headers['Accept']:
-        resp_spec = make_response(utils.turtleize(swag))
-        resp_spec.headers['Content-Type'] = 'text/turtle'
-    else:
-        resp_spec = make_response(jsonify(swag))
-        resp_spec.headers['Content-Type'] = 'application/json'
+    resp_spec = make_response(jsonify(swag))
+    resp_spec.headers['Content-Type'] = 'application/json'
 
     resp_spec.headers['Cache-Control'] = static.CACHE_CONTROL_POLICY  # Caching JSON specs for 15 minutes
 
@@ -90,8 +86,8 @@ def swagger_spec_local():
     return swagger_spec(user=None, repo=None, sha=None, content=None)
 
 # Callname execution
-@app.route('/api-local/<query_name>', methods=['GET'])
-@app.route('/api/local/local/<query_name>', methods=['GET'], strict_slashes=False)  # backward compatibility route
+@app.route('/api-local/<query_name>', methods=['GET', 'POST'])
+@app.route('/api/local/local/<query_name>', methods=['GET', 'POST'], strict_slashes=False)  # backward compatibility route
 def query_local(query_name):
     """SPARQL query execution for local routes."""
     return query(user=None, repo=None, query_name=query_name)
@@ -118,7 +114,7 @@ def swagger_spec_param():
     return swagger_spec(user=None, repo=None, spec_url=spec_url)
 
 # Callname execution
-@app.route('/api-url/<query_name>', methods=['GET'])
+@app.route('/api-url/<query_name>', methods=['GET', 'POST'])
 def query_param(query_name):
     """SPARQL query execution for specifications loaded via http."""
     spec_url = request.args['specUrl']
@@ -128,27 +124,6 @@ def query_param(query_name):
 ##############################
 ### Routes for GitHub APIs ###
 ##############################
-
-# Callname execution
-
-def query(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=None):
-    glogger.info("-----> Executing call name at /{}/{}/{}/{} on commit {}".format(user, repo, subdir, query_name, sha))
-    glogger.debug("Request accept header: " + request.headers["Accept"])
-
-    requestArgs = request.args
-    acceptHeader = request.headers['Accept']
-    requestUrl = request.url
-    formData = request.form
-
-    query_response, status, headers = utils.dispatch_query(user, repo, query_name, subdir, spec_url,
-                                                           sha=sha, content=content, requestArgs=requestArgs,
-                                                           acceptHeader=acceptHeader,
-                                                           requestUrl=requestUrl, formData=formData)
-
-    if isinstance(query_response, list):
-        query_response = jsonify(query_response)
-
-    return make_response(query_response, status, headers)
 
 # Spec generation, front-end
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>')
@@ -178,10 +153,6 @@ def swagger_spec_git(user, repo, subdir=None, spec_url=None, sha=None, content=N
     """Swagger spec for specifications loaded from a Github repo."""
     return swagger_spec(user, repo, subdir=None, spec_url=None, sha=None, content=None)
 
-def relative_path():
-    path = request.path
-    path = '.' + '/..' * (path.count('/') - 1)
-    return path
 
 # Callname execution
 @app.route('/api-git/<user>/<repo>/<query_name>', methods=['GET', 'POST'])
@@ -203,6 +174,7 @@ def relative_path():
 def query_git(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=None):
     """SPARQL query execution for specifications loaded from a Github repo."""
     return query(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=None)
+
 
 # Main thread
 if __name__ == '__main__':
