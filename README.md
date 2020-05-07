@@ -7,39 +7,39 @@
 
 grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor, automatically builds Web APIs using SPARQL queries stored in git repositories. http://grlc.io/
 
-## What is grlc ?
-grlc is a lightweight server that takes SPARQL queries (stored in a GitHub repository, local file storage or listed in a URL), and translates them to Linked Data Web APIs. This enables universal access to Linked Data. Users are not required to know SPARQL to query their data, but instead can access a web API.
+## What is grlc?
+grlc is a lightweight server that takes SPARQL queries (stored in a GitHub repository, in your local filesystem, or listed in a URL), and translates them to Linked Data Web APIs. This enables universal access to Linked Data. Users are not required to know SPARQL to query their data, but instead can access a web API.
 
 ## Quick tutorial
 For a quick usage tutorial check out our wiki [walkthrough](https://github.com/CLARIAH/grlc/wiki/Quick-tutorial) and [list of features](https://github.com/CLARIAH/grlc/wiki/Features).
 
 ## Usage
-grlc assumes that you have a collection of SPARQL queries as .rq files (like in [this one](https://github.com/CEDAR-project/Queries)). grlc will create an API operation per such a SPARQL query/.rq file. Your queries can include special [decorators](#decorator-syntax) to add extra functionality to your API.
+grlc assumes that you have a collection of SPARQL queries as .rq files (like [this](https://github.com/CEDAR-project/Queries)). grlc will create an API operation per such a SPARQL query/.rq file. Your queries can include special [decorators](#decorator-syntax) to add extra functionality to your API.
 
 ### Query location
-grlc can load your query collection from different locations. Each type of location has specific functionality features are accessible via different paths. However all location types produce the same beautiful API's.
+grlc can load your query collection from different locations: from a GitHub repository (`api-git`), from local storage (`api-local`), and from a specification file (`api-url`). Each type of location has specific features and is accessible via different paths. However all location types produce the same beautiful APIs.
 
-#### From a Github repository
-> API path: 
+#### From a GitHub repository
+> API path:
 `http://grlc-server/api-git/<user>/<repo>`
 
-grlc can build an API from any Github repository, specified by the github user name of the owner and repository name.
+grlc can build an API from any Github repository, specified by the GitHub user name of the owner (`<user>`) and repository name (`<repo>`).
 
 For example, assuming your queries are stored on a Github repo: `https://github.com/CLARIAH/grlc-queries/`, point your browser to the following location
 `http://grlc.io/api-git/CLARIAH/grlc-queries/`
 
-grlc can make use of Github version control mechanism to generate an API based on a specific version of queries in the repository. This can be done by including the commit sha in the URL path (`http://grlc-server/api-git/<user>/<repo>/commit/<sha>`), for example: `http://grlc.io/api-git/CLARIAH/grlc-queries/commit/79ceef2ee814a12e2ec572ffaa2f8212a22bae23`
+grlc can make use of git's version control mechanism to generate an API based on a specific version of queries in the repository. This can be done by including the commit sha in the URL path (`http://grlc-server/api-git/<user>/<repo>/commit/<sha>`), for example: `http://grlc.io/api-git/CLARIAH/grlc-queries/commit/79ceef2ee814a12e2ec572ffaa2f8212a22bae23`
 
 grlc can also use a subdirectory inside your Github repo. This can be done by including a subdirectory in the URL path (`http://grlc-server/api-git/<user>/<repo>/subdir/<subdir>`).
 
 #### From local storage
-> API path: 
+> API path:
 `http://grlc-server/api-local/`
 
-grlc can generate an API from a local directory in the computer where your grlc server runs. You can configure the location of this folder in your [grlc server configuration file](#grlc-server-configuration).
- 
+grlc can generate an API from a local directory in the computer where your grlc server runs. You can configure the location of this folder in your [grlc server configuration file](#grlc-server-configuration). See also [how to install and run your own grlc instance](#install-and-run).
+
 #### From a specification file
-> API path: 
+> API path:
 `http://grlc-server/api-url/?specUrl=<specUrl>`
 
 grlc can generate an API from a yaml specification file accessible on the web.
@@ -48,7 +48,7 @@ For example, ssuming your queries are listed on spec file: `https://raw.githubus
 `http://grlc.io/api-url?specUrl=https://raw.githubusercontent.com/CLARIAH/grlc-queries/master/urls.yml`
 
 ##### Specification file synax
-A grlc API specification file is a YAML file which includes all necessary information to create a grlc API. This file should contain the following fields
+A grlc API specification file is a YAML file which includes the necessary information to create a grlc API, most importantly a list of URLs to decorated and HTTP-dereferenceable SPARQL queries. This file should contain the following fields
 
  - `title`: Title of my API
  - `contact`: Contact details of the API owner. This should include the `name` and `url` properties.
@@ -68,9 +68,9 @@ queries:
   - https://www.otherwebsite.org/query3.rq
 ```
 
-### Grlc generated API
+### grlc generated API
 
-The API paths of all location types point o the generated swagger-ui style API documentation. On the API documentation page, you can explore available API calls and execute individual API calls.
+The API paths of all location types point to the generated [swagger-ui]() style API documentation. On the API documentation page, you can explore available API calls and execute individual API calls.
 
 You can also view the swagger spec of your API, by visiting `<API-path>/spec/`, for example: `http://grlc.io/api-git/CLARIAH/grlc-queries/spec/`
 
@@ -150,7 +150,7 @@ Syntax:
 Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/method.rq) and the equivalent (API operation)[http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/post_method].
 
 ### `tags`
-Assign tags to your query/operation. Query/operations with the same tag are grouped together in the swagger-ui. 
+Assign tags to your query/operation. Query/operations with the same tag are grouped together in the swagger-ui.
 
 Syntax:
 ```
@@ -162,7 +162,7 @@ Syntax:
 Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/tags.rq) and the equivalent (API operation)[http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/group1/get_tags].
 
 ### `enumerate`
-Indicates which parameters of your query/operation should get enumerations (and get dropdown menus in the swagger-ui) using the given values from the SPARQL endpoint. The values for each enumeration variable can also be specified into the query decorators to save endpoint requests and speed up the API generation. 
+Indicates which parameters of your query/operation should get enumerations (and get dropdown menus in the swagger-ui) using the given values from the SPARQL endpoint. The values for each enumeration variable can also be specified into the query decorators to save endpoint requests and speed up the API generation.
 
 Syntax:
 ```
@@ -189,7 +189,7 @@ Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/endpoint_url
 ###  `transform`
 Allows  query results to be converted to the specified JSON structure, by using [SPARQLTransformer](https://github.com/D2KLab/py-sparql-transformer) syntax.
 
-Syntax: 
+Syntax:
 ```
 #+ transform: {
 #+     "key": "?p",
@@ -214,7 +214,7 @@ You'll find the sources of these and many more in [GitHub](https://github.com/se
 Use [this GitHub search](https://github.com/search?q=endpoint+summary+language%3ASPARQL&type=Code&utf8=%E2%9C%93) to see examples from other grlc users.
 
 ## Install and run
-You can use grlc in different ways: 
+You can use grlc in different ways:
  - [Via grlc.io](#grlc.io): you can use the [grlc.io service](https://grlc.io/)
  - [Via Docker](#Docker): you can use the [grlc docker image](https://hub.docker.com/r/clariah/grlc) and start your own grlc server.
  - [Via pip](#Pip): you can install the [grlc Python package](https://pypi.org/project/grlc/) and start your own grlc server or use grlc as a Python library.
