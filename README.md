@@ -70,12 +70,12 @@ queries:
 
 ### grlc generated API
 
-The API paths of all location types point to the generated [swagger-ui]() style API documentation. On the API documentation page, you can explore available API calls and execute individual API calls.
+The API paths of all location types point to the generated [swagger-ui](https://swagger.io/) style API documentation. On the API documentation page, you can explore available API calls and execute individual API calls.
 
 You can also view the swagger spec of your API, by visiting `<API-path>/spec/`, for example: `http://grlc.io/api-git/CLARIAH/grlc-queries/spec/`
 
-### Grlc query execution
-When you call an API endpoint, grlc executes the SPARQL query for that endpoint.
+### grlc query execution
+When you call an API endpoint, grlc executes the SPARQL query for that endpoint by combining supplied parameters and decorators.
 
 There are 4 options to specify your own endpoint:
 
@@ -84,10 +84,10 @@ There are 4 options to specify your own endpoint:
 * Add the `#+ endpoint:` [decorator](#`endpoint`).
 * Add the URL of the endpoint on a single line in an `endpoint.txt` file within the GitHub repository that contains the queries.
 
-The endpoint call will return the result of executing the query as a json representation of rdflib.query.QueryResult. The format of the response can be modified by using the `#+ transform:` [decorator](#`transform`).
+The endpoint call will return the result of executing the query as a json representation of rdflib.query.QueryResult (for other result formats, you can use content negotiation via HTTP `Accept` headers). For json responses, the schema of the response can be modified by using the `#+ transform:` [decorator](#`transform`).
 
 ## Decorator syntax
-Special decorators are available to make your swagger-ui look nicer and to increase functionality. These are provided as comments at the start of your query file. All decorators start `#+ `, for example:
+Special decorators are available to make your swagger-ui look nicer and to increase functionality. These are provided as comments at the start of your query file, making it still syntactically valid SPARQL. All decorators start with `#+ `, for example:
 
 ```SPARQL
 #+ decorator_1: decorator value
@@ -130,7 +130,7 @@ Syntax:
 Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/endpoint.rq) and the equivalent (API operation)[http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_endpoint].
 
 ### `pagination`
-Paginates the results in groups of (for example) 100.
+Paginates the results in groups of (for example) 100. Links to previous, next, first, and last result pages are provided as HTTP response headers to avoid polluting the payload (see details [here](https://developer.github.com/v3/guides/traversing-with-pagination/))
 
 Syntax:
 ```
@@ -239,7 +239,7 @@ docker run -it --rm -p 8088:80 -e GRLC_SERVER_NAME=grlc.io -e GRLC_GITHUB_ACCESS
 If you want to run grlc locally or use it as a library, you can install grlc on your machine. Grlc is [registered in PyPi](https://pypi.org/project/grlc/) so you can install it using pip.
 
 #### Prerequisites
-Grlc has the following requirements:
+grlc has the following requirements:
 - Python3
 - development files (depending on your OS):
 ```bash
@@ -258,7 +258,7 @@ Once grlc is installed, you have several options:
  - [As a python library](#Grlc-library)
 
 #### Standalone server
-Grlc includes a command line tool which you can use to start your own grlc server:
+grlc includes a command line tool which you can use to start your own grlc server:
 ```bash
 grlc-server
 ```
@@ -287,10 +287,10 @@ waitress-serve --port=8088 grlc.server:app
 
 If you want to run grlc at system boot as a service, you can find example upstart scripts at [upstart/](upstart/grlc-docker.conf)
 
-#### Grlc library
+#### grlc library
 You can use grlc as a library directly from your own python script. See the [usage example](https://github.com/CLARIAH/grlc/blob/master/doc/notebooks/GrlcFromNotebook.ipynb) to find out more.
 
-#### Grlc server configuration
+#### grlc server configuration
 Regardless of how you are running your grlc server, you will need to configure it using the `config.ini` file. Have a look at the [example config file](./config.default.ini) to see how it this file is structured.
 
 The configuration file contains the following variables:
@@ -301,7 +301,7 @@ The configuration file contains the following variables:
  - `user` and `password` SPARQL endpoint default authentication (if required, specify `'none'` if not required)
  - `debug` enable debug level logging.
 
-##### Github access token
+##### GitHub access token
 In order for grlc to communicate with GitHub, you'll need to tell grlc what your access token is:
 
 1. Get a GitHub personal access token. In your GitHub's profile page, go to _Settings_, then _Developer settings_, _Personal access tokens_, and _Generate new token_
@@ -320,7 +320,7 @@ Check our [contributing](CONTRIBUTING.md) guidelines for these and more, and joi
 If you cannot code, that's no problem! There's still plenty you can contribute:
 
 - Share your experience at using grlc in Twitter (mention the handler **@grlcldapi**)
-- If you are good with HTML/CSS, [let us know](mailto:albert.merono@vu.nl)
+- If you are good with HTML/CSS, [let us know](mailto:albert.meronyo@gmail.com)
 
 ## Related tools
 - [SPARQL2Git](https://github.com/albertmeronyo/SPARQL2Git) is a Web interface for editing SPARQL queries and saving them in GitHub as grlc APIs.
@@ -348,3 +348,4 @@ Quotes from grlc users:
 - Albert Meroño-Peñuela, Rinke Hoekstra. “grlc Makes GitHub Taste Like Linked Data APIs”. The Semantic Web – ESWC 2016 Satellite Events, Heraklion, Crete, Greece, May 29 – June 2, 2016, Revised Selected Papers. LNCS 9989, pp. 342-353 (2016). ([PDF](https://link.springer.com/content/pdf/10.1007%2F978-3-319-47602-5_48.pdf))
 - Albert Meroño-Peñuela, Rinke Hoekstra. “SPARQL2Git: Transparent SPARQL and Linked Data API Curation via Git”. In: Proceedings of the 14th Extended Semantic Web Conference (ESWC 2017), Poster and Demo Track. Portoroz, Slovenia, May 28th – June 1st, 2017 (2017). ([PDF](https://www.albertmeronyo.org/wp-content/uploads/2017/04/sparql2git-transparent-sparql-4.pdf))
 - Albert Meroño-Peñuela, Rinke Hoekstra. “Automatic Query-centric API for Routine Access to Linked Data”. In: The Semantic Web – ISWC 2017, 16th International Semantic Web Conference. Lecture Notes in Computer Science, vol 10587, pp. 334-339 (2017). ([PDF](https://www.albertmeronyo.org/wp-content/uploads/2017/07/ISWC2017_paper_430.pdf))
+- Pasquale Lisena, Albert Meroño-Peñuela, Tobias Kuhn, Raphaël Troncy. “Easy Web API Development with SPARQL Transformer”. In: The Semantic Web – ISWC 2019, 18th International Semantic Web Conference. Lecture Notes in Computer Science, vol 11779, pp. 454-470 (2019). ([PDF](https://www.albertmeronyo.org/wp-content/uploads/2019/06/ISWC2019_paper_237.pdf))
