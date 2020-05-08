@@ -292,6 +292,7 @@ def get_yaml_decorators(rq):
 
 
 def enable_custom_function_prefix(rq, prefix):
+    """Add SPARQL prefixe header if the prefix is used in the given query."""
     if ' %s:' % prefix in rq or '(%s:' % prefix in rq and not 'PREFIX %s:' % prefix in rq:
         rq = 'PREFIX %s: <:%s>\n' % (prefix, prefix) + rq
     return rq
@@ -373,6 +374,8 @@ def get_metadata(rq, endpoint):
 
 
 def paginate_query(query, results_per_page, get_args):
+    """Modify the given query so that it can be paginated. The paginated query will 
+    split display a maximum of `results_per_page`."""
     page = get_args.get('page', 1)
 
     glogger.info("Paginating query for page {}, {} results per page".format(page, results_per_page))
@@ -391,6 +394,7 @@ def paginate_query(query, results_per_page, get_args):
 
 
 def rewrite_query(query, parameters, get_args):
+    """Rewrite query to replace query parameters for given values."""
     glogger.debug("Query parameters")
     glogger.debug(parameters)
     requireXSD = False

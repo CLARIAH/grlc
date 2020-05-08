@@ -31,13 +31,16 @@ def getLoader(user, repo, subdir=None, spec_url=None, sha=None, prov=None):
 
 
 def build_spec(user, repo, subdir=None, sha=None, prov=None, extraMetadata=[]):
+    """Build grlc specification for the given github user / repo.
+    
+    Deprecated."""
     glogger.warning("grlc.utils.build_spec is deprecated and will " \
                     "be removed in the future. Use grlc.swagger.build_spec instead.")
     return swagger.build_spec(user, repo, subdir, sha, prov, extraMetadata)
 
 
 def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName):
-    """Build grlc specification for the given github user / repo in swagger format """
+    """Build grlc specification for the given github user / repo in swagger format."""
     if user and repo:
         # Init provenance recording
         prov_g = grlcPROV(user, repo)
@@ -78,8 +81,10 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName):
     return swag
 
 
-def dispatch_query(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=None, requestArgs={}, acceptHeader='application/json',
-                   requestUrl='http://', formData={}):
+def dispatch_query(user, repo, query_name, subdir=None, spec_url=None, sha=None, 
+        content=None, requestArgs={}, acceptHeader='application/json',
+        requestUrl='http://', formData={}):
+    """Executes the specified SPARQL or TPF query."""
     loader = getLoader(user, repo, subdir, spec_url, sha=sha, prov=None)
     query, q_type = loader.getTextForName(query_name)
 
@@ -89,7 +94,7 @@ def dispatch_query(user, repo, query_name, subdir=None, spec_url=None, sha=None,
                                                     requestUrl)
 
         if acceptHeader == 'application/json':
-            # TODO: transform JSOn result if suitable
+            # TODO: transform JSON result if suitable
             pass
 
         return resp, status, headers
@@ -101,7 +106,9 @@ def dispatch_query(user, repo, query_name, subdir=None, spec_url=None, sha=None,
         return "Couldn't find a SPARQL, RDF dump, or TPF query with the requested name", 404, {}
 
 
-def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, content, formData, requestUrl):
+def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, content, 
+        formData, requestUrl):
+    """Executes the specified SPARQL query."""
     endpoint, auth = gquery.guess_endpoint_uri(raw_sparql_query, loader)
     if endpoint == '':
         return 'No SPARQL endpoint indicated', 407, {}
@@ -208,6 +215,7 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
 
 
 def dispatchTPFQuery(raw_tpf_query, loader, acceptHeader, content):
+    """Executes the specified TPF query."""
     endpoint, auth = gquery.guess_endpoint_uri(raw_tpf_query, loader)
     glogger.debug("=====================================================")
     glogger.debug("Sending query to TPF endpoint: {}".format(endpoint))

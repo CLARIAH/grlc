@@ -1,3 +1,6 @@
+/**
+ * Log to JavaScript console.
+ */
 function log() {
   if ('console' in window) {
     console.log.apply(console, arguments);
@@ -29,6 +32,9 @@ function set_commit_links(api) {
   }
 }
 
+/**
+ * Redirects to specified URL
+ */
 function redirectTo(url) {
   location.href= url;
 }
@@ -96,13 +102,18 @@ function grlcProvToggle(e){
  *
  */
 function grlcOnLoad() {
-  // Build a system
+  // Generate the swagger url
   let url = document.location.pathname;
+  if(url.endsWith("/api-docs")) {
+    url = url.replace('/api-docs', '');
+  }
   if( ! url.endsWith("/")) {
     url += "/";
   }
   swagger_url = url + "swagger" + document.location.search;
-  console.log('swagger_url: ' + swagger_url);
+  log('swagger_url: ' + swagger_url);
+
+  // Build a Swagger UI
   const ui = SwaggerUIBundle({
     url: swagger_url,
     dom_id: '#swagger-ui',
