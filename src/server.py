@@ -126,8 +126,13 @@ def query_param(query_name):
 ##############################
 
 # Spec generation, front-end
-@app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>')
-@app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/api-docs')
+@app.route('/api-git/<user>/<repo>', strict_slashes=False)
+@app.route('/api-git/<user>/<repo>/subdir/<subdir>', strict_slashes=False)
+@app.route('/api-git/<user>/<repo>/api-docs')
+@app.route('/api-git/<user>/<repo>/commit/<sha>')
+@app.route('/api-git/<user>/<repo>/commit/<sha>/api-docs')
+@app.route('/api-git/<user>/<repo>/subdir/<subdir>/commit/<sha>')
+@app.route('/api-git/<user>/<repo>/subdir/<subdir>/commit/<sha>/api-docs')
 @app.route('/api/<user>/<repo>', strict_slashes=False)  # backward compatibility route
 @app.route('/api/<user>/<repo>/<subdir>', strict_slashes=False)  # backward compatibility route
 @app.route('/api/<user>/<repo>/api-docs')  # backward compatibility route
@@ -156,13 +161,13 @@ def swagger_spec_git(user, repo, subdir=None, spec_url=None, sha=None, content=N
 
 # Callname execution
 @app.route('/api-git/<user>/<repo>/<query_name>', methods=['GET', 'POST'])
-@app.route('/api-git/<user>/<repo>/<subdir>/<query_name>', methods=['GET', 'POST'])
+@app.route('/api-git/<user>/<repo>/subdir/<subdir>/<query_name>', methods=['GET', 'POST'])
 @app.route('/api-git/<user>/<repo>/<query_name>.<content>', methods=['GET', 'POST'])
-@app.route('/api-git/<user>/<repo>/<subdir>/<query_name>.<content>', methods=['GET', 'POST'])
+@app.route('/api-git/<user>/<repo>/subdir/<subdir>/<query_name>.<content>', methods=['GET', 'POST'])
 @app.route('/api-git/<user>/<repo>/commit/<sha>/<query_name>', methods=['GET', 'POST'])
-@app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/<query_name>', methods=['GET', 'POST'])
+@app.route('/api-git/<user>/<repo>/subdir/<subdir>/commit/<sha>/<query_name>', methods=['GET', 'POST'])
 @app.route('/api-git/<user>/<repo>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
-@app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
+@app.route('/api-git/<user>/<repo>/subdir/<subdir>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
 @app.route('/api/<user>/<repo>/<query_name>', methods=['GET', 'POST'])  # backward compatibility route
 @app.route('/api/<user>/<repo>/<subdir>/<query_name>', methods=['GET', 'POST'])  # backward compatibility route
 @app.route('/api/<user>/<repo>/<query_name>.<content>', methods=['GET', 'POST'])  # backward compatibility route
