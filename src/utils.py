@@ -10,6 +10,7 @@ from grlc import __version__ as grlc_version
 import re
 import requests
 import json
+from urllib.parse import urlparse
 
 from rdflib import Graph
 
@@ -81,7 +82,7 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName):
     return swag
 
 
-def dispatch_query(user, repo, query_name, subdir=None, spec_url=None, sha=None, 
+def dispatch_query(user, repo, query_name, subdir=None, spec_url=None, sha=None,
         content=None, requestArgs={}, acceptHeader='application/json',
         requestUrl='http://', formData={}):
     """Executes the specified SPARQL or TPF query."""
@@ -106,7 +107,7 @@ def dispatch_query(user, repo, query_name, subdir=None, spec_url=None, sha=None,
         return "Couldn't find a SPARQL, RDF dump, or TPF query with the requested name", 404, {}
 
 
-def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, content, 
+def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, content,
         formData, requestUrl):
     """Executes the specified SPARQL query."""
     endpoint, auth = gquery.guess_endpoint_uri(raw_sparql_query, loader)
@@ -199,7 +200,10 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
         # Get number of total results
         count = gquery.count_query_results(rewritten_query, endpoint)
         pageArg = requestArgs.get('page', None)
-        headerLink = pageUtils.buildPaginationHeader(count, pagination, pageArg, requestUrl)
+
+        url = urlparse(requestUrl)
+        replaced = url._replace(netloc=static.SERVER_NAME)
+        headerLink = pageUtils.buildPaginationHeader(count, pagination, pageArg, replaced.geturl())
         headers['Link'] = headerLink
 
     if 'proto' in query_metadata:  # sparql transformer
