@@ -22,7 +22,7 @@ def buildPaginationHeader(resultCount, resultsPerPage, pageArg, url):
     else:
         separator = '&' if '?' in url else '?'
         page = 1
-        next_url = url + separator + "?page=2"
+        next_url = url + separator + "page=2"
         prev_url = ""
         first_url = url + separator + "page=1"
         last_url = url + separator + "page={}".format(lastPage)
