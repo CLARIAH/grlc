@@ -150,10 +150,10 @@ def api_docs_git(user, repo, subdir=None, spec_url=None, sha=None):
 @app.route('/api-git/<user>/<repo>/commit/<sha>/swagger')
 @app.route('/api-git/<user>/<repo>/subdir/<subdir>/commit/<sha>/swagger')
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/swagger')
-@app.route('/api-git/<user>/<repo>/swagger', methods=['GET'])  # backward compatibility route
-@app.route('/api-git/<user>/<repo>/<subdir>/swagger', methods=['GET'])  # backward compatibility route
-@app.route('/api-git/<user>/<repo>/commit/<sha>/swagger')  # backward compatibility route
-@app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/swagger')  # backward compatibility route
+@app.route('/api/<user>/<repo>/swagger', methods=['GET'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>/swagger', methods=['GET'])  # backward compatibility route
+@app.route('/api/<user>/<repo>/commit/<sha>/swagger')  # backward compatibility route
+@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/swagger')  # backward compatibility route
 def swagger_spec_git(user, repo, subdir=None, spec_url=None, sha=None, content=None):
     """Swagger spec for specifications loaded from a Github repo."""
     return swagger_spec(user, repo, subdir=None, spec_url=None, sha=None, content=None)
