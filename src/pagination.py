@@ -20,11 +20,12 @@ def buildPaginationHeader(resultCount, resultsPerPage, pageArg, url):
         first_url = re.sub("page=[0-9]+", "page=1", url)
         last_url = re.sub("page=[0-9]+", "page={}".format(lastPage), url)
     else:
+        separator = '&' if '?' in url else '?'
         page = 1
-        next_url = url + "?page=2"
+        next_url = url + separator + "?page=2"
         prev_url = ""
-        first_url = url + "?page=1"
-        last_url = url + "?page={}".format(lastPage)
+        first_url = url + separator + "page=1"
+        last_url = url + separator + "page={}".format(lastPage)
 
     if page == 1:
         headerLink = "<{}>; rel=next, <{}>; rel=last".format(next_url, last_url)
