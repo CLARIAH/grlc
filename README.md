@@ -107,7 +107,7 @@ Syntax:
 #+ summary: This is the summary of my query/operation
 ```
 
-Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/summary.rq) and the equivalent [API operation](http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_summary).
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/summary.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_summary).
 
 ### `description`
 Creates a description of your query/operation. This is shown as the description of your operation in the swagger-ui.
@@ -117,7 +117,7 @@ Syntax:
 #+ description: Extended description of my query/operation.
 ```
 
-Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/description.rq) and the equivalent [API operation](http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_description).
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/description.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_description).
 
 ### `endpoint`
 Specifies a query-specific endpoint.
@@ -127,7 +127,7 @@ Syntax:
 #+ endpoint: http://example.com/sparql
 ```
 
-Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/endpoint.rq) and the equivalent [API operation](http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_endpoint).
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/endpoint.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_endpoint).
 
 ### `pagination`
 Paginates the results in groups of (for example) 100. Links to previous, next, first, and last result pages are provided as HTTP response headers to avoid polluting the payload (see details [here](https://developer.github.com/v3/guides/traversing-with-pagination/))
@@ -137,7 +137,7 @@ Syntax:
 #+ pagination: 100
 ```
 
-Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/pagination.rq) and the equivalent [API operation](http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_pagination).
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/pagination.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_pagination).
 
 ### `method`
 Indicates the HTTP request method (`GET` and `POST` are supported).
@@ -147,7 +147,7 @@ Syntax:
 #+ method: GET
 ```
 
-Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/method.rq) and the equivalent [API operation](http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/post_method).
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/method.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/default/post_method).
 
 ### `tags`
 Assign tags to your query/operation. Query/operations with the same tag are grouped together in the swagger-ui.
@@ -159,7 +159,7 @@ Syntax:
 #+   - secondTag
 ```
 
-Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/tags.rq) and the equivalent [API operation](http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/group1/get_tags).
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/tags.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/group1/get_tags).
 
 ### `enumerate`
 Indicates which parameters of your query/operation should get enumerations (and get dropdown menus in the swagger-ui) using the given values from the SPARQL endpoint. The values for each enumeration variable can also be specified into the query decorators to save endpoint requests and speed up the API generation.
@@ -172,7 +172,7 @@ Syntax:
 #+     - value2
 ```
 
-Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/enumerate.rq) and the equivalent [API operation](http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_enumerate).
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/enumerate.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_enumerate).
 
 Notice that these should be plain variable names without SPARQL/BASIL conventions (so `var1` instead of `?_var1_iri`)
 
@@ -184,7 +184,7 @@ Syntax:
 #+ endpoint_in_url: False
 ```
 
-Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/endpoint_url.rq) and the equivalent [API operation](http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_endpoint_url).
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/endpoint_url.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_endpoint_url).
 
 ###  `transform`
 Allows  query results to be converted to the specified JSON structure, by using [SPARQLTransformer](https://github.com/D2KLab/py-sparql-transformer) syntax.
@@ -198,7 +198,7 @@ Syntax:
 #+   }
 ```
 
-Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/transform.rq) and the equivalent [API operation](http://dev.grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_transform).
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/transform.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_transform).
 
 ### Example APIs
 
