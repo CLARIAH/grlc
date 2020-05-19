@@ -13,7 +13,7 @@ for root,dirs,files in os.walk(grlc_base):
         root_dir = root.replace(grlc_base_dir, '')
         data_files = os.path.join(root_dir, '*')
         grlc_data.append(data_files)
-grlc_version = '1.3.3'
+grlc_version = '1.3.4'
 
 with codecs.open('requirements.txt', mode='r') as f:
     install_requires = f.read().splitlines()
