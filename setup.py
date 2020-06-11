@@ -13,7 +13,11 @@ for root,dirs,files in os.walk(grlc_base):
         root_dir = root.replace(grlc_base_dir, '')
         data_files = os.path.join(root_dir, '*')
         grlc_data.append(data_files)
-grlc_version = '1.3.4'
+
+with open('CITATION.cff', 'r') as cff:
+    for line in cff:
+        if 'version:' in line:
+            version = line.replace('version:', '').strip().strip('"')
 
 with codecs.open('requirements.txt', mode='r') as f:
     install_requires = f.read().splitlines()
@@ -33,7 +37,7 @@ setup(
     author='Albert Meroño',
     author_email='albert.merono@vu.nl',
     url='https://github.com/CLARIAH/grlc',
-    version=grlc_version,
+    version=version,
     py_modules=['grlc'],
     packages=['grlc'],
     package_dir = {'grlc': grlc_base},
@@ -47,5 +51,7 @@ setup(
         'recommonmark'
     ],
     tests_require=tests_require,
-    package_data = {'grlc': grlc_data},
+    package_data = { 'grlc': grlc_data },
+    include_package_data=True,
+    data_files=[('citation/grlc', ['CITATION.cff'])]
 )
