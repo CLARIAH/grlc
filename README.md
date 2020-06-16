@@ -44,10 +44,10 @@ grlc can generate an API from a local directory in the computer where your grlc 
 
 grlc can generate an API from a yaml specification file accessible on the web.
 
-For example, ssuming your queries are listed on spec file: `https://raw.githubusercontent.com/CLARIAH/grlc-queries/master/urls.yml`, point your browser to the following location
+For example, assuming your queries are listed on spec file: `https://raw.githubusercontent.com/CLARIAH/grlc-queries/master/urls.yml`, point your browser to the following location
 `http://grlc.io/api-url?specUrl=https://raw.githubusercontent.com/CLARIAH/grlc-queries/master/urls.yml`
 
-##### Specification file synax
+##### Specification file syntax
 A grlc API specification file is a YAML file which includes the necessary information to create a grlc API, most importantly a list of URLs to decorated and HTTP-dereferenceable SPARQL queries. This file should contain the following fields
 
  - `title`: Title of my API
