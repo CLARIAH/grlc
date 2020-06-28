@@ -53,3 +53,18 @@ mock_simpleSparqlResponse = {
         ]
     }
 }
+
+def mock_process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
+    mockItem = {
+        "status": "This is a mock item",
+        "call_name": call_name
+    }
+    return mockItem
+
+
+filesInRepo = [
+    {
+        u'name': u'fakeFile1.rq',
+        u'download_url': u'https://example.org/path/to/fakeFile.rq',
+    }
+]
