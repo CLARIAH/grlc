@@ -2,6 +2,8 @@ from mock import Mock
 from os import path
 from glob import glob
 
+from grlc.fileLoaders import LocalLoader
+
 base_url = path.join('tests', 'repo')
 def buildEntry(entryName):
     entryName = entryName.replace(base_url, '')
@@ -68,3 +70,5 @@ filesInRepo = [
         u'download_url': u'https://example.org/path/to/fakeFile.rq',
     }
 ]
+
+mockLoader = LocalLoader('./tests/repo/')
