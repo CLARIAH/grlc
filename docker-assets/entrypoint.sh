@@ -25,7 +25,9 @@ case ${1} in
         # configure default sparql endpoint
         sed -i "s|http://dbpedia.org/sparql|${GRLC_SPARQL_ENDPOINT}|" config.ini
         # enable/disable debugging
-        sed -i "s/debug = False/debug = ${DEBUG}/" config.ini
+        if [ $DEBUG ]; then
+          sed -i "s/debug = False/debug = True/" config.ini
+        fi
 
         grlc-server --port=8088
         # migrate_database
