@@ -14,6 +14,7 @@ for root,dirs,files in os.walk(grlc_base):
         data_files = os.path.join(root_dir, '*')
         grlc_data.append(data_files)
 
+# To update the package version number, edit CITATION.cff
 with open('CITATION.cff', 'r') as cff:
     for line in cff:
         if 'version:' in line:
