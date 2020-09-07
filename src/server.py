@@ -140,7 +140,7 @@ def query_param(query_name):
 @app.route('/api/<user>/<repo>/commit/<sha>/api-docs')  # backward compatibility route
 @app.route('/api/<user>/<repo>/<subdir>/commit/<sha>')  # backward compatibility route
 @app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/api-docs')  # backward compatibility route
-def api_docs_git(user, repo, subdir=None, spec_url=None, sha=None):
+def api_docs_git(user, repo, subdir=None, sha=None):
     """Grlc API page for specifications loaded from a Github repo."""
     return api_docs_template()
 
@@ -154,9 +154,9 @@ def api_docs_git(user, repo, subdir=None, spec_url=None, sha=None):
 @app.route('/api-git/<user>/<repo>/<subdir>/swagger', methods=['GET'])  # backward compatibility route
 @app.route('/api-git/<user>/<repo>/commit/<sha>/swagger')  # backward compatibility route
 @app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/swagger')  # backward compatibility route
-def swagger_spec_git(user, repo, subdir=None, spec_url=None, sha=None, content=None):
+def swagger_spec_git(user, repo, subdir=None, sha=None):
     """Swagger spec for specifications loaded from a Github repo."""
-    return swagger_spec(user, repo, subdir=None, spec_url=None, sha=None, content=None)
+    return swagger_spec(user, repo, subdir=subdir, sha=sha)
 
 
 # Callname execution
@@ -176,9 +176,9 @@ def swagger_spec_git(user, repo, subdir=None, spec_url=None, sha=None, content=N
 @app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/<query_name>', methods=['GET', 'POST'])  # backward compatibility route
 @app.route('/api/<user>/<repo>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])  # backward compatibility route
 @app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])  # backward compatibility route
-def query_git(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=None):
+def query_git(user, repo, query_name, subdir=None, sha=None, content=None):
     """SPARQL query execution for specifications loaded from a Github repo."""
-    return query(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=None)
+    return query(user, repo, query_name, subdir=subdir, sha=sha, content=content)
 
 
 # Main thread
