@@ -67,8 +67,6 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName):
     swag['next_commit'] = next_commit
     swag['info'] = info
     swag['basePath'] = basePath
-    if subdir:
-        swag['basePath'] = basePath + subdir
 
     # TODO: can we pass loader to build_spec ? --> Ideally yes!
     spec = swagger.build_spec(user, repo, subdir, spec_url, sha, prov_g)
