@@ -57,6 +57,7 @@ def get_repo_info(loader, sha, prov_g):
 
     if type(loader) is GithubLoader:
         basePath = '/api-git/' + user_repo + '/'
+        basePath += ('subdir/' + loader.subdir + '/') if loader.subdir else ''
         basePath += ('commit/' + sha + '/') if sha else ''
     elif type(loader) is LocalLoader:
         basePath = '/api-local/'
