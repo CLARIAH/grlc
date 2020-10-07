@@ -119,7 +119,7 @@ class TestGrlcExec:
 
     @classmethod
     def setup_class(self):
-        query_response = { "result": "mock" }
+        query_response = [{ "result": "mock" }]
         status = 200
         headers = { 'Content-Type': 'application/json' }
         self.mock_response = query_response, status, headers
@@ -127,17 +127,17 @@ class TestGrlcExec:
     def validate(self, response):
         assert response.status_code == 200
         assert 'application/json' in response.content_type
-        assert 'result' in response.json
-        assert response.json['result'] == 'mock'
+        assert len(response.json) > 0
+        assert 'result' in response.json[0]
+        assert response.json[0]['result'] == 'mock'
 
     @patch('grlc.utils.getLoader')
     @patch('grlc.utils.dispatch_query')
     def test_repo(self, mock_dispatch, mock_loader, client):
         """..."""
         mock_dispatch.return_value = self.mock_response
-
         rv = client.get('/api-git/testuser/testrepo/query_name',
-            headers={'accept': 'application/json'})
+            headers={'Accept': 'application/json'})
         self.validate(rv)
 
     @patch('grlc.utils.getLoader')
@@ -146,6 +146,9 @@ class TestGrlcExec:
         """..."""
         mock_dispatch.return_value = self.mock_response
 
+        # Check types of data passed to make_response.
+        # If jsonify(dict) fixes the issue, patch make_response to jsonify(query_response) before 
+        # returning data to rv.
         rv = client.get('/api-git/testuser/testrepo/subdir/testsubdir/query_name',
             headers={'accept': 'application/json'})
         self.validate(rv)
