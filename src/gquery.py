@@ -23,7 +23,7 @@ XSD_PREFIX = 'PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>'
 
 import SPARQLTransformer
 
-def guess_endpoint_uri(rq, gh_repo):
+def guess_endpoint_uri(rq, loader):
     """
     Guesses the endpoint URI from (in this order):
     - An endpoint parameter in URL
@@ -49,7 +49,7 @@ def guess_endpoint_uri(rq, gh_repo):
     except (TypeError, KeyError):
         # File
         try:
-            endpoint_content = gh_repo.getTextFor({'download_url': 'endpoint.txt'})
+            endpoint_content = loader.getEndpointText()
             endpoint = endpoint_content.strip().splitlines()[0]
             auth = None
             glogger.info("File guessed endpoint: " + endpoint)
@@ -374,7 +374,7 @@ def get_metadata(rq, endpoint):
 
 
 def paginate_query(query, results_per_page, get_args):
-    """Modify the given query so that it can be paginated. The paginated query will 
+    """Modify the given query so that it can be paginated. The paginated query will
     split display a maximum of `results_per_page`."""
     page = get_args.get('page', 1)
 

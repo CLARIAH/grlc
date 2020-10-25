@@ -7,6 +7,7 @@ import yaml
 from os import path
 from glob import glob
 from github import Github
+from github.GithubObject import NotSet
 from github.GithubException import BadCredentialsException
 
 
@@ -57,7 +58,7 @@ class BaseLoader:
 
 
 class GithubLoader(BaseLoader):
-    """Github based File Loader. Retrieves information from specified Github 
+    """Github based File Loader. Retrieves information from specified Github
     repository to construct a grlc specification."""
 
     def __init__(self, user, repo, subdir=None, sha=None, prov=None):
@@ -71,8 +72,8 @@ class GithubLoader(BaseLoader):
         prov -- grlcPROV object for tracking provenance (default: None)."""
         self.user = user
         self.repo = repo
-        self.subdir = subdir
-        self.sha = sha
+        self.subdir = (subdir + "/") if subdir else ""
+        self.sha = sha if sha else NotSet
         self.prov = prov
         gh = Github(static.ACCESS_TOKEN)
         try:
@@ -84,24 +85,22 @@ class GithubLoader(BaseLoader):
 
     def fetchFiles(self):
         """Returns a list of file items contained on the github repo."""
-        api_repo_content_uri = static.GITHUB_API_BASE_URL + self.user + '/' + self.repo + '/contents'
-        if self.subdir:
-            api_repo_content_uri += '/' + str(self.subdir)
-        params = {
-            'ref': 'master' if self.sha is None else self.sha
-        }
-        # TODO: use Github instead of requests ?
-        resp = requests.get(api_repo_content_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)},
-                            params=params)
-        if resp.ok:
-            return resp.json()
-        else:
-            raise Exception(resp.text)
+        contents = self.gh_repo.get_contents(self.subdir.strip('/'), ref=self.sha)
+        files = []
+        for content_file in contents:
+            if content_file.type == 'file':
+                files.append({
+                        'download_url': content_file.download_url,
+                        'name': content_file.name,
+                        'decoded_content': content_file.decoded_content
+                    })
+        return files
 
     def getRawRepoUri(self):
         """Returns the root url of the github repo."""
+        # TODO: replace by gh_repo.html_url ?
         raw_repo_uri = static.GITHUB_RAW_BASE_URL + self.user + '/' + self.repo
-        if self.sha is None:
+        if self.sha is NotSet:
             raw_repo_uri += '/master/'
         else:
             raw_repo_uri += '/{}/'.format(self.sha)
@@ -110,25 +109,18 @@ class GithubLoader(BaseLoader):
     def getTextFor(self, fileItem):
         """Returns the contents of the given file item on the github repo."""
         raw_query_uri = fileItem['download_url']
-        if '/' in raw_query_uri:
-            raw_query_uri = raw_query_uri.split('/')[-1]
-        resp = self._getText(raw_query_uri)
 
         # Add query URI as used entity by the logged activity
         if self.prov is not None:
             self.prov.add_used_entity(raw_query_uri)
-        return resp
+        return str(fileItem['decoded_content'], 'utf-8')
 
     def _getText(self, query_name):
         """Return the content of the specified file contained in the github repo."""
-        query_uri = self.getRawRepoUri() + query_name
-        if self.subdir:
-            query_uri = self.getRawRepoUri() + self.subdir + '/' + query_name
-        print("Requesting query at " + str(query_uri))
-        req = requests.get(query_uri, headers={'Authorization': 'token {}'.format(static.ACCESS_TOKEN)})
-        if req.status_code == 200:
-            return req.text
-        else:
+        try:
+            c = self.gh_repo.get_contents(self.subdir + query_name)
+            return str(c.decoded_content, 'utf-8')
+        except:
             return None
 
     def getRepoTitle(self):
@@ -155,9 +147,13 @@ class GithubLoader(BaseLoader):
         """Return the full URI of the github repo."""
         return static.GITHUB_API_BASE_URL + self.gh_repo.full_name
 
+    def getEndpointText(self):
+        """Return content of endpoint file (endpoint.txt)"""
+        return self._getText('endpoint.txt')
+
 
 class LocalLoader(BaseLoader):
-    """Local file system file loader. Retrieves information to construct 
+    """Local file system file loader. Retrieves information to construct
     a grlc specification from a local folder."""
 
     def __init__(self, baseDir=static.LOCAL_SPARQL_DIR):
@@ -224,11 +220,15 @@ class LocalLoader(BaseLoader):
         """Return the full URI of the local repo."""
         return 'local-file-system'
 
+    def getEndpointText(self):
+        """Return content of endpoint file (endpoint.txt)"""
+        return self._getText('endpoint.txt')
+
 
 class URLLoader(BaseLoader):
-    """URL specification loader. Retrieves information to construct a grlc 
+    """URL specification loader. Retrieves information to construct a grlc
     specification from a specification YAML file located on a remote server."""
-    
+
     def __init__(self, spec_url):
         """Create a new URLLoader.
 
@@ -251,7 +251,6 @@ class URLLoader(BaseLoader):
             del self.spec['queries']
         else:
             raise Exception(resp.text)
-
 
     def fetchFiles(self):
         """Returns a list of file items contained on specification."""
@@ -310,3 +309,7 @@ class URLLoader(BaseLoader):
     def getLicenceURL(self):
         """Returns the URL of the license file in the specification."""
         return self.spec['licence'] if self.spec['licence'] else ''
+
+    def getEndpointText(self):
+        """Return content of endpoint file (endpoint.txt)"""
+        return "" #TODO: add endpoint to spec file definition
