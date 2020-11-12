@@ -25,6 +25,7 @@ def get_repo_info(loader, sha, prov_g):
     """Generate swagger information from the repo being used."""
     user_repo = loader.getFullName()
     repo_title = loader.getRepoTitle()
+    repo_desc = loader.getRepoDescription()
     contact_name = loader.getContactName()
     contact_url = loader.getContactUrl()
     commit_list = loader.getCommitList()
@@ -45,6 +46,7 @@ def get_repo_info(loader, sha, prov_g):
     info = {
         'version': version,
         'title': repo_title,
+        'description': repo_desc,
         'contact': {
             'name': contact_name,
             'url': contact_url

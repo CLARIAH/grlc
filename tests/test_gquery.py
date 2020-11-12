@@ -3,7 +3,8 @@ import six
 import rdflib
 from mock import patch, Mock
 
-from grlc.fileLoaders import LocalLoader
+from tests.mock_data import mockLoader
+
 import grlc.gquery as gquery
 
 from flask import Flask
@@ -12,7 +13,7 @@ from flask import Flask
 class TestGQuery(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        self.loader = LocalLoader('./tests/repo/')
+        self.loader = mockLoader
         self.app = Flask('unittests')
 
     def test_guess_endpoint(self):
