@@ -3,6 +3,7 @@ from os import path
 from glob import glob
 
 from collections import namedtuple
+from grlc.fileLoaders import LocalLoader
 
 base_url = path.join('tests', 'repo')
 def buildEntry(entryName):
@@ -67,3 +68,5 @@ filesInRepo = [
         u'decoded_content': 'CONTENT ?'.encode() # Because Github ContentFile object contains bytes.
     }
 ]
+
+mockLoader = LocalLoader(base_url)
