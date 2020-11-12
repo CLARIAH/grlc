@@ -40,7 +40,17 @@ grlc can also use a subdirectory inside your Github repo. This can be done by in
 > API path:
 `http://grlc-server/api-local/`
 
-grlc can generate an API from a local directory in the computer where your grlc server runs. You can configure the location of this folder in your [grlc server configuration file](#grlc-server-configuration). See also [how to install and run your own grlc instance](#install-and-run).
+grlc can generate an API from a local directory in the computer where your grlc server runs. You can configure the location of this directory in your [grlc server configuration file](#grlc-server-configuration). See also [how to install and run your own grlc instance](#install-and-run).
+
+When the API is generated from a local directory, API information can be loaded from a configuration file in that folder. This file must be called `local-api-config.ini` and it has the following format:
+```ini
+[repo_info]
+repo_title = Some title
+api_description = Description of my API
+contact_name = My name
+contact_url = https://mypage/
+licence_url = https://mylicence/
+```
 
 #### From a specification file
 > API path:
@@ -55,6 +65,7 @@ For example, assuming your queries are listed on spec file: `https://raw.githubu
 A grlc API specification file is a YAML file which includes the necessary information to create a grlc API, most importantly a list of URLs to decorated and HTTP-dereferenceable SPARQL queries. This file should contain the following fields
 
  - `title`: Title of my API
+ - `description`: API description
  - `contact`: Contact details of the API owner. This should include the `name` and `url` properties.
  - `licence`: A URL pointing to the licence file for the API.
  - `queries`: A list of URLs of SPARQL queries (with header decorators).
@@ -62,6 +73,7 @@ A grlc API specification file is a YAML file which includes the necessary inform
 For example:
 ```YAML
 title: Title of my API
+description: Description of my API
 contact:
   name: Contact Name
   url: https://www.mywebsite.org

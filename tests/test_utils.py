@@ -2,15 +2,14 @@ import unittest
 from mock import patch, Mock
 import json
 
-from grlc.fileLoaders import LocalLoader
 import grlc.utils as utils
 
-from tests.mock_data import mock_simpleSparqlResponse
+from tests.mock_data import mock_simpleSparqlResponse, mockLoader
 
 class TestUtils(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        self.loader = LocalLoader('./tests/repo/')
+        self.loader = mockLoader
 
     @patch('requests.get')
     def test_sparql_transformer(self, mock_get):
