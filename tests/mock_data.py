@@ -71,4 +71,4 @@ filesInRepo = [
     }
 ]
 
-mockLoader = LocalLoader('./tests/repo/')
+mockLoader = LocalLoader(base_url)
