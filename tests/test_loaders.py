@@ -6,20 +6,13 @@ from os import path
 from grlc.fileLoaders import LocalLoader, GithubLoader, URLLoader
 from grlc.queryTypes import qType
 
-from tests.mock_data import mock_requestsGithub, mock_requestsUrl
+from tests.mock_data import MockGithubRepo, mock_requestsUrl
 
 
 class TestGithubLoader(unittest.TestCase):
-    def setUp(self):
-        self.patcher = patch('requests.get', side_effect=mock_requestsGithub)
-        self.patcher.start()
-
-    def tearDown(self):
-        self.patcher.stop()
-
     @classmethod
-    @patch('github.Github.get_repo', return_value=[])
-    def setUpClass(self, github_get_repo_patch):
+    @patch('grlc.fileLoaders.Github.get_repo', return_value=MockGithubRepo())
+    def setUpClass(self, mocked_repo):
         self.user = 'fakeuser'
         self.repo = 'fakerepo'
         self.loader = GithubLoader(self.user, self.repo, subdir=None, sha=None, prov=None)
@@ -73,6 +66,12 @@ class TestGithubLoader(unittest.TestCase):
         for name, expectedType in testableNames:
             text, actualType = self.loader.getTextForName(name)
             self.assertEqual(expectedType, actualType, "Query type should match %s != %s" % (expectedType, actualType))
+
+    def test_getEndpointText(self):
+        endpoint = self.loader.getEndpointText()
+
+        # Should be some text
+        self.assertIsInstance(endpoint, six.string_types, "Should be some text")
 
 
 class TestLocalLoader(unittest.TestCase):
@@ -128,6 +127,12 @@ class TestLocalLoader(unittest.TestCase):
         for name, expectedType in testableNames:
             text, actualType = self.loader.getTextForName(name)
             self.assertEqual(expectedType, actualType, "Query type should match %s != %s" % (expectedType, actualType))
+
+    def test_getEndpointText(self):
+        endpoint = self.loader.getEndpointText()
+
+        # Should be some text
+        self.assertIsInstance(endpoint, six.string_types, "Should be some text")
 
 
 class TestURLLoader(unittest.TestCase):
@@ -194,6 +199,12 @@ class TestURLLoader(unittest.TestCase):
         for name, expectedType in testableNames:
             text, actualType = self.loader.getTextForName(name)
             self.assertEqual(expectedType, actualType, "Query type should match %s != %s" % (expectedType, actualType))
+
+    def test_getEndpointText(self):
+        endpoint = self.loader.getEndpointText()
+
+        # Should be some text
+        self.assertIsInstance(endpoint, six.string_types, "Should be some text")
 
 
 if __name__ == '__main__':

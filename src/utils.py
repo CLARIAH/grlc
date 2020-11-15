@@ -36,7 +36,8 @@ def build_spec(user, repo, subdir=None, sha=None, prov=None, extraMetadata=[]):
     Deprecated."""
     glogger.warning("grlc.utils.build_spec is deprecated and will " \
                     "be removed in the future. Use grlc.swagger.build_spec instead.")
-    return swagger.build_spec(user, repo, subdir, sha, prov, extraMetadata)
+    items, _ = swagger.build_spec(user, repo, subdir, sha, prov, extraMetadata)
+    return items
 
 
 def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName):
@@ -67,13 +68,19 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName):
     swag['next_commit'] = next_commit
     swag['info'] = info
     swag['basePath'] = basePath
-    if subdir:
-        swag['basePath'] = basePath + subdir
 
     # TODO: can we pass loader to build_spec ? --> Ideally yes!
-    spec = swagger.build_spec(user, repo, subdir, spec_url, sha, prov_g)
+    spec, warnings = swagger.build_spec(user, repo, subdir, spec_url, sha, prov_g)
+    # Use items to build API paths
     for item in spec:
         swag['paths'][item['call_name']] = swagger.get_path_for_item(item)
+
+     # TODO: Add bootstrap style to top level HTML
+    # Without a better place to display warnings, we can make them part of the description.
+    if 'description' not in swag['info']:
+        swag['info']['description'] = ''
+    for warn in warnings:
+        swag['info']['description'] += swagger.get_warning_div(warn)
 
     if prov_g:
         prov_g.end_prov_graph()

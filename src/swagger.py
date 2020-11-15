@@ -25,6 +25,7 @@ def get_repo_info(loader, sha, prov_g):
     """Generate swagger information from the repo being used."""
     user_repo = loader.getFullName()
     repo_title = loader.getRepoTitle()
+    repo_desc = loader.getRepoDescription()
     contact_name = loader.getContactName()
     contact_url = loader.getContactUrl()
     commit_list = loader.getCommitList()
@@ -45,6 +46,7 @@ def get_repo_info(loader, sha, prov_g):
     info = {
         'version': version,
         'title': repo_title,
+        'description': repo_desc,
         'contact': {
             'name': contact_name,
             'url': contact_url
@@ -57,6 +59,7 @@ def get_repo_info(loader, sha, prov_g):
 
     if type(loader) is GithubLoader:
         basePath = '/api-git/' + user_repo + '/'
+        basePath += ('subdir/' + loader.subdir + '/') if loader.subdir else ''
         basePath += ('commit/' + sha + '/') if sha else ''
     elif type(loader) is LocalLoader:
         basePath = '/api-local/'
@@ -122,10 +125,10 @@ def build_spec(user, repo, subdir=None, query_url=None, sha=None, prov=None, ext
 
     # Fetch all .rq files
     items = []
+    warnings = []
 
     allowed_ext = ["rq", "sparql", "json", "tpf"]
     for c in files:
-        # glogger.debug(files)
         glogger.debug('>>>>>>>>>>>>>>>>>>>>>>>>>c_name: {}'.format(c['name']))
         extension = c['name'].split('.')[-1]
         if extension in allowed_ext or query_url: # parameter provided queries may not have extension
@@ -142,18 +145,23 @@ def build_spec(user, repo, subdir=None, query_url=None, sha=None, prov=None, ext
                 glogger.debug("===================================================================")
                 glogger.debug("Processing SPARQL query: {}".format(c['name']))
                 glogger.debug("===================================================================")
-                item = process_sparql_query_text(query_text, loader, call_name, extraMetadata)
+                try:
+                    item = process_sparql_query_text(query_text, loader, call_name, extraMetadata)
+                except Exception as e:
+                    warnings.append(str(e))
             elif "tpf" == extension:
                 glogger.debug("===================================================================")
                 glogger.debug("Processing TPF query: {}".format(c['name']))
                 glogger.debug("===================================================================")
                 item = process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata)
+                # TODO: raise exceptions in process_tpf_query_text
             else:
                 glogger.info("Ignoring unsupported source call name: {}".format(c['name']))
 
             if item:
                 items.append(item)
-    return items
+    # TODO: we should then return two things: list of items and list of errors
+    return items, warnings
 
 
 def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
@@ -197,12 +205,8 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
 
     try:
         query_metadata = gquery.get_metadata(query_text, endpoint)
-    except Exception:
-        raw_repo_uri = loader.getRawRepoUri()
-        raw_query_uri = raw_repo_uri + ' / ' + call_name
-        glogger.error("Could not parse query at {}".format(raw_query_uri))
-        glogger.error(traceback.print_exc())
-        return None
+    except Exception as e:
+        raise Exception('Could not parse query {}: {}'.format(call_name, str(e)))
 
     tags = query_metadata['tags'] if 'tags' in query_metadata else []
 
@@ -308,7 +312,7 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
             method = 'get'
     else:
         # TODO: process all other kinds of queries
-        glogger.warning("Query of type {} is currently unsupported! Skipping".format(query_metadata['type']))
+        raise Exception('Could not parse query {}: Query of type {} is currently unsupported'.format(call_name, query_metadata['type']))
 
     # Finally: main structure of the callname spec
     item = packItem('/' + call_name, method, tags, summary, description, params, query_metadata, extraMetadata)
@@ -335,3 +339,6 @@ def packItem(call_name, method, tags, summary, description, params, query_metada
             item[extraField] = query_metadata[extraField]
 
     return item
+
+def get_warning_div(warn):
+    return '<div class="errors-wrapper">{}</div>'.format(warn)

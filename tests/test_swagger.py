@@ -6,21 +6,7 @@ from mock import patch
 import grlc.utils  # BUG: grlc.swagger will not import without this import first
 from grlc.swagger import build_spec
 
-
-def mock_process_sparql_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
-    mockItem = {
-        "status": "This is a mock item",
-        "call_name": call_name
-    }
-    return mockItem
-
-
-filesInRepo = [
-    {
-        u'name': u'fakeFile1.rq',
-        u'download_url': u'https://example.org/path/to/fakeFile.rq',
-    }
-]
+from tests.mock_data import mock_process_sparql_query_text, filesInRepo
 
 
 class TestSwagger(unittest.TestCase):
@@ -33,7 +19,7 @@ class TestSwagger(unittest.TestCase):
 
         user = 'testuser'
         repo = 'testrepo'
-        spec = build_spec(user, repo)
+        spec, warnings = build_spec(user, repo)
 
         self.assertEqual(len(spec), len(filesInRepo))
 

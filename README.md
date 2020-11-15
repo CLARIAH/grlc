@@ -29,7 +29,11 @@ grlc is a lightweight server that takes SPARQL queries (stored in a GitHub repos
 For a quick usage tutorial check out our wiki [walkthrough](https://github.com/CLARIAH/grlc/wiki/Quick-tutorial) and [list of features](https://github.com/CLARIAH/grlc/wiki/Features).
 
 ## Usage
-grlc assumes that you have a collection of SPARQL queries as .rq files (like [this](https://github.com/CEDAR-project/Queries)). grlc will create an API operation per such a SPARQL query/.rq file. Your queries can include special [decorators](#decorator-syntax) to add extra functionality to your API.
+grlc assumes that you have a collection of SPARQL queries as .rq files (like [this](https://github.com/CLARIAH/grlc-queries)). grlc will create one API operation for each SPARQL query/.rq file in the collection.
+
+Your queries can add API parameters to each operation by using the [parameter mapping](https://github.com/CLARIAH/grlc/wiki/Parameter-Mapping) syntax. This allows your query to define query variables which will be mapped to API parameters for your API operation ([see here](https://github.com/CLARIAH/grlc-queries/blob/master/enumerate.rq) for an example).
+
+Your queries can include special [decorators](#decorator-syntax) to add extra functionality to your API.
 
 ### Query location
 grlc can load your query collection from different locations: from a GitHub repository (`api-git`), from local storage (`api-local`), and from a specification file (`api-url`). Each type of location has specific features and is accessible via different paths. However all location types produce the same beautiful APIs.
@@ -51,7 +55,17 @@ grlc can also use a subdirectory inside your Github repo. This can be done by in
 > API path:
 `http://grlc-server/api-local/`
 
-grlc can generate an API from a local directory in the computer where your grlc server runs. You can configure the location of this folder in your [grlc server configuration file](#grlc-server-configuration). See also [how to install and run your own grlc instance](#install-and-run).
+grlc can generate an API from a local directory in the computer where your grlc server runs. You can configure the location of this directory in your [grlc server configuration file](#grlc-server-configuration). See also [how to install and run your own grlc instance](#install-and-run).
+
+When the API is generated from a local directory, API information can be loaded from a configuration file in that folder. This file must be called `local-api-config.ini` and it has the following format:
+```ini
+[repo_info]
+repo_title = Some title
+api_description = Description of my API
+contact_name = My name
+contact_url = https://mypage/
+licence_url = https://mylicence/
+```
 
 #### From a specification file
 > API path:
@@ -66,6 +80,7 @@ For example, assuming your queries are listed on spec file: `https://raw.githubu
 A grlc API specification file is a YAML file which includes the necessary information to create a grlc API, most importantly a list of URLs to decorated and HTTP-dereferenceable SPARQL queries. This file should contain the following fields
 
  - `title`: Title of my API
+ - `description`: API description
  - `contact`: Contact details of the API owner. This should include the `name` and `url` properties.
  - `licence`: A URL pointing to the licence file for the API.
  - `queries`: A list of URLs of SPARQL queries (with header decorators).
@@ -73,6 +88,7 @@ A grlc API specification file is a YAML file which includes the necessary inform
 For example:
 ```YAML
 title: Title of my API
+description: Description of my API
 contact:
   name: Contact Name
   url: https://www.mywebsite.org
@@ -223,6 +239,7 @@ Check these out:
 - http://grlc.io/api-git/CLARIAH/wp4-queries-hisco
 - http://grlc.io/api-git/albertmeronyo/lodapi
 - http://grlc.io/api-git/albertmeronyo/lsq-api
+- https://grlc.io/api-git/CEDAR-project/Queries
 
 You'll find the sources of these and many more in [GitHub](https://github.com/search?o=desc&q=endpoint+summary+language%3ASPARQL&s=indexed&type=Code&utf8=%E2%9C%93)
 

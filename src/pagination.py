@@ -1,4 +1,4 @@
-import re
+from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode, ParseResult
 
 def getSwaggerPaginationDef(resultsPerPage):
     """Build swagger spec section for pagination"""
@@ -13,23 +13,30 @@ def buildPaginationHeader(resultCount, resultsPerPage, pageArg, url):
     """Build link header for result pagination"""
     lastPage = resultCount / resultsPerPage
 
-    if pageArg:
-        page = int(pageArg)
-        next_url = re.sub("page=[0-9]+", "page={}".format(page + 1), url)
-        prev_url = re.sub("page=[0-9]+", "page={}".format(page - 1), url)
-        first_url = re.sub("page=[0-9]+", "page=1", url)
-        last_url = re.sub("page=[0-9]+", "page={}".format(lastPage), url)
-    else:
-        page = 1
-        next_url = url + "?page=2"
-        prev_url = ""
-        first_url = url + "?page=1"
-        last_url = url + "?page={}".format(lastPage)
+    url_parts = urlparse(url)
+    query = dict(parse_qsl(url_parts.query)) # Use dict parse_qsl instead of parse_qs to ensure 'page' is unique
 
-    if page == 1:
+    first_url = _buildNewUrlWithPage(url_parts, query, page=1)
+    last_url = _buildNewUrlWithPage(url_parts, query, page=lastPage)
+
+    if not pageArg:
+        next_url = _buildNewUrlWithPage(url_parts, query, page=1)
+        prev_url = ""
         headerLink = "<{}>; rel=next, <{}>; rel=last".format(next_url, last_url)
-    elif page == lastPage:
-        headerLink = "<{}>; rel=prev, <{}>; rel=first".format(prev_url, first_url)
     else:
-        headerLink = "<{}>; rel=next, <{}>; rel=prev, <{}>; rel=first, <{}>; rel=last".format(next_url, prev_url, first_url, last_url)
+        page = int(pageArg)
+        next_url = _buildNewUrlWithPage(url_parts, query, page + 1)
+        prev_url = _buildNewUrlWithPage(url_parts, query, page - 1)
+
+        if page == lastPage:
+            headerLink = "<{}>; rel=prev, <{}>; rel=first".format(prev_url, first_url)
+        else:
+            headerLink = "<{}>; rel=next, <{}>; rel=prev, <{}>; rel=first, <{}>; rel=last".format(next_url, prev_url, first_url, last_url)
     return headerLink
+
+def _buildNewUrlWithPage(url_parts, query, page):
+    query['page'] = page
+    new_query = urlencode(query)
+    newParsedUrl = ParseResult(scheme=url_parts.scheme, netloc=url_parts.netloc, path=url_parts.path,
+                               params=url_parts.params, query=new_query, fragment=url_parts.fragment)
+    return urlunparse(newParsedUrl)
