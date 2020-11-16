@@ -26,10 +26,10 @@ message: "If you use this software, please cite it as below."
 repository-code: "https://github.com/CLARIAH/grlc"
 title: grlc
 abstract: grlc, the git repository linked data API constructor, automatically builds Web APIs using SPARQL queries stored in git repositories.
-keywords: 
+keywords:
   - "swagger-ui"
   - sparql
   - "linked-data"
   - "semantic-web"
   - "linked-data-api"
-version: "1.3.4"
+version: "1.3.5"
