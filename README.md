@@ -177,6 +177,17 @@ Syntax:
 
 Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/tags.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/group1/get_tags).
 
+### `defaults`
+Set the default value in the swagger-ui for a specific parameter in the query.
+
+Syntax:
+```
+#+ defaults:
+#+   - param_name: default_value
+```
+
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/defaults.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_defaults).
+
 ### `enumerate`
 Indicates which parameters of your query/operation should get enumerations (and get dropdown menus in the swagger-ui) using the given values from the SPARQL endpoint. The values for each enumeration variable can also be specified into the query decorators to save endpoint requests and speed up the API generation.
 
