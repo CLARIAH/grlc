@@ -89,10 +89,12 @@ def swagger_spec_local():
 
 # Callname execution
 @app.route('/api-local/<query_name>', methods=['GET', 'POST'])
+@app.route('/api-local/<query_name>.<content>', methods=['GET', 'POST'])
 @app.route('/api/local/local/<query_name>', methods=['GET', 'POST'], strict_slashes=False)  # backward compatibility route
-def query_local(query_name):
+@app.route('/api/local/local/<query_name>.<content>', methods=['GET', 'POST'], strict_slashes=False)  # backward compatibility route
+def query_local(query_name, content=None):
     """SPARQL query execution for local routes."""
-    return query(user=None, repo=None, query_name=query_name)
+    return query(user=None, repo=None, query_name=query_name, content=content)
 
 ################################
 ### Routes for URL HTTP APIs ###
@@ -118,11 +120,12 @@ def swagger_spec_param():
 
 # Callname execution
 @app.route('/api-url/<query_name>', methods=['GET', 'POST'])
-def query_param(query_name):
+@app.route('/api-url/<query_name>.<content>', methods=['GET', 'POST'])
+def query_param(query_name, content=None):
     """SPARQL query execution for specifications loaded via http."""
     spec_url = request.args['specUrl']
     glogger.debug("Spec URL: {}".format(spec_url))
-    return query(user=None, repo=None, query_name=query_name, spec_url=spec_url)
+    return query(user=None, repo=None, query_name=query_name, spec_url=spec_url, content=content)
 
 ##############################
 ### Routes for GitHub APIs ###
