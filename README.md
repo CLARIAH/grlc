@@ -88,7 +88,7 @@ queries:
 
 The API paths of all location types point to the generated [swagger-ui](https://swagger.io/) style API documentation. On the API documentation page, you can explore available API calls and execute individual API calls.
 
-You can also view the swagger spec of your API, by visiting `<API-path>/spec/`, for example: `http://grlc.io/api-git/CLARIAH/grlc-queries/spec/`
+You can also view the swagger spec of your API, by visiting `<API-path>/swagger`, for example: `http://grlc.io/api-git/CLARIAH/grlc-queries/swagger`
 
 ### grlc query execution
 When you call an API endpoint, grlc executes the SPARQL query for that endpoint by combining supplied parameters and decorators.
