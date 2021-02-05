@@ -203,7 +203,7 @@ Syntax:
 Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/endpoint_url.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_endpoint_url).
 
 ###  `transform`
-Allows  query results to be converted to the specified JSON structure, by using [SPARQLTransformer](https://github.com/D2KLab/py-sparql-transformer) syntax.
+Allows  query results to be converted to the specified JSON structure, by using [SPARQLTransformer](https://github.com/D2KLab/py-sparql-transformer) syntax. Notice that the response content type must be set to `application/json` for the transformation to take effect.
 
 Syntax:
 ```
