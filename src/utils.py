@@ -194,7 +194,12 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
         glogger.debug('Sending HTTP request to SPARQL endpoint with params: {}'.format(data))
         glogger.debug('Sending HTTP request to SPARQL endpoint with headers: {}'.format(reqHeaders))
         glogger.debug('Sending HTTP request to SPARQL endpoint with auth: {}'.format(auth))
-        response = requests.get(endpoint, params=data, headers=reqHeaders, auth=auth)
+        try:
+            response = requests.get(endpoint, params=data, headers=reqHeaders, auth=auth)
+        except Exception as e:
+            # Error contacting SPARQL endpoint
+            glogger.debug('Exception encountered while connecting to SPARQL endpoint')
+            return { 'error': str(e) }, 400, headers
         glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
 
         # Response headers
