@@ -124,7 +124,11 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
     glogger.debug("Sending query to SPARQL endpoint: {}".format(endpoint))
     glogger.debug("=====================================================")
 
-    query_metadata = gquery.get_metadata(raw_sparql_query, endpoint)
+    try:
+        query_metadata = gquery.get_metadata(raw_sparql_query, endpoint)
+    except Exception as e:
+        # extracting metadata
+        return { 'error': str(e) }, 400, {}
 
     acceptHeader = 'application/json' if isinstance(raw_sparql_query, dict) else acceptHeader
     pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
