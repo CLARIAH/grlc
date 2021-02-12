@@ -82,7 +82,7 @@ def get_path_for_item(item):
         query = "\n" + json.dumps(query, indent=2) + "\n"
 
     description = item['description']
-    description += '\n\n```{}```'.format(query)
+    description += '\n\n```\n{}\n```'.format(query)
     description += '\n\nSPARQL transformation:\n```json\n{}```'.format(
         item['transform']) if 'transform' in item else ''
 
