@@ -212,7 +212,7 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
     if 'proto' in query_metadata:  # sparql transformer
         resp = SPARQLTransformer.post_process(json.loads(resp), query_metadata['proto'], query_metadata['opt'])
 
-    if 'transform' in query_metadata:  # sparql transformer
+    if 'transform' in query_metadata and acceptHeader == 'application/json':  # sparql transformer
         rq = { 'proto': query_metadata['transform'] }
         _, _, opt = SPARQLTransformer.pre_process(rq)
         resp = SPARQLTransformer.post_process(json.loads(resp), query_metadata['transform'], opt)
