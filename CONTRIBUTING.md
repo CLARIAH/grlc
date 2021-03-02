@@ -4,7 +4,7 @@ Thank you very much for your interest in contributing to grlc! It's people like 
 
 If you would like to get in touch with the grlc developers, and with other users of grlc, you can reach us in two ways:
  - Via Twitter, by using the grlc handle (**@grlcldapi**). Follow this account to hear about updates.
- - Via the grlc mailing list (**TODO: link**). Sign up to the mailing list to ask questions and make suggestions.
+ - Via the grlc [mailing list](https://groups.google.com/g/grlc-list/). Sign up to the mailing list to ask questions and make suggestions.
 
 ## Filing bug reports
 
@@ -62,7 +62,11 @@ You're good to pick any issue at the  [issue tracker](https://github.com/CLARIAH
 
 ## Governance model
 
-As creators of grlc, @albertmeronyo and @c-martinez are benevolent dictators for this project. This means that they have a final say of the direction of the project. This DOES NOT mean they are not willing to listen to suggestion (on the contrary, they *love* to hear new ideas)!
+As creators of grlc, [@albertmeronyo](https://github.com/albertmeronyo) and [@c-martinez](http://github.com/c-martinez) are benevolent dictators for this project. This means that they have a final say of the direction of the project. This DOES NOT mean they are not willing to listen to suggestion (on the contrary, they *love* to hear new ideas)!
+
+## Contributing
+
+All grlc contributors will be listed in the [CONTRIBUTORS.md](CONTRIBUTORS.md) file. Also, [notes of new releases](https://github.com/CLARIAH/grlc/releases) will mention who contributed to that specific release.
 
 ## Questions
 
