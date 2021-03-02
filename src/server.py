@@ -81,18 +81,18 @@ def api_docs_local():
 # Spec generation, JSON
 @app.route('/api-local/swagger', methods=['GET'])
 @app.route('/api/local/local/swagger', methods=['GET'], strict_slashes=False)  # backward compatibility route
-@app.route('/api-local/spec', methods=['GET'])                              # backward compatibility route
-@app.route('/api/local/local/spec', methods=['GET'], strict_slashes=False)  # backward compatibility route
 def swagger_spec_local():
     """Swagger spec for local routes."""
     return swagger_spec(user=None, repo=None, sha=None, content=None)
 
 # Callname execution
 @app.route('/api-local/<query_name>', methods=['GET', 'POST'])
+@app.route('/api-local/<query_name>.<content>', methods=['GET', 'POST'])
 @app.route('/api/local/local/<query_name>', methods=['GET', 'POST'], strict_slashes=False)  # backward compatibility route
-def query_local(query_name):
+@app.route('/api/local/local/<query_name>.<content>', methods=['GET', 'POST'], strict_slashes=False)  # backward compatibility route
+def query_local(query_name, content=None):
     """SPARQL query execution for local routes."""
-    return query(user=None, repo=None, query_name=query_name)
+    return query(user=None, repo=None, query_name=query_name, content=content)
 
 ################################
 ### Routes for URL HTTP APIs ###
@@ -109,7 +109,6 @@ def api_docs_param():
 
 # Spec generation, JSON
 @app.route('/api-url/swagger', methods=['GET'])
-@app.route('/api-url/spec', methods=['GET'])      # backward compatibility route
 def swagger_spec_param():
     """Swagger spec for specifications loaded via http."""
     spec_url = request.args['specUrl']
@@ -118,11 +117,12 @@ def swagger_spec_param():
 
 # Callname execution
 @app.route('/api-url/<query_name>', methods=['GET', 'POST'])
-def query_param(query_name):
+@app.route('/api-url/<query_name>.<content>', methods=['GET', 'POST'])
+def query_param(query_name, content=None):
     """SPARQL query execution for specifications loaded via http."""
     spec_url = request.args['specUrl']
     glogger.debug("Spec URL: {}".format(spec_url))
-    return query(user=None, repo=None, query_name=query_name, spec_url=spec_url)
+    return query(user=None, repo=None, query_name=query_name, spec_url=spec_url, content=content)
 
 ##############################
 ### Routes for GitHub APIs ###
@@ -157,18 +157,8 @@ def api_docs_git(user, repo, subdir=None, sha=None):
 @app.route('/api/<user>/<repo>/<subdir>/swagger', methods=['GET'])  # backward compatibility route
 @app.route('/api/<user>/<repo>/commit/<sha>/swagger')  # backward compatibility route
 @app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/swagger')  # backward compatibility route
-@app.route('/api-git/<user>/<repo>/spec', methods=['GET'])  # backward compatibility route
-@app.route('/api-git/<user>/<repo>/swagger', methods=['GET'])  # backward compatibility route
-@app.route('/api-git/<user>/<repo>/subdir/<subdir>/spec', methods=['GET'])  # backward compatibility route
 @app.route('/api-git/<user>/<repo>/<path:subdir>/swagger', methods=['GET'])  # backward compatibility route
-@app.route('/api-git/<user>/<repo>/commit/<sha>/spec')  # backward compatibility route
-@app.route('/api-git/<user>/<repo>/subdir/<subdir>/commit/<sha>/spec')  # backward compatibility route
-@app.route('/api-git/<user>/<repo>/<subdir>/commit/<sha>/spec')  # backward compatibility route
 @app.route('/api-git/<user>/<repo>/<path:subdir>/commit/<sha>/swagger')  # backward compatibility route
-@app.route('/api/<user>/<repo>/spec', methods=['GET'])  # backward compatibility route
-@app.route('/api/<user>/<repo>/<subdir>/spec', methods=['GET'])  # backward compatibility route
-@app.route('/api/<user>/<repo>/commit/<sha>/spec')  # backward compatibility route
-@app.route('/api/<user>/<repo>/<subdir>/commit/<sha>/spec')  # backward compatibility route
 def swagger_spec_git(user, repo, subdir=None, sha=None):
     """Swagger spec for specifications loaded from a Github repo."""
     return swagger_spec(user, repo, subdir=subdir, spec_url=None, sha=sha, content=None)

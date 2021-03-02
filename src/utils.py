@@ -124,7 +124,11 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
     glogger.debug("Sending query to SPARQL endpoint: {}".format(endpoint))
     glogger.debug("=====================================================")
 
-    query_metadata = gquery.get_metadata(raw_sparql_query, endpoint)
+    try:
+        query_metadata = gquery.get_metadata(raw_sparql_query, endpoint)
+    except Exception as e:
+        # extracting metadata
+        return { 'error': str(e) }, 400, {}
 
     acceptHeader = 'application/json' if isinstance(raw_sparql_query, dict) else acceptHeader
     pagination = query_metadata['pagination'] if 'pagination' in query_metadata else ""
@@ -194,7 +198,12 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
         glogger.debug('Sending HTTP request to SPARQL endpoint with params: {}'.format(data))
         glogger.debug('Sending HTTP request to SPARQL endpoint with headers: {}'.format(reqHeaders))
         glogger.debug('Sending HTTP request to SPARQL endpoint with auth: {}'.format(auth))
-        response = requests.get(endpoint, params=data, headers=reqHeaders, auth=auth)
+        try:
+            response = requests.get(endpoint, params=data, headers=reqHeaders, auth=auth)
+        except Exception as e:
+            # Error contacting SPARQL endpoint
+            glogger.debug('Exception encountered while connecting to SPARQL endpoint')
+            return { 'error': str(e) }, 400, headers
         glogger.debug('Response header from endpoint: ' + response.headers['Content-Type'])
 
         # Response headers
@@ -212,7 +221,7 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
     if 'proto' in query_metadata:  # sparql transformer
         resp = SPARQLTransformer.post_process(json.loads(resp), query_metadata['proto'], query_metadata['opt'])
 
-    if 'transform' in query_metadata:  # sparql transformer
+    if 'transform' in query_metadata and acceptHeader == 'application/json':  # sparql transformer
         rq = { 'proto': query_metadata['transform'] }
         _, _, opt = SPARQLTransformer.pre_process(rq)
         resp = SPARQLTransformer.post_process(json.loads(resp), query_metadata['transform'], opt)
