@@ -1,7 +1,6 @@
 <p algin="center"><img src="https://raw.githubusercontent.com/CLARIAH/grlc/master/src/static/grlc_logo_01.png" width="250px"></p>
 
 [![PyPI version](https://badge.fury.io/py/grlc.svg)](https://badge.fury.io/py/grlc)
-[![Join the chat at https://gitter.im/grlc](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/grlc/Lobby#)
 [![DOI](https://zenodo.org/badge/46131212.svg)](https://zenodo.org/badge/latestdoi/46131212)
 [![Build Status](https://travis-ci.org/CLARIAH/grlc.svg?branch=master)](https://travis-ci.org/CLARIAH/grlc)
 
@@ -348,7 +347,7 @@ Check our [contributing](CONTRIBUTING.md) guidelines for these and more, and joi
 
 If you cannot code, that's no problem! There's still plenty you can contribute:
 
-- Share your experience at using grlc in Twitter (mention the handler **@grlcldapi**)
+- Share your experience at using grlc in Twitter (mention the handle **@grlcldapi**)
 - If you are good with HTML/CSS, [let us know](mailto:albert.meronyo@gmail.com)
 
 ## Related tools
