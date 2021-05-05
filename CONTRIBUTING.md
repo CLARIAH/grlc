@@ -1,5 +1,11 @@
 Thank you very much for your interest in contributing to grlc! It's people like you that truly make the Semantic Web more accessible to everyone :)
 
+## Communication channels
+
+If you would like to get in touch with the grlc developers, and with other users of grlc, you can reach us in two ways:
+ - Via Twitter, by using the grlc handle (**@grlcldapi**). Follow this account to hear about updates.
+ - Via the grlc [mailing list](https://groups.google.com/g/grlc-list/). Sign up to the mailing list to ask questions and make suggestions.
+
 ## Filing bug reports
 
 The official channel to file bug reports is via our GitHub's [issue tracker](https://github.com/CLARIAH/grlc/issues). When doing so make sure that:
@@ -16,6 +22,14 @@ As with bug reports, for requesting features please use the [issue tracker](http
 - Describe your use case so we understand what you are using grlc for
 - Name the file/module if known/available
 - Tag the issue as **enhancement**
+
+## Sending pull requests
+
+If you would like to contribute to the code directly, please send in a [pull request (PR)](https://github.com/CLARIAH/grlc/pulls). Please make sure that:
+ - The title of your PR briefly describes the content
+ - Describe in detail what your PR contributes
+ - If your PR addresses a specific issue, indicate the issue number
+ - Assign @albertmeronyo or @c-martinez as reviewer of your PR.
 
 ## Testing environment
 
@@ -45,6 +59,14 @@ services:
 6. Your local grlc instance should be available at http://localhost:8001 and should respond to code modifications you make on `<GRLC_CLONE_PATH>`
 
 You're good to pick any issue at the  [issue tracker](https://github.com/CLARIAH/grlc/issues) marked as **enhancement** and start implementing it :)
+
+## Governance model
+
+As creators of grlc, [@albertmeronyo](https://github.com/albertmeronyo) and [@c-martinez](http://github.com/c-martinez) are benevolent dictators for this project. This means that they have a final say of the direction of the project. This DOES NOT mean they are not willing to listen to suggestion (on the contrary, they *love* to hear new ideas)!
+
+## Contributing
+
+All grlc contributors will be listed in the [CONTRIBUTORS.md](CONTRIBUTORS.md) file. Also, [notes of new releases](https://github.com/CLARIAH/grlc/releases) will mention who contributed to that specific release.
 
 ## Questions
 

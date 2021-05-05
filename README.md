@@ -1,6 +1,6 @@
 <p algin="center"><img src="https://raw.githubusercontent.com/CLARIAH/grlc/master/src/static/grlc_logo_01.png" width="250px"></p>
 
-[![Join the chat at https://gitter.im/grlc](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/grlc/Lobby#)
+[![PyPI version](https://badge.fury.io/py/grlc.svg)](https://badge.fury.io/py/grlc)
 [![DOI](https://zenodo.org/badge/46131212.svg)](https://zenodo.org/badge/latestdoi/46131212)
 [![Build Status](https://travis-ci.org/CLARIAH/grlc.svg?branch=master)](https://travis-ci.org/CLARIAH/grlc)
 
@@ -103,7 +103,7 @@ queries:
 
 The API paths of all location types point to the generated [swagger-ui](https://swagger.io/) style API documentation. On the API documentation page, you can explore available API calls and execute individual API calls.
 
-You can also view the swagger spec of your API, by visiting `<API-path>/spec/`, for example: `http://grlc.io/api-git/CLARIAH/grlc-queries/spec/`
+You can also view the swagger spec of your API, by visiting `<API-path>/swagger`, for example: `http://grlc.io/api-git/CLARIAH/grlc-queries/swagger`
 
 ### grlc query execution
 When you call an API endpoint, grlc executes the SPARQL query for that endpoint by combining supplied parameters and decorators.
@@ -192,6 +192,17 @@ Syntax:
 
 Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/tags.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/group1/get_tags).
 
+### `defaults`
+Set the default value in the swagger-ui for a specific parameter in the query.
+
+Syntax:
+```
+#+ defaults:
+#+   - param_name: default_value
+```
+
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/defaults.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_defaults).
+
 ### `enumerate`
 Indicates which parameters of your query/operation should get enumerations (and get dropdown menus in the swagger-ui) using the given values from the SPARQL endpoint. The values for each enumeration variable can also be specified into the query decorators to save endpoint requests and speed up the API generation.
 
@@ -218,7 +229,7 @@ Syntax:
 Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/endpoint_url.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_endpoint_url).
 
 ###  `transform`
-Allows  query results to be converted to the specified JSON structure, by using [SPARQLTransformer](https://github.com/D2KLab/py-sparql-transformer) syntax.
+Allows  query results to be converted to the specified JSON structure, by using [SPARQLTransformer](https://github.com/D2KLab/py-sparql-transformer) syntax. Notice that the response content type must be set to `application/json` for the transformation to take effect.
 
 Syntax:
 ```
@@ -351,7 +362,7 @@ Check our [contributing](CONTRIBUTING.md) guidelines for these and more, and joi
 
 If you cannot code, that's no problem! There's still plenty you can contribute:
 
-- Share your experience at using grlc in Twitter (mention the handler **@grlcldapi**)
+- Share your experience at using grlc in Twitter (mention the handle **@grlcldapi**)
 - If you are good with HTML/CSS, [let us know](mailto:albert.meronyo@gmail.com)
 
 ## Related tools

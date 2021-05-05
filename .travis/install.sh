@@ -19,5 +19,6 @@ if [[ $TRAVIS_BUILD_STAGE_NAME == 'Deploy' ]]; then
 fi
 
 pip install --upgrade pip
+pip install docutils==0.17.1
 pip install .
 pip install -r requirements-test.txt

@@ -340,7 +340,7 @@ class URLLoader(BaseLoader):
 
     def getLicenceURL(self):
         """Returns the URL of the license file in the specification."""
-        return self.spec['licence'] if self.spec['licence'] else ''
+        return self.spec['licence'] if 'licence' in self.spec else None
 
     def getEndpointText(self):
         """Return content of endpoint file (endpoint.txt)"""
