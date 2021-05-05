@@ -5,7 +5,22 @@
 [![Build Status](https://travis-ci.org/CLARIAH/grlc.svg?branch=master)](https://travis-ci.org/CLARIAH/grlc)
 
 
-grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor, automatically builds Web APIs using SPARQL queries stored in git repositories. http://grlc.io/
+grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor, automatically builds Web APIs using shared SPARQL queries. http://grlc.io/
+
+If you use grlc in your work, please cite it as:
+
+```
+@InProceedings{merono2016grlc,
+ author = {Mero{\~{n}}o-Pe{\~{n}}uela, Albert and Hoekstra, Rinke},
+ title = {{grlc Makes GitHub Taste Like Linked Data APIs}},
+ booktitle = {The Semantic Web: ESWC 2016 Satellite Events, Heraklion, Crete, Greece, May 29 -- June 2,  2016},
+ year = {2016},
+ publisher = {Springer},
+ pages = {342--353},
+ isbn = {978-3-319-47602-5},
+ doi = {10.1007/978-3-319-47602-5_48}
+}
+```
 
 ## What is grlc?
 grlc is a lightweight server that takes SPARQL queries (stored in a GitHub repository, in your local filesystem, or listed in a URL), and translates them to Linked Data Web APIs. This enables universal access to Linked Data. Users are not required to know SPARQL to query their data, but instead can access a web API.

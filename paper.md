@@ -22,9 +22,9 @@ bibliography: paper.bib
 
 # Summary
 
-RDF is a knowledge representation format (often also refered to as Linked Open Data) which has gained popularity over the years and it continues to be adopted in different domains such as life sciences and humanities. RDF data is typically represented as sets of triples, consisting of subject, predicate and object, and is usually stored in a triple store. SPARQL is one of the most commonly used query languages used to retrieve linked data from a triple store. However writing SPARQL queries is not a trivial task and requires certain level of expertise.
+RDF is a knowledge representation format (often also refered to as Linked Open Data) which has gained popularity over the years and it continues to be adopted in different domains such as life sciences and humanities. RDF data is typically represented as sets of triples, consisting of subject, predicate and object, and is usually stored in a triple store. SPARQL is one of the most commonly used query languages used to retrieve linked data from a triple store. However writing SPARQL queries is not a trivial task and requires some degree of expertise.
 
-Domain experts usually face the challenge having to learn SPARQL, when all they want is to be able to access the information contained in the triple store. Knowledge engineers with the necessary expertise can help domain experts write SPARQL queries, but they still need to modify part of the query every time they want to extract new data.
+Domain experts usually face the challenge of having to learn SPARQL, when all they want is to be able to access the information contained in the triple store. Knowledge engineers with the necessary expertise can help domain experts write SPARQL queries, but they still need to modify part of the query every time they want to extract new data.
 
 `grlc` is a lightweight server that takes SPARQL queries (stored in a GitHub repository, local file storage or listed in a URL), and translates them to Linked Data Web APIs. This enables universal access to Linked Data. Users are not required to know SPARQL to query their data, but instead can access a web API. In this way, `grlc` enables researchers to easily access knowledge represented in RDF format.
 
