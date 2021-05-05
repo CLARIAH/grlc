@@ -29,7 +29,7 @@ def get_repo_info(loader, sha, prov_g):
     contact_name = loader.getContactName()
     contact_url = loader.getContactUrl()
     commit_list = loader.getCommitList()
-    licence_url = loader.getLicenceURL()
+    licence_url = loader.getLicenceURL()    # This will be None if there is no license
 
     # Add the API URI as a used entity by the activity
     if prov_g:
@@ -50,12 +50,13 @@ def get_repo_info(loader, sha, prov_g):
         'contact': {
             'name': contact_name,
             'url': contact_url
-        },
-        'license': {
+        } 
+    }
+    if licence_url:
+        info['license'] = {
             'name': 'License',
             'url': licence_url
         }
-    }
 
     if type(loader) is GithubLoader:
         basePath = '/api-git/' + user_repo + '/'
