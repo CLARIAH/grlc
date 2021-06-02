@@ -11,6 +11,7 @@ from github import Github
 from github.GithubObject import NotSet
 from github.GithubException import BadCredentialsException
 from configparser import ConfigParser
+from urllib.parse import urljoin
 
 glogger = glogging.getGrlcLogger(__name__)
 
@@ -304,13 +305,14 @@ class URLLoader(BaseLoader):
     def _getText(self, itemName):
         """Return the content of the specified item in the specification."""
         if itemName in self.spec['files']:
-            itemUrl = self.spec['files'][itemName]['download_url']
             headers = {'Accept' : 'text/plain'}
+            itemUrl = self.spec['files'][itemName]['download_url']
+            itemUrl = urljoin(self.spec['url'], itemUrl) # Join with base URL if relative URL
             resp = requests.get(itemUrl, headers=headers)
             if resp.status_code == 200:
                 return resp.text
             else:
-                raise Exception(resp.text)
+                raise Exception('HTTP status {} encountered while loading {}'.format(resp.status_code, itemUrl))
         else:
             return None
 
