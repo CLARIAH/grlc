@@ -161,7 +161,11 @@ def build_spec(user, repo, subdir=None, query_url=None, sha=None, prov=None, ext
 
             if item:
                 items.append(item)
-    # TODO: we should then return two things: list of items and list of errors
+
+    # Add a warning if no license is found
+    if loader.getLicenceURL() is None:
+        warnings.append("Queries behind this API do not have a license. You may not be allowed to use them.")
+
     return items, warnings
 
 
