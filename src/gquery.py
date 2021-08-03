@@ -365,7 +365,6 @@ def get_metadata(rq, endpoint):
             glogger.error(query_metadata['query'])
             glogger.error(traceback.print_exc())
             raise Exception('could not parse query: {}'.format(str(e)))
-            pass
 
     glogger.debug("Finished parsing query of type {}".format(query_metadata['type']))
     glogger.debug("All parsed query metadata (from decorators and content): ")
