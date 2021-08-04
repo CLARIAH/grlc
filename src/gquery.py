@@ -60,7 +60,7 @@ def guess_endpoint_uri(rq, loader):
             auth = (static.DEFAULT_ENDPOINT_USER, static.DEFAULT_ENDPOINT_PASSWORD)
             if auth == ('none', 'none'):
                 auth = None
-            glogger.debug("No endpoint specified, using default ({})".format(endpoint))
+            glogger.info("No endpoint specified, using default ({})".format(endpoint))
 
     return endpoint, auth
 
