@@ -274,7 +274,7 @@ def get_yaml_decorators(rq):
         query_metadata = yaml_string
     elif type(yaml_string) == str:
         try:  # Invalid YAMLs will produce empty metadata
-            query_metadata = yaml.load(yaml_string)
+            query_metadata = yaml.safe_load(yaml_string)
         except (yaml.parser.ParserError, yaml.scanner.ScannerError) as e:
             try:
                 query_metadata = json.loads(yaml_string)
