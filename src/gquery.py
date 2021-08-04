@@ -360,11 +360,11 @@ def get_metadata(rq, endpoint):
             glogger.info("Update query parsed with {}".format(query_metadata['type']))
             # if query_metadata['type'] == 'InsertData':
             #     query_metadata['variables'] = parsed_query.algebra['PV']
-        except:
+        except Exception as e:
             glogger.error("Could not parse query")
             glogger.error(query_metadata['query'])
             glogger.error(traceback.print_exc())
-            pass
+            raise Exception('could not parse query: {}'.format(str(e)))
 
     glogger.debug("Finished parsing query of type {}".format(query_metadata['type']))
     glogger.debug("All parsed query metadata (from decorators and content): ")
