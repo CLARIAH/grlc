@@ -54,5 +54,6 @@ setup(
     tests_require=tests_require,
     package_data = { 'grlc': grlc_data },
     include_package_data=True,
-    data_files=[('citation/grlc', ['CITATION.cff'])]
+    data_files=[('citation/grlc', ['CITATION.cff'])],
+    python_requires='>=3.7, <=3.8',
 )
