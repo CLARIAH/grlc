@@ -12,7 +12,7 @@ authors:
     orcid: 0000-0001-5565-7577
     affiliation: 2
 affiliations:
- - name: Vrije Universiteit Amsterdam
+ - name: King's College London
    index: 1
  - name: Netherlands eScience Center
    index: 2
