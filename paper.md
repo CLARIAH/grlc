@@ -22,7 +22,7 @@ bibliography: paper.bib
 
 # Summary
 
-RDF is a knowledge representation format (often also refered to as Linked Open Data) which has gained popularity over the years and it continues to be adopted in different domains such as life sciences and humanities. RDF data is typically represented as sets of triples, consisting of subject, predicate and object, and is usually stored in a triple store. SPARQL is one of the most commonly used query languages used to retrieve linked data from a triple store. However writing SPARQL queries is not a trivial task and requires some degree of expertise.
+RDF is a knowledge representation format (and an enabling technology for Linked Open Data) which has gained popularity over the years and it continues to be adopted in different domains such as life sciences and humanities. RDF data is typically represented as sets of triples, consisting of subject, predicate and object, and is usually stored in a triple store. SPARQL is one of the most commonly used query languages used to retrieve linked data from a triple store. However writing SPARQL queries is not a trivial task and requires some degree of expertise.
 
 Domain experts usually face the challenge of having to learn SPARQL, when all they want is to be able to access the information contained in the triple store. Knowledge engineers with the necessary expertise can help domain experts write SPARQL queries, but they still need to modify part of the query every time they want to extract new data.
 
@@ -32,7 +32,7 @@ Domain experts usually face the challenge of having to learn SPARQL, when all th
 
 `grlc` has been used in a number of scientific publications [@Merono_ISWC2016,@Merono_ISWC2017,@Merono_ESWC2017,@Merono_ISWC2019] and PhD thesis [@Singh2019].
 
-Other comparable approaches exist, which allow users to access Linked Open Data without requiring to know SPARQL; for example [OpenPHACTS](https://github.com/openphacts) and RAMOSE [@Daquino2021] are two of the most notable ones.
+Other comparable approaches exist, which allow users to access Linked Open Data without requiring to know SPARQL; for example [OpenPHACTS](https://github.com/openphacts) and RAMOSE [@Daquino2021] are two of the most notable ones. For an extensive review of other related work, a recent survey on API approaches for knowledge graphs [@Espinoza2021].
 
 
 # Acknowledgements
