@@ -383,7 +383,7 @@ Quotes from grlc users:
 
 **Contributors:**	[Albert Meroño](https://github.com/albertmeronyo), [Rinke Hoekstra](https://github.com/RinkeHoekstra), [Carlos Martínez](https://github.com/c-martinez)
 
-**Copyright:**	Albert Meroño, VU University Amsterdam  
+**Copyright:**	Albert Meroño, Rinke Hoekstra, Carlos Martínez  
 **License:**	MIT License (see [LICENSE.txt](LICENSE.txt))
 
 ## Academic publications
