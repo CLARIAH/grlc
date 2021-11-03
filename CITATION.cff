@@ -3,21 +3,15 @@
 ---
 authors:
   -
-    affiliation: "Vrije Universiteit Amsterdam"
+    affiliation: "King's College London"
     family-names: Meroño-Peñuela
     given-names: Albert
-  -
-    family-names: Hoekstra
-    given-names: Rinke
+    orcid: "https://orcid.org/0000-0003-4646-5842"
   -
     affiliation: "Netherlands eScience Center"
     family-names: Martinez
     given-names: Carlos
     orcid: "https://orcid.org/0000-0001-5565-7577"
-  -
-    affiliation: "International Institute of Social History"
-    family-names: Zijdeman
-    given-names: Richard
 cff-version: "1.0.3"
 doi: 10.5281/zenodo.1064391
 license: MIT
