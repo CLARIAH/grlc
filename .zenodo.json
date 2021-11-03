@@ -1,20 +1,14 @@
 {
   "creators": [
     {
-      "affiliation": "Vrije Universiteit Amsterdam",
-      "name": "Meroño-Peñuela, Albert"
-    },
-    {
-      "name": "Hoekstra, Rinke"
+      "affiliation": "King's College London",
+      "name": "Meroño-Peñuela, Albert",
+      "orcid": "0000-0003-4646-5842"
     },
     {
       "affiliation": "Netherlands eScience Center",
       "name": "Martinez, Carlos",
       "orcid": "0000-0001-5565-7577"
-    },
-    {
-      "affiliation": "International Institute of Social History",
-      "name": "Zijdeman, Richard"
     }
   ],
   "description": "grlc, the git repository linked data API constructor, automatically builds Web APIs using SPARQL queries stored in git repositories.",
