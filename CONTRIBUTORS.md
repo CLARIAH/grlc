@@ -12,3 +12,4 @@ This is a list of all people who have contributed to grlc. Big thanks to everyon
 [jspaaks](https://github.com/jspaaks)  
 [ecow](https://github.com/ecow)
 [rapw3k](https://github.com/rapw3k)
+[jblom](https://github.com/jblom)
