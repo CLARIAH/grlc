@@ -1,16 +1,12 @@
-name: Testing 
-
+name: Testing
 on: [push]
-
 jobs:
   build:
-
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.6, 3.7, 3.8]
-
+        python-version: [3.7, 3.8]
     steps:
     - uses: actions/checkout@master
     - name: Set up Python ${{ matrix.python-version }}
