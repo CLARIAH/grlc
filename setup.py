@@ -48,8 +48,8 @@ setup(
         # dependency for `python setup.py test`
         'pytest-runner',
         # dependencies for `python setup.py build_sphinx`
-        'sphinx',
-        'recommonmark'
+        # 'sphinx',
+        # 'recommonmark'
     ],
     tests_require=tests_require,
     package_data = { 'grlc': grlc_data },
