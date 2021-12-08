@@ -37,7 +37,7 @@ def guess_endpoint_uri(rq, loader):
 
     if has_request_context() and "endpoint" in request.args:
         endpoint = request.args['endpoint']
-        glogger.info("Endpoint provided in request: " + endpoint)
+        glogger.debug("Endpoint provided in request: " + endpoint)
         return endpoint, auth
 
     # Decorator
@@ -45,14 +45,14 @@ def guess_endpoint_uri(rq, loader):
         decorators = get_yaml_decorators(rq)
         endpoint = decorators['endpoint']
         auth = None
-        glogger.info("Decorator guessed endpoint: " + endpoint)
+        glogger.debug("Decorator guessed endpoint: " + endpoint)
     except (TypeError, KeyError):
         # File
         try:
             endpoint_content = loader.getEndpointText()
             endpoint = endpoint_content.strip().splitlines()[0]
             auth = None
-            glogger.info("File guessed endpoint: " + endpoint)
+            glogger.debug("File guessed endpoint: " + endpoint)
         # TODO: except all is really ugly
         except:
             # Default
@@ -60,7 +60,7 @@ def guess_endpoint_uri(rq, loader):
             auth = (static.DEFAULT_ENDPOINT_USER, static.DEFAULT_ENDPOINT_PASSWORD)
             if auth == ('none', 'none'):
                 auth = None
-            glogger.warning("No endpoint specified, using default ({})".format(endpoint))
+            glogger.info("No endpoint specified, using default ({})".format(endpoint))
 
     return endpoint, auth
 
@@ -175,7 +175,7 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
             if vdefault is not None:
                 parameters[vname]['default'] = vdefault
 
-            glogger.info('Finished parsing the following parameters: {}'.format(parameters))
+            glogger.debug('Finished parsing the following parameters: {}'.format(parameters))
 
     return parameters
 
@@ -213,7 +213,7 @@ def get_enumeration_sparql(rq, v, endpoint, auth=None):
     """
     Returns a list of enumerated values for variable 'v' in query 'rq'
     """
-    glogger.info('Retrieving enumeration for variable {}'.format(v))
+    glogger.debug('Retrieving enumeration for variable {}'.format(v))
     vcodes = []
     # tpattern_matcher = re.compile(".*(FROM\s+)?(?P<gnames>.*)\s+WHERE.*[\.\{][\n\t\s]*(?P<tpattern>.*\?" + re.escape(v) + ".*?\.).*", flags=re.DOTALL)
     # tpattern_matcher = re.compile(".*?((FROM\s*)(?P<gnames>(\<.*\>)+))?\s*WHERE\s*\{(?P<tpattern>.*)\}.*", flags=re.DOTALL)
@@ -346,9 +346,9 @@ def get_metadata(rq, endpoint):
 
         try:
             # update query
-            glogger.info("Trying to parse UPDATE query")
+            glogger.debug("Trying to parse UPDATE query")
             parsed_query = UpdateUnit.parseString(rq, parseAll=True)
-            glogger.info(parsed_query)
+            glogger.debug(parsed_query)
             query_metadata['type'] = parsed_query[0]['request'][0].name
             if query_metadata['type'] == 'InsertData':
                 query_metadata['parameters'] = {
@@ -357,7 +357,7 @@ def get_metadata(rq, endpoint):
                     'data': {'datatype': None, 'enum': [], 'lang': None, 'name': 'data', 'original': '?_data',
                              'required': True, 'type': 'literal'}}
 
-            glogger.info("Update query parsed with {}".format(query_metadata['type']))
+            glogger.debug("Update query parsed with {}".format(query_metadata['type']))
             # if query_metadata['type'] == 'InsertData':
             #     query_metadata['variables'] = parsed_query.algebra['PV']
         except Exception as e:
@@ -378,7 +378,7 @@ def paginate_query(query, results_per_page, get_args):
     split display a maximum of `results_per_page`."""
     page = get_args.get('page', 1)
 
-    glogger.info("Paginating query for page {}, {} results per page".format(page, results_per_page))
+    glogger.debug("Paginating query for page {}, {} results per page".format(page, results_per_page))
 
     # If contains LIMIT or OFFSET, remove them
     glogger.debug("Original query: " + query)

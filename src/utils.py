@@ -208,6 +208,8 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
 
         # Response headers
         resp = response.text
+
+        glogger.debug('Got HTTP response from to SPARQL endpoint: {}'.format(resp))
         headers['Content-Type'] = response.headers['Content-Type']
 
     # If the query is paginated, set link HTTP headers
