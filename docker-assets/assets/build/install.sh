@@ -31,7 +31,7 @@ sed -i \
  /etc/nginx/nginx.conf
 
  # configure gitlab log rotation
- cat > /etc/logrotate.d/grlc << EOF
+ cat > /etc/logrotate.d/grlc << EOF1
  ${GRLC_LOG_DIR}/grlc/*.log {
    weekly
    missingok
@@ -41,10 +41,10 @@ sed -i \
    notifempty
    copytruncate
  }
- EOF
+EOF1
 
  # configure gitlab vhost log rotation
- cat > /etc/logrotate.d/grlc-nginx << EOF
+ cat > /etc/logrotate.d/grlc-nginx << EOF2
  ${GRLC_LOG_DIR}/nginx/*.log {
    weekly
    missingok
@@ -54,4 +54,4 @@ sed -i \
    notifempty
    copytruncate
  }
- EOF
+EOF2

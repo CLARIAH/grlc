@@ -1,6 +1,7 @@
 #FROM python:3.6.8
 FROM python:3.9.13
 MAINTAINER albert.merono@vu.nl
+RUN apt-get update && apt-get full-upgrade -y
 
 # Default values for env variables
 ARG GRLC_GITHUB_ACCESS_TOKEN=
@@ -29,7 +30,11 @@ RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales \
  && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get dist-upgrade -y
+
+
 RUN curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+RUN chmod a+r /usr/share/keyrings/nodesource.gpg
 RUN apt-get update && apt-get install -y nodejs
 
 COPY ./ ${GRLC_INSTALL_DIR}
