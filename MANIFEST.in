@@ -1,3 +1,4 @@
-include requirements.txt
-include requirements-test.txt
-include CITATION.cff
+include grlc_fork/static/*
+include grlc_fork/static/js/*
+include grlc_fork/static/css/*
+include grlc_fork/templates/*

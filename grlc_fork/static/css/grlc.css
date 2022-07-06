@@ -1,0 +1,195 @@
+/* Adapted from bootstrap's cover.css */
+
+/*
+ * Globals
+ */
+
+/* Links */
+a:focus {
+  color: #373737;
+}
+a,a:hover {
+  color: #00a9a4;
+}
+
+/* Custom default button */
+.btn-default:hover,.bton-default:focus {
+  color: #fff;
+  text-shadow: none; /* Prevent inheritence from `body` */
+  background-color: #008782;
+  border: 1px solid #01aaa5;
+}
+.btn-default {
+  color: #fff;
+  text-shadow: none; /* Prevent inheritence from `body` */
+  background-color: #00a9a4;
+  border: 1px solid #01aaa5;
+}
+
+
+/*
+ * Base structure
+ */
+
+html,
+body {
+  height: 100%;
+  background-color: #eee;
+}
+body {
+  color: #373737;
+  text-align: center;
+  /* text-shadow: 0 1px 3px rgba(0,0,0,.5); */
+}
+
+/* Extra markup and styles for table-esque vertical and horizontal centering */
+.site-wrapper {
+  display: table;
+  width: 100%;
+  height: 100%; /* For at least Firefox */
+  min-height: 100%;
+  -webkit-box-shadow: inset 0 0 65px rgba(0,0,0,.5);
+          box-shadow: inset 0 0 65px rgba(0,0,0,.5);
+}
+.site-wrapper-inner {
+  display: table-cell;
+  vertical-align: top;
+}
+.cover-container {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+/* Padding for spacing */
+.inner {
+  padding: 30px;
+}
+
+.smaller {
+  font-size: 16px;
+}
+
+
+/*
+ * Header
+ */
+.masthead-brand {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.masthead-nav > li {
+  display: inline-block;
+}
+.masthead-nav > li + li {
+  margin-left: 20px;
+}
+.masthead-nav > li > a {
+  padding-right: 0;
+  padding-left: 0;
+  font-size: 16px;
+  font-weight: bold;
+  color: #373737; /* IE8 proofing */
+  /* color: rgba(255,255,255,.75); */
+  border-bottom: 2px solid transparent;
+}
+.masthead-nav > li > a:hover,
+.masthead-nav > li > a:focus {
+  background-color: transparent;
+  border-bottom-color: #373737;
+  /* border-bottom-color: rgba(255,255,255,.25); */
+}
+.masthead-nav > .active > a,
+.masthead-nav > .active > a:hover,
+.masthead-nav > .active > a:focus {
+  color: #373737;
+  border-bottom-color: #00a9a4;
+}
+
+@media (min-width: 768px) {
+  .masthead-brand {
+    float: left;
+  }
+  .masthead-nav {
+    float: right;
+  }
+}
+
+
+/*
+ * Cover
+ */
+
+.cover {
+  padding: 0 20px;
+}
+.cover .btn-lg {
+  padding: 10px 20px;
+  font-weight: bold;
+}
+
+
+/*
+ * Footer
+ */
+
+.mastfoot {
+  color: #373737; /* IE8 proofing */
+  /* color: rgba(255,255,255,.5); */
+}
+
+
+/*
+ * Affix and center
+ */
+
+@media (min-width: 768px) {
+  /* Pull out the header and footer */
+  .masthead {
+    position: fixed;
+    top: 0;
+  }
+  .mastfoot {
+    position: fixed;
+    bottom: 0;
+  }
+  /* Start the vertical centering */
+  .site-wrapper-inner {
+    vertical-align: middle;
+  }
+  /* Handle the widths */
+  .masthead,
+  .mastfoot,
+  .cover-container {
+    width: 100%; /* Must be percentage or pixels for horizontal alignment */
+  }
+}
+
+@media (min-width: 992px) {
+  .masthead,
+  .mastfoot,
+  .cover-container {
+    width: 700px;
+  }
+}
+
+
+/* grlc specific styles */
+
+.circ-number {
+    background-color: #fff;
+    border: 3px solid #00a9a4;
+    width: 40px;
+    line-height: 36px;
+    height: 40px;
+    display: block;
+    margin: 0 auto;
+    border-radius: 50%;
+    font-weight: bold;
+}
+
+/* Add space between p paragraphs */
+
+.lead {
+  margin-top: 10px;
+}

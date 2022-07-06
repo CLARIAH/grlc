@@ -1,0 +1,9 @@
+{
+    "name" : "grlc",
+    "title" : "git repository linked data API constructor",
+    "description" : "grlc makes all your Linked Data accessible to the Web by automatically converting your SPARQL queries into RESTful APIs.",
+    "url" : "http://grlc.io",
+    "keywords" : "tools, SPARQL, query, API, Linked Data, LOD",
+    "author" : "Albert Meroño Peñuela",
+    "repository" : "https://github.com/clariah/grlc"
+}
