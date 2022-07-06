@@ -1,9 +1,0 @@
-#+ summary: Test query for containing pre-defined enumeration.
-#+ enumerate:
-#+   - o:
-#+     - v1
-#+     - v2
-
-SELECT * WHERE {
- ?s ?p ?_o .
-}

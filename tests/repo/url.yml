@@ -1,9 +1,0 @@
-title: TestAPI
-contact:
-  name: Name of the author
-  url: http://example.org/contact.html
-licence: http://example.org/licence.html
-queries:
-  - http://example.org/test-rq.rq
-  - http://example.org/test-sparql.sparql
-  - http://example.org/test-tpf.tpf

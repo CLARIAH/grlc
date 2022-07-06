@@ -1,1 +1,0 @@
-http://test-endpoint/from-file/sparql
