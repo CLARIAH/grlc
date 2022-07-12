@@ -21,11 +21,11 @@ chown ${GRLC_USER}:${GRLC_USER} ${GRLC_HOME} -R
 pip install --upgrade pip
 pip install 'setuptools<58'
 pip install 'docutils'
-python setup.py install_egg_info
-pip install 'setuptools<56'
-pip install -e .
+pip install .
 
-npm install git2prov
+#npm install git2prov
+#npm audit fix
+
 
 #move nginx logs to ${GITLAB_LOG_DIR}/nginx
 sed -i \
