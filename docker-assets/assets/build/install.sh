@@ -20,7 +20,10 @@ cd ${GRLC_INSTALL_DIR}
 chown ${GRLC_USER}:${GRLC_USER} ${GRLC_HOME} -R
 pip install --upgrade pip
 pip install 'setuptools<58'
-pip install .
+pip install 'docutils'
+python setup.py install_egg_info
+pip install 'setuptools<56'
+pip install -e .
 
 npm install git2prov
 

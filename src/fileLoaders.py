@@ -73,7 +73,8 @@ class GithubLoader(BaseLoader):
         self.prov = prov
         gh = Github(static.ACCESS_TOKEN)
         try:
-            self.gh_repo = gh.get_repo(user + '/' + repo, lazy=False)
+            #self.gh_repo = gh.get_repo(user + '/' + repo, lazy=False)
+            raise Exception("GitHub Access is disabled for this grlc server")
         except BadCredentialsException:
             raise Exception('BadCredentials: have you set up github_access_token on config.ini ?')
         except Exception:
