@@ -1,9 +1,10 @@
 <p algin="center"><img src="https://raw.githubusercontent.com/CLARIAH/grlc/master/src/static/grlc_logo_01.png" width="250px"></p>
 
-[![PyPI version](https://badge.fury.io/py/grlc.svg)](https://badge.fury.io/py/grlc)
-[![DOI](https://zenodo.org/badge/46131212.svg)](https://zenodo.org/badge/latestdoi/46131212)
-[![Build Status](https://travis-ci.org/CLARIAH/grlc.svg?branch=master)](https://travis-ci.org/CLARIAH/grlc)
+# NOTE:  This is a highly crippled version of the original grlc server
 
+It is intended to be used in secure environments.  Specifically, the GitHub and YAML file integration has been disabled.  Only local queries will be available.
+
+## Original Documentation from https://raw.githubusercontent.com/CLARIAH/grlc/ is below
 
 grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor, automatically builds Web APIs using shared SPARQL queries. http://grlc.io/
 
