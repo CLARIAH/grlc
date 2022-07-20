@@ -55,5 +55,5 @@ setup(
     package_data = { 'grlc': grlc_data },
     include_package_data=True,
     data_files=[('citation/grlc', ['CITATION.cff'])],
-    python_requires='>=3.7, <=3.8',
+    python_requires='>=3.9, <=3.10',
 )

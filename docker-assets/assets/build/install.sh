@@ -18,11 +18,14 @@ passwd -d ${GRLC_USER}
 
 cd ${GRLC_INSTALL_DIR}
 chown ${GRLC_USER}:${GRLC_USER} ${GRLC_HOME} -R
-
 pip install --upgrade pip
+pip install 'setuptools<58'
+pip install 'docutils'
 pip install .
 
-npm install git2prov
+#npm install git2prov
+#npm audit fix
+
 
 #move nginx logs to ${GITLAB_LOG_DIR}/nginx
 sed -i \
@@ -31,7 +34,7 @@ sed -i \
  /etc/nginx/nginx.conf
 
  # configure gitlab log rotation
- cat > /etc/logrotate.d/grlc << EOF
+ cat > /etc/logrotate.d/grlc << EOF1
  ${GRLC_LOG_DIR}/grlc/*.log {
    weekly
    missingok
@@ -41,10 +44,10 @@ sed -i \
    notifempty
    copytruncate
  }
- EOF
+EOF1
 
  # configure gitlab vhost log rotation
- cat > /etc/logrotate.d/grlc-nginx << EOF
+ cat > /etc/logrotate.d/grlc-nginx << EOF2
  ${GRLC_LOG_DIR}/nginx/*.log {
    weekly
    missingok
@@ -54,4 +57,4 @@ sed -i \
    notifempty
    copytruncate
  }
- EOF
+EOF2

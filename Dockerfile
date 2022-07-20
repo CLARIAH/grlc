@@ -1,5 +1,8 @@
-FROM python:3.6.8
-MAINTAINER albert.merono@vu.nl
+#FROM python:3.6.8
+FROM python:3.9.13
+LABEL org.opencontainers.image.authors="ORIGINAL: albert.merono@vu.nl; THIS VERSION: mark.wilkinson@upm.es"
+LABEL org.opencontainers.image.documentation="https://github.com/markwilkinson/grlc/blob/master/README.md"
+RUN apt-get update && apt-get full-upgrade -y
 
 # Default values for env variables
 ARG GRLC_GITHUB_ACCESS_TOKEN=
@@ -22,13 +25,17 @@ ENV GRLC_INSTALL_DIR="${GRLC_HOME}/grlc" \
     GRLC_RUNTIME_DIR="${GRLC_CACHE_DIR}/runtime"
 
 RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y nginx git-core logrotate python-pip locales gettext-base sudo build-essential apt-utils \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y nginx git-core logrotate python3-pip locales gettext-base sudo build-essential apt-utils \
  && update-locale LANG=C.UTF-8 LC_MESSAGES=POSIX \
  && locale-gen en_US.UTF-8 \
  && DEBIAN_FRONTEND=noninteractive dpkg-reconfigure locales \
  && rm -rf /var/lib/apt/lists/*
 
-RUN curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+RUN apt-get update && apt-get dist-upgrade -y
+
+
+RUN curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+RUN chmod a+r /usr/share/keyrings/nodesource.gpg
 RUN apt-get update && apt-get install -y nodejs
 
 COPY ./ ${GRLC_INSTALL_DIR}
@@ -48,3 +55,4 @@ VOLUME ["${GRLC_DATA_DIR}", "${GRLC_LOG_DIR}"]
 WORKDIR ${GRLC_INSTALL_DIR}
 ENTRYPOINT ["/sbin/entrypoint.sh"]
 CMD ["app:start"]
+
