@@ -1,6 +1,7 @@
 #FROM python:3.6.8
 FROM python:3.9.13
-MAINTAINER albert.merono@vu.nl
+LABEL org.opencontainers.image.authors="ORIGINAL: albert.merono@vu.nl; THIS VERSION: mark.wilkinson@upm.es"
+LABEL org.opencontainers.image.documentation="https://github.com/markwilkinson/grlc/blob/master/README.md"
 RUN apt-get update && apt-get full-upgrade -y
 
 # Default values for env variables

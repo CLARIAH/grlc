@@ -71,14 +71,15 @@ class GithubLoader(BaseLoader):
         self.subdir = (subdir + "/") if subdir else ""
         self.sha = sha if sha else NotSet
         self.prov = prov
-        gh = Github(static.ACCESS_TOKEN)
+        #gh = Github(static.ACCESS_TOKEN)
         try:
             #self.gh_repo = gh.get_repo(user + '/' + repo, lazy=False)
             raise Exception("GitHub Access is disabled for this grlc server")
         except BadCredentialsException:
             raise Exception('BadCredentials: have you set up github_access_token on config.ini ?')
         except Exception:
-            raise Exception('Repo not found: ' + user + '/' + repo)
+            raise Exception('GitHub Access has been disabled for this server' )
+#            raise Exception('Repo not found: ' + user + '/' + repo)
 
     def fetchFiles(self):
         """Returns a list of file items contained on the github repo."""
@@ -263,27 +264,32 @@ class URLLoader(BaseLoader):
     specification from a specification YAML file located on a remote server."""
 
     def __init__(self, spec_url):
-        """Create a new URLLoader.
+        try:
+            raise Exception("YAML file access is disabled for this grlc server")
+        except Exception:
+            raise Exception("YAML file access is disabled for this grlc server")
 
-        Keyword arguments:
-        spec_url -- URL where the specification YAML file is located."""
-        headers = {'Accept' : 'text/yaml'}
-        resp = requests.get(spec_url, headers=headers)
-        if resp.status_code == 200:
-            self.spec = yaml.load(resp.text)
-            self.spec['url'] = spec_url
-            self.spec['files'] = {}
-            for queryUrl in self.spec['queries']:
-                queryNameExt = path.basename(queryUrl)
-                queryName = path.splitext(queryNameExt)[0] # Remove extention
-                item = {
-                    'name': queryName,
-                    'download_url': queryUrl
-                }
-                self.spec['files'][queryNameExt] = item
-            del self.spec['queries']
-        else:
-            raise Exception(resp.text)
+        # """Create a new URLLoader.
+
+        # Keyword arguments:
+        # spec_url -- URL where the specification YAML file is located."""
+        # headers = {'Accept' : 'text/yaml'}
+        # resp = requests.get(spec_url, headers=headers)
+        # if resp.status_code == 200:
+        #     self.spec = yaml.load(resp.text)
+        #     self.spec['url'] = spec_url
+        #     self.spec['files'] = {}
+        #     for queryUrl in self.spec['queries']:
+        #         queryNameExt = path.basename(queryUrl)
+        #         queryName = path.splitext(queryNameExt)[0] # Remove extention
+        #         item = {
+        #             'name': queryName,
+        #             'download_url': queryUrl
+        #         }
+        #         self.spec['files'][queryNameExt] = item
+        #     del self.spec['queries']
+        # else:
+        #     raise Exception(resp.text)
 
     def fetchFiles(self):
         """Returns a list of file items contained on specification."""
