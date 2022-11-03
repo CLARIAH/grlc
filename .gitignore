@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+#
+# SPDX-License-Identifier: MIT
+
 node_modules
 .*!.gitignore
 */.DS_Store
@@ -20,3 +24,18 @@ bin/
 share/
 .idea
 .pytest_cache
+.eggs/
+.vscode/
+.ipynb_checkpoints/
+ssl-certificates/
+testQueries/
+grlc.egg-info/
+src/config.ini
+src/FileLoaderTesting.ipynb
+Dockerfile2
+FileLoaders.ipynb
+ReleaseProcedure.md
+TODOs.md
+TwitterAPIKeys.md
+config.ini
+ink_ext_XXXXXX_img0.png

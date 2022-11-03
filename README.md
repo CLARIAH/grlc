@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+
+SPDX-License-Identifier: MIT
+-->
+
 <p algin="center"><img src="https://raw.githubusercontent.com/CLARIAH/grlc/master/src/static/grlc_logo_01.png" width="250px"></p>
 
 [![PyPI version](https://badge.fury.io/py/grlc.svg)](https://badge.fury.io/py/grlc)

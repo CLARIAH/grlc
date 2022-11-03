@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+
+SPDX-License-Identifier: MIT
+-->
+
 # Contributors
 This is a list of all people who have contributed to grlc. Big thanks to everyone.
 

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+#
+# SPDX-License-Identifier: MIT
+
 from urllib.parse import urlparse, urlunparse, parse_qsl, urlencode, ParseResult
 
 def getSwaggerPaginationDef(resultsPerPage):
