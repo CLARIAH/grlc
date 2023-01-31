@@ -35,12 +35,14 @@ config_fallbacks = {
     'password': '',
     'server_name': '',
     'local_sparql_dir': '',
-    'debug': 'False'
+    'debug': 'False',
+    'gitlab_url': 'https://gitlab'
 }
 config = ConfigParser(config_fallbacks)
 config.add_section('auth')
 config.add_section('defaults')
 config.add_section('local')
+config.add_section('api_gitlab')
 config_filename = os.path.join(os.getcwd(), 'config.ini')
 print('Reading config file: ', config_filename)
 config.read(config_filename)
@@ -53,6 +55,9 @@ DEFAULT_ENDPOINT_PASSWORD = config.get('defaults', 'password')
 
 # Local folder where queries are loaded from
 LOCAL_SPARQL_DIR = config.get('local', 'local_sparql_dir')
+
+# api_gitlab
+GITLAB_URL = config.get('api_gitlab', 'gitlab_url')
 
 # server name, used by the Flask app and in the swagger spec
 SERVER_NAME = config.get('defaults', 'server_name')

@@ -2,7 +2,7 @@ import json
 import grlc.utils
 import grlc.gquery as gquery
 import grlc.pagination as pageUtils
-from grlc.fileLoaders import GithubLoader, LocalLoader, URLLoader
+from grlc.fileLoaders import GithubLoader, LocalLoader, URLLoader, GitlabLoader
 
 import traceback
 import grlc.glogging as glogging
@@ -62,6 +62,11 @@ def get_repo_info(loader, sha, prov_g):
         basePath = '/api-git/' + user_repo + '/'
         basePath += ('subdir/' + loader.subdir + '/') if loader.subdir else ''
         basePath += ('commit/' + sha + '/') if sha else ''
+    if type(loader) is GitlabLoader:
+        basePath = '/api-gitlab/' + user_repo + '/query/' 
+        basePath += ('branch/' + loader.branch + '/') if loader.branch else ''
+        basePath += ('subdir/' + loader.subdir.strip('/') + '/') if loader.subdir else ''
+        basePath += ('commit/' + sha + '/') if sha else ''
     elif type(loader) is LocalLoader:
         basePath = '/api-local/'
     elif type(loader) is URLLoader:
@@ -117,9 +122,9 @@ def get_path_for_item(item):
     return item_path
 
 
-def build_spec(user, repo, subdir=None, query_url=None, sha=None, prov=None, extraMetadata=[]):
+def build_spec(user, repo, subdir=None, query_url=None, sha=None, prov=None, extraMetadata=[], git_type=None, branch='main'):
     """Build grlc specification for the given github user / repo."""
-    loader = grlc.utils.getLoader(user, repo, subdir, query_url, sha=sha, prov=prov)
+    loader = grlc.utils.getLoader(user, repo, subdir, query_url, sha=sha, prov=prov, git_type=git_type, branch=branch)
 
     files = loader.fetchFiles()
     raw_repo_uri = loader.getRawRepoUri()

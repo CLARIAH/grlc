@@ -1,10 +1,22 @@
+# /*
+# * SPDX-License-Identifier: MIT
+# * SPDX-FileCopyrightText: Copyright (c) 2022 Orange SA
+# *
+# * Author: Mihary RANAIVOSON
+# * Modifications: Add GitlabLoader
+# */
+
 import grlc.static as static
 from grlc.queryTypes import qType
 import grlc.glogging as glogging
 
 import json
+import gitlab
 import requests
 import yaml
+import urllib.parse
+import base64
+import os
 from os import path
 from glob import glob
 from github import Github
@@ -13,7 +25,9 @@ from github.GithubException import BadCredentialsException
 from configparser import ConfigParser
 from urllib.parse import urljoin
 
+# util variables
 glogger = glogging.getGrlcLogger(__name__)
+
 
 class BaseLoader:
     """Base class for File Loaders"""
@@ -158,6 +172,115 @@ class GithubLoader(BaseLoader):
     def getRepoDescription(self):
         """Return the description of the repository"""
         return self.gh_repo.description
+
+
+class GitlabLoader(BaseLoader):
+
+    def __init__(self, user, repo, subdir=None, sha=None, prov=None, branch='main'):
+        """Create a new GithubLoader.
+        # TODO: Update to GITLAB !
+
+        Keyword arguments:
+        user -- Github user name of the target github repo.
+        repo -- Repository name of the target github repo.
+        subdir -- Target subdirectory within the given repo. (default: None).
+        branch -- Branch
+        sha -- Github commit identifier hash (default: None).
+        prov -- grlcPROV object for tracking provenance (default: None)."""
+        self.user = user
+        self.repo = repo
+        self.subdir = (subdir + "/") if subdir else ""
+        self.branch = branch
+        self.sha = sha if sha else None
+        self.prov = prov
+        gl = gitlab.Gitlab(
+            url=static.GITLAB_URL, 
+            private_token=static.ACCESS_TOKEN
+        )
+        try:
+            self.gl_repo = gl.projects.get(user + '/' + repo)
+        except BadCredentialsException:
+            raise Exception('BadCredentials: have you set up github_access_token on config.ini ?')
+        except Exception:
+            raise Exception('Repo not found: ' + user + '/' + repo)
+
+    def fetchFiles(self):
+        """Returns a list of file items contained on the github repo."""
+        gitlab_files = self.gl_repo.repository_tree(path=self.subdir.strip('/'), ref=self.branch, all=True)
+        files = []
+        for gitlab_file in gitlab_files:            
+            if gitlab_file['type'] == 'blob':
+                name = gitlab_file['name']
+                files.append({
+                    'download_url': path.join(self.getRawRepoUri(), self.subdir, name),
+                    'name': name,
+                    'decoded_content': str.encode(self._getText(gitlab_file['name']))
+                })
+        return files
+
+    def getRawRepoUri(self):
+        """Returns the root url of the github repo."""
+        # TODO: replace by gh_repo.html_url ?
+        return path.join(static.GITLAB_URL, self.user, self.repo, '-', 'raw', self.branch)
+
+    def getTextFor(self, fileItem):
+        """Returns the contents of the given file item on the github repo."""
+        raw_query_uri = fileItem['download_url']
+
+        # Add query URI as used entity by the logged activity
+        if self.prov is not None:
+            self.prov.add_used_entity(raw_query_uri)
+        return str(fileItem['decoded_content'], 'utf-8')  
+
+    def _getText(self, query_name):
+        """Return the content of the specified file contained in the github repo."""
+        try:
+            file_path = path.join(self.subdir, query_name)
+            f = self.gl_repo.files.get(file_path=file_path, ref=self.branch)
+            file_content = base64.b64decode(f.content).decode("utf-8")
+            return file_content.replace('\\n', '\n').replace('\\t', '\t')
+        except:
+            return None
+    
+    def getRepoTitle(self):
+        """Return the title of the github repo."""
+        return self.gl_repo.name
+
+    def getContactName(self):
+        """Return the name of the owner of the gitlab repo."""
+        return self.gl_repo.namespace['name']
+
+    def getContactUrl(self):
+        """Return the home page of the owner of the gitlab repo."""
+        return self.gl_repo.namespace['web_url']
+
+    def getCommitList(self):
+        """Return a list of commits on the gitlab repo."""
+        return [ c.id for c in self.gl_repo.commits.list() ]
+
+    def getFullName(self):
+        """Return the full name of the gitlab repo (user/repo)."""
+        return self.gl_repo.path_with_namespace
+
+    def getRepoURI(self):
+        """Return the full URI of the gitlab repo."""
+        return self.gl_repo.web_url
+
+    def getEndpointText(self):
+        """Return content of endpoint file (endpoint.txt)"""
+        return self._getText('endpoint.txt')
+
+    def getLicenceURL(self):
+        """Returns the URL of the license file in this repository if one exists."""
+        for f in self.fetchFiles():
+            if f['name'].lower() == 'license' or f['name'].lower() == 'licence':
+                return f['download_url']
+        return None
+
+    def getRepoDescription(self):
+        """Return the description of the repository"""
+        return self.gl_repo.description
+
 
 
 class LocalLoader(BaseLoader):
