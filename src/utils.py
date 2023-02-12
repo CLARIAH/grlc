@@ -26,7 +26,7 @@ def getLoader(user, repo, subdir=None, spec_url=None, sha=None, prov=None, git_t
     elif spec_url:
        loader = URLLoader(spec_url)
     else:
-        if git_type == 'github':
+        if git_type == static.TYPE_GITHUB:
             glogger.debug("Building GithubLoader....")
             loader = GithubLoader(user, repo, subdir, sha, prov)
         else:

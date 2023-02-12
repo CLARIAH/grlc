@@ -22,6 +22,10 @@ mimetypes = {
 GITHUB_RAW_BASE_URL = 'https://raw.githubusercontent.com/'
 GITHUB_API_BASE_URL = 'https://api.github.com/repos/'
 
+# Git types
+TYPE_GITHUB = "github"
+TYPE_GITLAB = "gitlab"
+
 # Cache control
 # CACHE_CONTROL_POLICY = 'public, max-age=60'
 # With the new hash retrieveal and redirect caching becomes obsolete

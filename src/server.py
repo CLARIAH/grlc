@@ -164,7 +164,7 @@ def api_docs_git(user, repo, subdir=None, sha=None):
 @app.route('/api-git/<user>/<repo>/<path:subdir>/commit/<sha>/swagger')  # backward compatibility route
 def swagger_spec_git(user, repo, subdir=None, sha=None):
     """Swagger spec for specifications loaded from a Github repo."""
-    return swagger_spec(user, repo, subdir=subdir, spec_url=None, sha=sha, content=None, git_type="github")
+    return swagger_spec(user, repo, subdir=subdir, spec_url=None, sha=sha, content=None, git_type=static.TYPE_GITHUB)
 
 # Callname execution
 @app.route('/api-git/<user>/<repo>/<query_name>', methods=['GET', 'POST'])
@@ -185,7 +185,7 @@ def swagger_spec_git(user, repo, subdir=None, sha=None):
 @app.route('/api/<user>/<repo>/<path:subdir>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])  # backward compatibility route
 def query_git(user, repo, query_name, subdir=None, sha=None, content=None):
     """SPARQL query execution for specifications loaded from a Github repo."""
-    return query(user, repo, query_name, subdir=subdir, sha=sha, content=content, git_type="github")
+    return query(user, repo, query_name, subdir=subdir, sha=sha, content=content, git_type=static.TYPE_GITHUB)
 
 
 
@@ -220,7 +220,7 @@ def api_docs_gitlab(user, repo, subdir=None, sha=None, branch='main'):
 def swagger_spec_gitlab(user, repo, subdir=None, sha=None, branch='main'):
     """Swagger spec for specifications loaded from a Github repo."""
     glogger.debug("Entry in function: __main__.swagger_spec_gitlab")
-    return swagger_spec(user, repo, subdir=subdir, spec_url=None, sha=sha, content=None, git_type="gitlab", branch=branch)
+    return swagger_spec(user, repo, subdir=subdir, spec_url=None, sha=sha, content=None, git_type=static.TYPE_GITLAB, branch=branch)
 
 # Callname execution
 @app.route('/api-gitlab/<user>/<repo>/query/<query_name>', methods=['GET', 'POST'])
@@ -236,7 +236,7 @@ def swagger_spec_gitlab(user, repo, subdir=None, sha=None, branch='main'):
 def query_gitlab(user, repo, query_name, subdir=None, sha=None, content=None, branch='main'):
     """SPARQL query execution for specifications loaded from a Github repo."""
     glogger.debug("Entry in function: __main__.query_gitlab")
-    return query(user, repo, query_name, subdir=subdir, sha=sha, content=content, git_type="gitlab", branch=branch)
+    return query(user, repo, query_name, subdir=subdir, sha=sha, content=content, git_type=static.TYPE_GITLAB, branch=branch)
 
 
 
