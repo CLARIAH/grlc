@@ -142,6 +142,21 @@
         "name": "CLARIAH",
         "url": "http://www.clariah.nl"
     },
+    "funding": {
+        "@type": "Grant",
+        "name": "CLARIAH-PLUS (NWO grant 184.034.023)",
+        "funder": {
+            "@type": "Organization",
+            "name": "NWO",
+            "url": "https://www.nwo.nl"
+        }
+    },
+    "softwareHelp": {
+        "@id": "https://github.com/CLARIAH/grlc/wiki",
+        "@type": "WebSite",
+        "name": "grlc Wiki",
+        "url": "https://github.com/CLARIAH/grlc/wiki"
+    },
     "programmingLanguage": "Python",
     "readme": "https://github.com/CLARIAH/grlc/blob//README.md",
     "runtimePlatform": "Python 3",
