@@ -1,0 +1,331 @@
+{
+    "@context": [
+        "https://doi.org/10.5063/schema/codemeta-2.0",
+        "https://w3id.org/software-iodata",
+        "https://raw.githubusercontent.com/jantman/repostatus.org/master/badges/latest/ontology.jsonld",
+        "https://schema.org",
+        "https://w3id.org/software-types"
+    ],
+    "@type": "SoftwareSourceCode",
+    "author": [
+        {
+            "@id": "https://orcid.org/0000-0003-4646-5842",
+            "@type": "Person",
+            "affiliation": {
+                "@type": "Organization",
+                "legalName": "King's College London"
+            },
+            "familyName": "Meroño-Peñuela",
+            "givenName": "Albert"
+        },
+        {
+            "@id": "https://orcid.org/0000-0001-5565-7577",
+            "@type": "Person",
+            "affiliation": {
+                "@type": "Organization",
+                "legalName": "Netherlands eScience Center"
+            },
+            "familyName": "Martinez",
+            "givenName": "Carlos"
+        }
+    ],
+    "codeRepository": "https://github.com/CLARIAH/grlc.git",
+    "contIntegration": "https://travis-ci.org/CLARIAH/grlc",
+    "contributor": [
+        {
+            "@type": "Person",
+            "email": "albert.meronyo@gmail.com",
+            "familyName": "Meroño-Peñuela",
+            "givenName": "Albert"
+        },
+        {
+            "@type": "Person",
+            "email": "c.martinez@esciencecenter.nl",
+            "familyName": "Martinez",
+            "givenName": "Carlos"
+        },
+        {
+            "@type": "Person",
+            "email": "rinke.hoekstra@vu.nl",
+            "familyName": "Hoekstra",
+            "givenName": "Rinke"
+        },
+        {
+            "@type": "Person",
+            "email": "pasquale.lisena@eurecom.fr",
+            "familyName": "Lisena",
+            "givenName": "Pasquale"
+        },
+        {
+            "@type": "Person",
+            "email": "14040777+RoderickvanderWeerdt@users.noreply.github.com",
+            "familyName": "",
+            "givenName": "RoderickvanderWeerdt"
+        },
+        {
+            "@type": "Person",
+            "email": "richard.zijdeman@iisg.nl",
+            "familyName": "Zijdeman",
+            "givenName": "Richard"
+        },
+        {
+            "@type": "Person",
+            "email": "jblom@beeldengeluid.nl",
+            "familyName": "Blom",
+            "givenName": "Jaap"
+        },
+        {
+            "@type": "Person",
+            "email": "a.kuzniar@esciencecenter.nl",
+            "familyName": "Kuzniar",
+            "givenName": "Arnold"
+        },
+        {
+            "@type": "Person",
+            "email": "38520885+mwigham@users.noreply.github.com",
+            "familyName": "",
+            "givenName": "mwigham"
+        },
+        {
+            "@type": "Person",
+            "email": "github.com@steltenpower.com",
+            "familyName": "Steltenpool",
+            "givenName": "Ruud"
+        },
+        {
+            "@type": "Person",
+            "email": "j.spaaks@esciencecenter.nl",
+            "familyName": "H. Spaaks",
+            "givenName": "Jurriaan"
+        },
+        {
+            "@type": "Person",
+            "email": "jetschni@users.noreply.github.com",
+            "familyName": "",
+            "givenName": "Jonas"
+        },
+        {
+            "@type": "Person",
+            "email": "abel.s.siqueira@gmail.com",
+            "familyName": "Siqueira",
+            "givenName": "Abel"
+        }
+    ],
+    "dateCreated": "2015-11-13T17:17:15Z+0100",
+    "dateModified": "2022-03-21T22:20:00Z+0100",
+    "datePublished": "2021-11-03",
+    "description": "grlc, the git repository linked data API constructor, automatically builds Web APIs using SPARQL queries stored in git repositories.",
+    "developmentStatus": "https://www.repostatus.org/#inactive",
+    "identifier": "grlc",
+    "issueTracker": "https://github.com/CLARIAH/grlc/issues",
+    "keywords": [
+        "linked-data",
+        "linked-data-api",
+        "semantic-web",
+        "sparql",
+        "swagger-ui"
+    ],
+    "license": "http://spdx.org/licenses/MIT",
+    "maintainer": {
+        "@id": "https://orcid.org/0000-0003-4646-5842",
+        "@type": "Person",
+        "affiliation": {
+            "@type": "Organization",
+            "legalName": "King's College London"
+        },
+        "familyName": "Meroño-Peñuela",
+        "givenName": "Albert"
+    },
+    "name": "grlc: the git repository linked data API constructor",
+    "producer": {
+        "@type": "Organization",
+        "name": "CLARIAH",
+        "url": "http://www.clariah.nl"
+    },
+    "programmingLanguage": "Python",
+    "readme": "https://github.com/CLARIAH/grlc/blob//README.md",
+    "runtimePlatform": "Python 3",
+    "softwareRequirements": [
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "Flask",
+            "name": "Flask",
+            "runtimePlatform": "Python 3",
+            "version": "1.0.2"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "Flask-Cors",
+            "name": "Flask-Cors",
+            "runtimePlatform": "Python 3",
+            "version": "3.0.6"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "MarkupSafe",
+            "name": "MarkupSafe",
+            "runtimePlatform": "Python 3",
+            "version": "0.23"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "PyGithub",
+            "name": "PyGithub",
+            "runtimePlatform": "Python 3",
+            "version": "1.43.5"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "PyYAML",
+            "name": "PyYAML",
+            "runtimePlatform": "Python 3",
+            "version": "5.4"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "SPARQLTransformer",
+            "name": "SPARQLTransformer",
+            "runtimePlatform": "Python 3",
+            "version": "2.1.1"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "SPARQLWrapper",
+            "name": "SPARQLWrapper",
+            "runtimePlatform": "Python 3",
+            "version": "1.8.2"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "docopt",
+            "name": "docopt",
+            "runtimePlatform": "Python 3",
+            "version": "0.6.2"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "docutils",
+            "name": "docutils",
+            "runtimePlatform": "Python 3",
+            "version": "0.17.1"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "gevent",
+            "name": "gevent",
+            "runtimePlatform": "Python 3",
+            "version": "1.4.0"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "greenlet",
+            "name": "greenlet",
+            "runtimePlatform": "Python 3",
+            "version": "0.4.15"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "gunicorn",
+            "name": "gunicorn",
+            "runtimePlatform": "Python 3",
+            "version": "19.6.0"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "html5lib",
+            "name": "html5lib",
+            "runtimePlatform": "Python 3",
+            "version": "1.0.1"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "isodate",
+            "name": "isodate",
+            "runtimePlatform": "Python 3",
+            "version": "0.5.4"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "keepalive",
+            "name": "keepalive",
+            "runtimePlatform": "Python 3",
+            "version": "0.5"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "pyaml",
+            "name": "pyaml",
+            "runtimePlatform": "Python 3",
+            "version": "18.11.0"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "pyparsing",
+            "name": "pyparsing",
+            "runtimePlatform": "Python 3",
+            "version": "2.0.7"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "rdflib",
+            "name": "rdflib",
+            "runtimePlatform": "Python 3",
+            "version": "5.0.0"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "rdflib-jsonld",
+            "name": "rdflib-jsonld",
+            "runtimePlatform": "Python 3",
+            "version": "0.4.0"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "requests",
+            "name": "requests",
+            "runtimePlatform": "Python 3",
+            "version": "2.20.0"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "setuptools",
+            "name": "setuptools",
+            "runtimePlatform": "Python 3",
+            "version": ">= 38.6.0"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "simplejson",
+            "name": "simplejson",
+            "runtimePlatform": "Python 3",
+            "version": "3.16.0"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "six",
+            "name": "six",
+            "runtimePlatform": "Python 3",
+            "version": "1.12.0"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "waitress",
+            "name": "waitress",
+            "runtimePlatform": "Python 3",
+            "version": ">= 1.4.2"
+        },
+        {
+            "@type": "SoftwareApplication",
+            "identifier": "werkzeug",
+            "name": "werkzeug",
+            "runtimePlatform": "Python 3",
+            "version": ">= 0.16.0"
+        }
+    ],
+    "targetProduct": {
+        "@type": "stype:WebApplication",
+        "name": "grlc: the git repository linked data API constructor"
+    },
+    "url": "https://github.com/CLARIAH/grlc",
+    "version": "1.3.7"
+}
