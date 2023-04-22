@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+#
+# SPDX-License-Identifier: MIT
+
 if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
   pyenv global $PYENV_VERSION
   if [[ $PYENV_VERSION == 2* ]]; then

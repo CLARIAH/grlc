@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+#
+# SPDX-License-Identifier: MIT
+
 # Store location of original virtualenv so we can reactivate it on deploy
 if [[ $TRAVIS_BUILD_STAGE_NAME == 'Deploy' ]]; then
   ORIG_ENV="$(dirname $(which python))/activate"

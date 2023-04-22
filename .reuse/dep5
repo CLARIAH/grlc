@@ -1,0 +1,5 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+
+Files: tests/repo/endpoint.txt tests/repo/*.rq tests/repo/*.json tests/repo/*.sparql tests/repo/*.tpf tests/repo/*.yml src/static/toolinfo.json src/static/*.png src/static/favicon.ico requirements-test.txt requirements.txt docker-assets/assets/runtime/functions docker-assets/assets/runtime/env-defaults docker-assets/assets/runtime/configs/nginx/grlc doc/notebooks/GrlcFromNotebook.ipynb doc/img/*.png doc/img/grlc_logo_01.eps CITATION.cff .zenodo.json .travis.yml .github/workflows/tweet-release.yml .dependabot/config.yml
+Copyright: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+License: MIT

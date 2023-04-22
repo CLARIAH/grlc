@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+
+SPDX-License-Identifier: MIT
+-->
+
 ---
 title: 'grlc: the git repository linked data API constructor.'
 tags:

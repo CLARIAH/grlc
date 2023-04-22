@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+
+SPDX-License-Identifier: MIT
+-->
+
 Thank you very much for your interest in contributing to grlc! It's people like you that truly make the Semantic Web more accessible to everyone :)
 
 ## Communication channels
