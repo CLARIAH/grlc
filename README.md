@@ -83,7 +83,7 @@ A grlc API specification file is a YAML file which includes the necessary inform
  - `description`: API description
  - `contact`: Contact details of the API owner. This should include the `name` and `url` properties.
  - `licence`: A URL pointing to the licence file for the API.
- - `queries`: A list of URLs of SPARQL queries (with header decorators).
+ - `queries`: A list of URLs of SPARQL queries (with header decorators). Alternatively a query can be defined as a dictionary with a `name` and a `url`.
 
 For example:
 ```YAML
@@ -97,6 +97,8 @@ queries:
   - https://www.mywebsite.org/query1.rq
   - https://www.mywebsite.org/query2.rq
   - https://www.otherwebsite.org/query3.rq
+  - name: QueryFour
+    url: https://www.mywebsite.org/query4.rq
 ```
 
 ### grlc generated API

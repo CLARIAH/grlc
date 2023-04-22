@@ -7,7 +7,7 @@
 # */
 
 import grlc.static as static
-from grlc.queryTypes import qType
+from grlc.queryTypes import qType, guessQueryType
 import grlc.glogging as glogging
 
 import json
@@ -37,15 +37,14 @@ class BaseLoader:
         for `query_name='query1'` would return the content of file `query1.rq`
         from the loader's source (assuming such file exists)."""
         # The URIs of all candidates
-        rq_name = query_name + '.rq'
-        sparql_name = query_name + '.sparql'
-        tpf_name = query_name + '.tpf'
-        json_name = query_name + '.json'
+        candidateNames = [
+            query_name + '.rq',
+            query_name + '.sparql',
+            query_name + '.tpf',
+            query_name + '.json'
+        ]
         candidates = [
-            (rq_name, qType['SPARQL']),
-            (sparql_name, qType['SPARQL']),
-            (tpf_name, qType['TPF']),
-            (json_name, qType['JSON'])
+            (name, guessQueryType(name)) for name in candidateNames
         ]
 
         for queryFullName, queryType in candidates:
@@ -380,7 +379,6 @@ class LocalLoader(BaseLoader):
         return self.api_description
 
 
-
 class URLLoader(BaseLoader):
     """URL specification loader. Retrieves information to construct a grlc
     specification from a specification YAML file located on a remote server."""
@@ -396,17 +394,32 @@ class URLLoader(BaseLoader):
             self.spec = yaml.load(resp.text)
             self.spec['url'] = spec_url
             self.spec['files'] = {}
-            for queryUrl in self.spec['queries']:
-                queryNameExt = path.basename(queryUrl)
-                queryName = path.splitext(queryNameExt)[0] # Remove extention
+
+            for query in self.spec['queries']:
+                queryName, queryUrl = self.extractQueryInfo(query)
+
                 item = {
                     'name': queryName,
                     'download_url': queryUrl
                 }
-                self.spec['files'][queryNameExt] = item
+                self.spec['files'][queryName] = item
             del self.spec['queries']
         else:
             raise Exception(resp.text)
+
+    def extractQueryInfo(self, query):
+        """Extract query name and URL from specification. These could 
+        either be explicitly declared (values in a dict) or need to be 
+        infered from the URL (which itself could be explicilty declared or 
+        be the only element of query."""
+        queryUrl = query['url'] if type(query) is dict else query
+
+        if type(query) is dict and 'name' in query:
+            queryName = query['name']
+        else:
+            queryNameExt = path.basename(queryUrl)
+            queryName = path.splitext(queryNameExt)[0] # Remove extention
+        return queryName, queryUrl
 
     def fetchFiles(self):
         """Returns a list of file items contained on specification."""
@@ -423,7 +436,18 @@ class URLLoader(BaseLoader):
         """Returns the contents of the given file item on the specification."""
         # TODO: tiene sentido esto? O es un hack horrible ?
         nameExt = path.basename(fileItem['download_url'])
-        return self._getText(nameExt)
+        return self._getText(fileItem['name'])
+
+    def getTextForName(self, query_name):
+        """Return the query text and query type for the given query name.
+        Specific implementation for URLLoader."""
+        try:
+            queryText = self._getText(query_name)
+            queryType = guessQueryType(self.spec['files'][query_name]['download_url'])
+            return queryText, queryType
+        except Exception as e:
+            # No query found...
+            return '', None
 
     def _getText(self, itemName):
         """Return the content of the specified item in the specification."""
