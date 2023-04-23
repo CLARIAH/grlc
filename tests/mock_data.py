@@ -31,6 +31,11 @@ class MockGithubRepo:
             return None
 
 
+class MockGitlabRepo:
+    pass
+
+
+
 def mock_requestsUrl(url, headers={}, params={}):
     url = url.replace('http://example.org/', 'tests/repo/')
     f = open(url, 'r')

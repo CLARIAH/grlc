@@ -14,6 +14,7 @@ keepalive==0.5; python_version <= '3.6'
 MarkupSafe==0.23
 pyaml==18.11.0
 pyparsing==2.0.7
+python-gitlab==2.10.1
 PyYAML==5.4
 rdflib==4.2.2; python_version <= '3.6'
 rdflib==5.0.0; python_version > '3.6'

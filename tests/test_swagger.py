@@ -19,7 +19,7 @@ class TestSwagger(unittest.TestCase):
 
         user = 'testuser'
         repo = 'testrepo'
-        spec, warnings = build_spec(user, repo)
+        spec, warnings = build_spec(user, repo, git_type="github")
 
         self.assertEqual(len(spec), len(filesInRepo))
 

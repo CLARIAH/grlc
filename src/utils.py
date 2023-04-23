@@ -3,7 +3,7 @@ import grlc.gquery as gquery
 import grlc.pagination as pageUtils
 import grlc.swagger as swagger
 from grlc.prov import grlcPROV
-from grlc.fileLoaders import GithubLoader, LocalLoader, URLLoader
+from grlc.fileLoaders import GithubLoader, LocalLoader, URLLoader, GitlabLoader
 from grlc.queryTypes import qType
 from grlc import __version__ as grlc_version
 
@@ -19,14 +19,19 @@ import grlc.glogging as glogging
 
 glogger = glogging.getGrlcLogger(__name__)
 
-def getLoader(user, repo, subdir=None, spec_url=None, sha=None, prov=None):
+def getLoader(user, repo, subdir=None, spec_url=None, sha=None, prov=None, git_type=None, branch='main'):
     """Build a fileLoader (LocalLoader, GithubLoader, URLLoader) for the given parameters."""
     if user is None and repo is None and not spec_url:
         loader = LocalLoader()
     elif spec_url:
        loader = URLLoader(spec_url)
     else:
-        loader = GithubLoader(user, repo, subdir, sha, prov)
+        if git_type == static.TYPE_GITHUB:
+            glogger.debug("Building GithubLoader....")
+            loader = GithubLoader(user, repo, subdir, sha, prov)
+        else:
+            glogger.debug("Building GitlabLoader....")
+            loader = GitlabLoader(user, repo, subdir, sha, prov, branch)
     return loader
 
 
@@ -40,7 +45,7 @@ def build_spec(user, repo, subdir=None, sha=None, prov=None, extraMetadata=[]):
     return items
 
 
-def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName):
+def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName, git_type, branch='main'):
     """Build grlc specification for the given github user / repo in swagger format."""
     if user and repo:
         # Init provenance recording
@@ -52,7 +57,7 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName):
     swag['host'] = serverName
 
     try:
-        loader = getLoader(user, repo, subdir, spec_url, sha, prov_g)
+        loader = getLoader(user, repo, subdir, spec_url, sha, prov_g, git_type, branch)
     except Exception as e:
         # If repo does not exits
         swag['info'] = {
@@ -70,7 +75,7 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName):
     swag['basePath'] = basePath
 
     # TODO: can we pass loader to build_spec ? --> Ideally yes!
-    spec, warnings = swagger.build_spec(user, repo, subdir, spec_url, sha, prov_g)
+    spec, warnings = swagger.build_spec(user, repo, subdir, spec_url, sha, prov_g, [], git_type, branch)
     # Use items to build API paths
     for item in spec:
         swag['paths'][item['call_name']] = swagger.get_path_for_item(item)
@@ -90,9 +95,9 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName):
 
 def dispatch_query(user, repo, query_name, subdir=None, spec_url=None, sha=None, 
         content=None, requestArgs={}, acceptHeader='application/json',
-        requestUrl='http://', formData={}):
+        requestUrl='http://', formData={}, git_type=None, branch='main'):
     """Executes the specified SPARQL or TPF query."""
-    loader = getLoader(user, repo, subdir, spec_url, sha=sha, prov=None)
+    loader = getLoader(user, repo, subdir, spec_url, sha=sha, prov=None, git_type=git_type, branch=branch)
     query, q_type = loader.getTextForName(query_name)
 
     # Call name implemented with SPARQL query

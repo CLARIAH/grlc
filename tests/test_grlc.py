@@ -23,7 +23,7 @@ class TestGrlcLib(unittest.TestCase):
 
         user = 'testuser'
         repo = 'testrepo'
-        spec, warning = swagger.build_spec(user=user, repo=repo)
+        spec, warning = swagger.build_spec(user=user, repo=repo, git_type="github")
 
         self.assertEqual(len(spec), len(filesInRepo))
 
