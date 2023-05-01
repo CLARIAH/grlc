@@ -82,7 +82,7 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName, git_type, 
 
      # TODO: Add bootstrap style to top level HTML
     # Without a better place to display warnings, we can make them part of the description.
-    if 'description' not in swag['info']:
+    if 'description' not in swag['info'] or swag['info']['description'] is None:
         swag['info']['description'] = ''
     for warn in warnings:
         swag['info']['description'] += swagger.get_warning_div(warn)
