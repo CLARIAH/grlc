@@ -316,6 +316,9 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
     elif query_metadata['type'] == 'ConstructQuery':
         if not method:
             method = 'get'
+    elif query_metadata['type'] == 'InsertData': # UPDATE queries should map here
+        if not method:
+            method = 'get'
     elif query_metadata['type'] == 'UNKNOWN':
         glogger.warning("grlc could not parse this query; assuming a plain, non-parametric SELECT in the API spec")
         if not method:
