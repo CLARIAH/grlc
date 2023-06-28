@@ -50,11 +50,13 @@ def query(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=
     acceptHeader = request.headers['Accept']
     requestUrl = request.url
     formData = request.form
+    method = request.method
 
     query_response, status, headers = utils.dispatch_query(user, repo, query_name, subdir, spec_url,
                                                            sha=sha, content=content, requestArgs=requestArgs,
-                                                           acceptHeader=acceptHeader,
-                                                           requestUrl=requestUrl, formData=formData, git_type=git_type, branch=branch)
+                                                           acceptHeader=acceptHeader, requestUrl=requestUrl, 
+                                                           formData=formData, method=method, git_type=git_type, 
+                                                           branch=branch)
     if isinstance(query_response, list):
         query_response = jsonify(query_response)
 

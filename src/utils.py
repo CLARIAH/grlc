@@ -95,7 +95,7 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName, git_type, 
 
 def dispatch_query(user, repo, query_name, subdir=None, spec_url=None, sha=None, 
         content=None, requestArgs={}, acceptHeader='application/json',
-        requestUrl='http://', formData={}, git_type=None, branch='main'):
+        requestUrl='http://', formData={}, method="POST", git_type=None, branch='main'):
     """Executes the specified SPARQL or TPF query."""
     loader = getLoader(user, repo, subdir, spec_url, sha=sha, prov=None, git_type=git_type, branch=branch)
     query, q_type = loader.getTextForName(query_name)
@@ -103,7 +103,7 @@ def dispatch_query(user, repo, query_name, subdir=None, spec_url=None, sha=None,
     # Call name implemented with SPARQL query
     if q_type == qType['SPARQL'] or q_type == qType['JSON']:
         resp, status, headers = dispatchSPARQLQuery(query, loader, requestArgs, acceptHeader, content, formData,
-                                                    requestUrl)
+                                                    requestUrl, method)
 
         if acceptHeader == 'application/json':
             # TODO: transform JSON result if suitable
@@ -119,7 +119,7 @@ def dispatch_query(user, repo, query_name, subdir=None, spec_url=None, sha=None,
 
 
 def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, content, 
-        formData, requestUrl):
+        formData, requestUrl, method="GET"):
     """Executes the specified SPARQL query."""
     endpoint, auth = gquery.guess_endpoint_uri(raw_sparql_query, loader)
     if endpoint == '':
@@ -179,6 +179,10 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
     # Check for INSERT/POST
     elif query_metadata['type'] == 'InsertData':
         glogger.debug("Processing INSERT query")
+        if method != 'POST':
+            glogger.debug('INSERT queries must use POST method')
+            return { 'error': 'INSERT queries must use POST method' }, 400, headers
+
         # Rewrite INSERT
         rewritten_query = rewritten_query.replace("?_g_iri", "{}".format(formData.get('g')))
         rewritten_query = rewritten_query.replace("<s> <p> <o>", formData.get('data'))

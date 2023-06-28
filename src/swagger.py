@@ -316,12 +316,16 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
     elif query_metadata['type'] == 'ConstructQuery':
         if not method:
             method = 'get'
+    elif query_metadata['type'] == 'InsertData' or query_metadata['type'] == 'Modify': # UPDATE queries should map here
+        if not method:
+            method = 'post'
     elif query_metadata['type'] == 'UNKNOWN':
         glogger.warning("grlc could not parse this query; assuming a plain, non-parametric SELECT in the API spec")
         if not method:
             method = 'get'
     else:
         # TODO: process all other kinds of queries
+        glogger.debug('Could not parse query {}: Query of type {} is currently unsupported'.format(call_name, query_metadata['type']))
         raise Exception('Could not parse query {}: Query of type {} is currently unsupported'.format(call_name, query_metadata['type']))
 
     # Finally: main structure of the callname spec
