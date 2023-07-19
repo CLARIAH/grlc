@@ -20,7 +20,7 @@ rdflib==4.2.2; python_version <= '3.6'
 rdflib==5.0.0; python_version > '3.6'
 rdflib-jsonld==0.4.0; python_version <= '3.6'
 rdflib-jsonld==0.6.2; python_version > '3.6'
-requests>=2.20.0
+requests>=2.31.0
 six==1.12.0
 simplejson==3.16.0
 setuptools>=38.6.0
