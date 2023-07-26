@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+//
+// SPDX-License-Identifier: MIT
+
 // Create the layout component
 class GrlcLayout extends React.Component {
   render() {

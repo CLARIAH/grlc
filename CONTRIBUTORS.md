@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+
+SPDX-License-Identifier: MIT
+-->
+
 # Contributors
 This is a list of all people who have contributed to grlc. Big thanks to everyone.
 
@@ -16,3 +22,4 @@ This is a list of all people who have contributed to grlc. Big thanks to everyon
 [tkuhn](https://github.com/tkuhn)
 [GenEars](https://github.com/GenEars)
 [nichtich](https://github.com/nichtich)
+[jblom](https://github.com/jblom)

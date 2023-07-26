@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+#
+# SPDX-License-Identifier: MIT
+
 from SPARQLWrapper import SPARQLWrapper, CSV, JSON
 from flask import jsonify
 from collections import defaultdict

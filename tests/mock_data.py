@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+#
+# SPDX-License-Identifier: MIT
+
 from mock import Mock
 from os import path
 from glob import glob

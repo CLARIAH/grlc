@@ -1,10 +1,6 @@
-# /*
-# * SPDX-License-Identifier: MIT
-# * SPDX-FileCopyrightText: Copyright (c) 2022 Orange SA
-# *
-# * Author: Mihary RANAIVOSON
-# * Modifications: Add GitlabLoader
-# */
+# SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+#
+# SPDX-License-Identifier: MIT
 
 import grlc.static as static
 from grlc.queryTypes import qType, guessQueryType
