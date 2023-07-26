@@ -1,3 +1,23 @@
+@Comment{
+SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+
+SPDX-License-Identifier: MIT
+}
+
+@article{Espinoza2021,
+title = {Crossing the chasm between ontology engineering and application development: A survey},
+journal = {Journal of Web Semantics},
+volume = {70},
+pages = {100655},
+year = {2021},
+issn = {1570-8268},
+doi = {10.1016/j.websem.2021.100655},
+url = {https://www.sciencedirect.com/science/article/pii/S1570826821000305},
+author = {Paola Espinoza-Arias and Daniel Garijo and Oscar Corcho},
+keywords = {Ontology, OWL, Ontology engineering, Web API, Application development, Knowledge graph},
+abstract = {The adoption of Knowledge Graphs (KGs) by public and private organizations to integrate and publish data has increased in recent years. Ontologies play a crucial role in providing the structure for KGs, but are usually disregarded when designing Application Programming Interfaces (APIs) to enable browsing KGs in a developer-friendly manner. In this paper we provide a systematic review of the state of the art on existing approaches to ease access to ontology-based KG data}
+}
+
 @InProceedings{Merono_ISWC2019,
 author="Lisena, Pasquale
 and Mero{\~{n}}o-Pe{\~{n}}uela, Albert
@@ -19,7 +39,8 @@ publisher="Springer International Publishing",
 address="Cham",
 pages="454--470",
 abstract="In a document-based world as the one of Web APIs, the triple-based output of SPARQL endpoints can be a barrier for developers who want to integrate Linked Data in their applications. A different JSON output can be obtained with SPARQL Transformer, which relies on a single JSON object for defining which data should be extracted from the endpoint and which shape should they assume. We propose a new approach that amounts to merge SPARQL bindings on the base of identifiers and the integration in the grlc API framework to create new bridges between the Web of Data and the Web of applications.",
-isbn="978-3-030-30796-7"
+isbn="978-3-030-30796-7",
+doi="10.1007/978-3-030-30796-7_28"
 }
 
 @phdthesis{Singh2019,
@@ -27,7 +48,9 @@ isbn="978-3-030-30796-7"
   url = {https://doi.org/10.18174/505685},
   publisher = {Wageningen University and Research},
   author = {Gurnoor Singh},
-  title = {Genomics data integration for knowledge discovery using genome annotations from molecular databases and scientific literature}
+  title = {Genomics data integration for knowledge discovery using genome annotations from molecular databases and scientific literature},
+  institution = "Wageningen University",
+  year = "2019"
 }
 
 @InProceedings{Merono_ISWC2016,
@@ -46,7 +69,8 @@ publisher="Springer International Publishing",
 address="Cham",
 pages="342--353",
 abstract="Building Web APIs on top of SPARQL endpoints is becoming common practice. It enables universal access to the integration favorable data space of Linked Data. In the majority of use cases, users cannot be expected to learn SPARQL to query this data space. Web APIs are the most common way to enable programmatic access to data on the Web. However, the implementation of Web APIs around Linked Data is often a tedious and repetitive process. Recent work speeds up this Linked Data API construction by wrapping it around SPARQL queries, which carry out the API functionality under the hood. Inspired by this development, in this paper we present grlc, a lightweight server that takes SPARQL queries curated in GitHub repositories, and translates them to Linked Data APIs on the fly.",
-isbn="978-3-319-47602-5"
+isbn="978-3-319-47602-5",
+doi="10.1007/978-3-319-47602-5_48"
 }
 
 @InProceedings{Merono_ESWC2017,
@@ -65,7 +89,8 @@ publisher="Springer International Publishing",
 address="Cham",
 pages="143--148",
 abstract="In this demo, we show how an effective and application agnostic way of curating SPARQL queries can be achieved by leveraging Git-based architectures. Often, SPARQL queries are hard-coded into Linked Data consuming applications. This tight coupling poses issues in code maintainability, since these queries are prone to change to adapt to new situations; and query reuse, since queries that might be useful in other applications remain inaccessible. In order to enable decoupling, version control, availability and accessibility of SPARQL queries, we propose SPARQL2Git, an interface for editing, curating and storing SPARQL queries that uses cloud based Git repositories (such as GitHub) as a backend. We describe the query management capabilities of SPARQL2Git, its convenience for SPARQL users that lack Git knowledge, and its combination with grlc to easily generate Linked Data APIs.",
-isbn="978-3-319-70407-4"
+isbn="978-3-319-70407-4",
+doi="10.1007/978-3-319-70407-4_27"
 }
 
 @InProceedings{Merono_ISWC2017,
@@ -86,5 +111,36 @@ publisher="Springer International Publishing",
 address="Cham",
 pages="334--349",
 abstract="Despite the advatages of Linked Data as a data integration paradigm, accessing and consuming Linked Data is still a cumbersome task. Linked Data applications need to use technologies such as RDF and SPARQL that, despite their expressive power, belong to the data integration stack. As a result, applications and data cannot be cleanly separated: SPARQL queries, endpoint addresses, namespaces, and URIs end up as part of the application code. Many publishers address these problems by building RESTful APIs around their Linked Data. However, this solution has two pitfalls: these APIs are costly to maintain; and they blackbox functionality by hiding the queries they use. In this paper we describe grlc, a gateway between Linked Data applications and the LOD cloud that offers a RESTful, reusable and uniform means to routinely access any Linked Data. It generates an OpenAPI compatible API by using parametrized queries shared on the Web. The resulting APIs require no coding, rely on low-cost external query storage and versioning services, contain abundant provenance information, and integrate access to different publishing paradigms into a single API. We evaluate grlc qualitatively, by describing its reported value by current users; and quantitatively, by measuring the added overhead at generating API specifications and answering to calls.",
-isbn="978-3-319-68204-4"
+isbn="978-3-319-68204-4",
+doi="10.1007/978-3-319-68204-4_30"
+}
+
+@article{Verborgh2016,
+  doi = {10.1016/j.websem.2016.03.003},
+  url = {https://doi.org/10.1016/j.websem.2016.03.003},
+  year = {2016},
+  month = mar,
+  publisher = {Elsevier {BV}},
+  volume = {37-38},
+  pages = {184--206},
+  author = {Ruben Verborgh and Miel Vander Sande and Olaf Hartig and Joachim Van Herwegen and Laurens De Vocht and Ben De Meester and Gerald Haesendonck and Pieter Colpaert},
+  title = {Triple Pattern Fragments: A low-cost knowledge graph interface for the Web},
+  journal = {Journal of Web Semantics}
+}
+
+@article{Daquino2021,
+  author    = {Marilena Daquino and
+               Ivan Heibi and
+               Silvio Peroni and
+               David M. Shotton},
+  title     = {Creating Restful APIs over {SPARQL} endpoints with {RAMOSE}},
+  journal   = {CoRR},
+  volume    = {abs/2007.16079},
+  year      = {2020},
+  url       = {https://arxiv.org/abs/2007.16079},
+  archivePrefix = {arXiv},
+  eprint    = {2007.16079},
+  timestamp = {Mon, 03 Aug 2020 14:32:13 +0200},
+  biburl    = {https://dblp.org/rec/journals/corr/abs-2007-16079.bib},
+  bibsource = {dblp computer science bibliography, https://dblp.org}
 }

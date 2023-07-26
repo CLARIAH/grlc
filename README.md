@@ -1,8 +1,15 @@
+<!--
+SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+
+SPDX-License-Identifier: MIT
+-->
+
 <p algin="center"><img src="https://raw.githubusercontent.com/CLARIAH/grlc/master/src/static/grlc_logo_01.png" width="250px"></p>
 
 [![PyPI version](https://badge.fury.io/py/grlc.svg)](https://badge.fury.io/py/grlc)
 [![DOI](https://zenodo.org/badge/46131212.svg)](https://zenodo.org/badge/latestdoi/46131212)
 ![Build Status](https://github.com/CLARIAH/grlc/actions/workflows/testing.yml/badge.svg?branch=master)
+[![status](https://joss.theoj.org/papers/437074e2d77df8c6cbf3bc4e407b3b17/status.svg)](https://joss.theoj.org/papers/437074e2d77df8c6cbf3bc4e407b3b17)
 
 
 grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor, automatically builds Web APIs using shared SPARQL queries. http://grlc.io/
@@ -385,7 +392,7 @@ Quotes from grlc users:
 
 **Contributors:**	[Albert Meroño](https://github.com/albertmeronyo), [Rinke Hoekstra](https://github.com/RinkeHoekstra), [Carlos Martínez](https://github.com/c-martinez)
 
-**Copyright:**	Albert Meroño, VU University Amsterdam  
+**Copyright:**	Albert Meroño, Rinke Hoekstra, Carlos Martínez  
 **License:**	MIT License (see [LICENSE.txt](LICENSE.txt))
 
 ## Academic publications

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+#
+# SPDX-License-Identifier: MIT
+
 import grlc.static as static
 import grlc.gquery as gquery
 import grlc.pagination as pageUtils

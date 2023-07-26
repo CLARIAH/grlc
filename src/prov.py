@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+#
+# SPDX-License-Identifier: MIT
+
 # prov.py: class generating grlc related W3C prov triples
 
 from rdflib import Graph, URIRef, Namespace, RDF, Literal

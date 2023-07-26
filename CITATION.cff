@@ -15,17 +15,13 @@ authors:
     family-names: Martinez
     given-names: Carlos
     orcid: "https://orcid.org/0000-0001-5565-7577"
-  -
-    affiliation: "International Institute of Social History"
-    family-names: Zijdeman
-    given-names: Richard
 cff-version: "1.0.3"
 date-released: 2023-07-30
 doi: 10.5281/zenodo.1064391
 license: MIT
 message: "If you use this software, please cite it as below."
 repository-code: "https://github.com/CLARIAH/grlc"
-title: grlc
+title: "grlc: the git repository linked data API constructor"
 abstract: grlc, the git repository linked data API constructor, automatically builds Web APIs using SPARQL queries stored in git repositories.
 keywords:
   - "swagger-ui"

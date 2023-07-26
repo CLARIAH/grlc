@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+
+# SPDX-FileCopyrightText: 2022 Albert Meroño, Rinke Hoekstra, Carlos Martínez
+#
+# SPDX-License-Identifier: MIT
+
 # -*- coding: iso-8859-15 -*-
 
 import codecs
@@ -54,5 +59,5 @@ setup(
     tests_require=tests_require,
     package_data = { 'grlc': grlc_data },
     include_package_data=True,
-    data_files=[('citation/grlc', ['CITATION.cff'])]
+    data_files=[('citation/grlc', ['CITATION.cff'])],
 )
