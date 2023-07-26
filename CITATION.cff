@@ -3,10 +3,13 @@
 ---
 authors:
   -
-    affiliation: "Vrije Universiteit Amsterdam"
+    affiliation: "King's College London"
     family-names: Meroño-Peñuela
     given-names: Albert
     orcid: "https://orcid.org/0000-0003-4646-5842"
+  -
+    family-names: Hoekstra
+    given-names: Rinke
   -
     affiliation: "Netherlands eScience Center"
     family-names: Martinez
