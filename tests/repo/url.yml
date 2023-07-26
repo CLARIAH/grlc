@@ -7,3 +7,4 @@ queries:
   - http://example.org/test-rq.rq
   - http://example.org/test-sparql.sparql
   - http://example.org/test-tpf.tpf
+  - ./test-rq.rq

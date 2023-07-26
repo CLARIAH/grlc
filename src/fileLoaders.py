@@ -3,20 +3,27 @@
 # SPDX-License-Identifier: MIT
 
 import grlc.static as static
-from grlc.queryTypes import qType
+from grlc.queryTypes import qType, guessQueryType
 import grlc.glogging as glogging
 
 import json
+import gitlab
 import requests
 import yaml
+import urllib.parse
+import base64
+import os
 from os import path
 from glob import glob
 from github import Github
 from github.GithubObject import NotSet
 from github.GithubException import BadCredentialsException
 from configparser import ConfigParser
+from urllib.parse import urljoin
 
+# util variables
 glogger = glogging.getGrlcLogger(__name__)
+
 
 class BaseLoader:
     """Base class for File Loaders"""
@@ -26,15 +33,14 @@ class BaseLoader:
         for `query_name='query1'` would return the content of file `query1.rq`
         from the loader's source (assuming such file exists)."""
         # The URIs of all candidates
-        rq_name = query_name + '.rq'
-        sparql_name = query_name + '.sparql'
-        tpf_name = query_name + '.tpf'
-        json_name = query_name + '.json'
+        candidateNames = [
+            query_name + '.rq',
+            query_name + '.sparql',
+            query_name + '.tpf',
+            query_name + '.json'
+        ]
         candidates = [
-            (rq_name, qType['SPARQL']),
-            (sparql_name, qType['SPARQL']),
-            (tpf_name, qType['TPF']),
-            (json_name, qType['JSON'])
+            (name, guessQueryType(name)) for name in candidateNames
         ]
 
         for queryFullName, queryType in candidates:
@@ -163,6 +169,115 @@ class GithubLoader(BaseLoader):
         return self.gh_repo.description
 
 
+class GitlabLoader(BaseLoader):
+
+    def __init__(self, user, repo, subdir=None, sha=None, prov=None, branch='main'):
+        """Create a new GithubLoader.
+        # TODO: Update to GITLAB !
+
+        Keyword arguments:
+        user -- Github user name of the target github repo.
+        repo -- Repository name of the target github repo.
+        subdir -- Target subdirectory within the given repo. (default: None).
+        branch -- Branch
+        sha -- Github commit identifier hash (default: None).
+        prov -- grlcPROV object for tracking provenance (default: None)."""
+        self.user = user
+        self.repo = repo
+        self.subdir = (subdir + "/") if subdir else ""
+        self.branch = branch
+        self.sha = sha if sha else None
+        self.prov = prov
+        gl = gitlab.Gitlab(
+            url=static.GITLAB_URL, 
+            private_token=static.ACCESS_TOKEN
+        )
+        try:
+            self.gl_repo = gl.projects.get(user + '/' + repo)
+        except BadCredentialsException:
+            raise Exception('BadCredentials: have you set up github_access_token on config.ini ?')
+        except Exception:
+            raise Exception('Repo not found: ' + user + '/' + repo)
+
+    def fetchFiles(self):
+        """Returns a list of file items contained on the github repo."""
+        gitlab_files = self.gl_repo.repository_tree(path=self.subdir.strip('/'), ref=self.branch, all=True)
+        files = []
+        for gitlab_file in gitlab_files:            
+            if gitlab_file['type'] == 'blob':
+                name = gitlab_file['name']
+                files.append({
+                    'download_url': path.join(self.getRawRepoUri(), self.subdir, name),
+                    'name': name,
+                    'decoded_content': str.encode(self._getText(gitlab_file['name']))
+                })
+        return files
+
+    def getRawRepoUri(self):
+        """Returns the root url of the github repo."""
+        # TODO: replace by gh_repo.html_url ?
+        return path.join(static.GITLAB_URL, self.user, self.repo, '-', 'raw', self.branch)
+
+    def getTextFor(self, fileItem):
+        """Returns the contents of the given file item on the github repo."""
+        raw_query_uri = fileItem['download_url']
+
+        # Add query URI as used entity by the logged activity
+        if self.prov is not None:
+            self.prov.add_used_entity(raw_query_uri)
+        return str(fileItem['decoded_content'], 'utf-8')  
+
+    def _getText(self, query_name):
+        """Return the content of the specified file contained in the github repo."""
+        try:
+            file_path = path.join(self.subdir, query_name)
+            f = self.gl_repo.files.get(file_path=file_path, ref=self.branch)
+            file_content = base64.b64decode(f.content).decode("utf-8")
+            return file_content.replace('\\n', '\n').replace('\\t', '\t')
+        except:
+            return None
+    
+    def getRepoTitle(self):
+        """Return the title of the github repo."""
+        return self.gl_repo.name
+
+    def getContactName(self):
+        """Return the name of the owner of the gitlab repo."""
+        return self.gl_repo.namespace['name']
+
+    def getContactUrl(self):
+        """Return the home page of the owner of the gitlab repo."""
+        return self.gl_repo.namespace['web_url']
+
+    def getCommitList(self):
+        """Return a list of commits on the gitlab repo."""
+        return [ c.id for c in self.gl_repo.commits.list() ]
+
+    def getFullName(self):
+        """Return the full name of the gitlab repo (user/repo)."""
+        return self.gl_repo.path_with_namespace
+
+    def getRepoURI(self):
+        """Return the full URI of the gitlab repo."""
+        return self.gl_repo.web_url
+
+    def getEndpointText(self):
+        """Return content of endpoint file (endpoint.txt)"""
+        return self._getText('endpoint.txt')
+
+    def getLicenceURL(self):
+        """Returns the URL of the license file in this repository if one exists."""
+        for f in self.fetchFiles():
+            if f['name'].lower() == 'license' or f['name'].lower() == 'licence':
+                return f['download_url']
+        return None
+
+    def getRepoDescription(self):
+        """Return the description of the repository"""
+        return self.gl_repo.description
+
+
+
 class LocalLoader(BaseLoader):
     """Local file system file loader. Retrieves information to construct
     a grlc specification from a local folder."""
@@ -260,7 +375,6 @@ class LocalLoader(BaseLoader):
         return self.api_description
 
 
-
 class URLLoader(BaseLoader):
     """URL specification loader. Retrieves information to construct a grlc
     specification from a specification YAML file located on a remote server."""
@@ -276,17 +390,32 @@ class URLLoader(BaseLoader):
             self.spec = yaml.load(resp.text)
             self.spec['url'] = spec_url
             self.spec['files'] = {}
-            for queryUrl in self.spec['queries']:
-                queryNameExt = path.basename(queryUrl)
-                queryName = path.splitext(queryNameExt)[0] # Remove extention
+
+            for query in self.spec['queries']:
+                queryName, queryUrl = self.extractQueryInfo(query)
+
                 item = {
                     'name': queryName,
                     'download_url': queryUrl
                 }
-                self.spec['files'][queryNameExt] = item
+                self.spec['files'][queryName] = item
             del self.spec['queries']
         else:
             raise Exception(resp.text)
+
+    def extractQueryInfo(self, query):
+        """Extract query name and URL from specification. These could 
+        either be explicitly declared (values in a dict) or need to be 
+        infered from the URL (which itself could be explicilty declared or 
+        be the only element of query."""
+        queryUrl = query['url'] if type(query) is dict else query
+
+        if type(query) is dict and 'name' in query:
+            queryName = query['name']
+        else:
+            queryNameExt = path.basename(queryUrl)
+            queryName = path.splitext(queryNameExt)[0] # Remove extention
+        return queryName, queryUrl
 
     def fetchFiles(self):
         """Returns a list of file items contained on specification."""
@@ -303,18 +432,30 @@ class URLLoader(BaseLoader):
         """Returns the contents of the given file item on the specification."""
         # TODO: tiene sentido esto? O es un hack horrible ?
         nameExt = path.basename(fileItem['download_url'])
-        return self._getText(nameExt)
+        return self._getText(fileItem['name'])
+
+    def getTextForName(self, query_name):
+        """Return the query text and query type for the given query name.
+        Specific implementation for URLLoader."""
+        try:
+            queryText = self._getText(query_name)
+            queryType = guessQueryType(self.spec['files'][query_name]['download_url'])
+            return queryText, queryType
+        except Exception as e:
+            # No query found...
+            return '', None
 
     def _getText(self, itemName):
         """Return the content of the specified item in the specification."""
         if itemName in self.spec['files']:
-            itemUrl = self.spec['files'][itemName]['download_url']
             headers = {'Accept' : 'text/plain'}
+            itemUrl = self.spec['files'][itemName]['download_url']
+            itemUrl = urljoin(self.spec['url'], itemUrl) # Join with base URL if relative URL
             resp = requests.get(itemUrl, headers=headers)
             if resp.status_code == 200:
                 return resp.text
             else:
-                raise Exception(resp.text)
+                raise Exception('HTTP status {} encountered while loading {}'.format(resp.status_code, itemUrl))
         else:
             return None
 

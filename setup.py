@@ -53,12 +53,11 @@ setup(
         # dependency for `python setup.py test`
         'pytest-runner',
         # dependencies for `python setup.py build_sphinx`
-        'sphinx',
-        'recommonmark'
+        # 'sphinx',
+        # 'recommonmark'
     ],
     tests_require=tests_require,
     package_data = { 'grlc': grlc_data },
     include_package_data=True,
     data_files=[('citation/grlc', ['CITATION.cff'])],
-    python_requires='>=3.7, <=3.8',
 )

@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 
 [![PyPI version](https://badge.fury.io/py/grlc.svg)](https://badge.fury.io/py/grlc)
 [![DOI](https://zenodo.org/badge/46131212.svg)](https://zenodo.org/badge/latestdoi/46131212)
-[![Build Status](https://travis-ci.org/CLARIAH/grlc.svg?branch=master)](https://travis-ci.org/CLARIAH/grlc)
+![Build Status](https://github.com/CLARIAH/grlc/actions/workflows/testing.yml/badge.svg?branch=master)
 [![status](https://joss.theoj.org/papers/437074e2d77df8c6cbf3bc4e407b3b17/status.svg)](https://joss.theoj.org/papers/437074e2d77df8c6cbf3bc4e407b3b17)
 
 
@@ -90,7 +90,7 @@ A grlc API specification file is a YAML file which includes the necessary inform
  - `description`: API description
  - `contact`: Contact details of the API owner. This should include the `name` and `url` properties.
  - `licence`: A URL pointing to the licence file for the API.
- - `queries`: A list of URLs of SPARQL queries (with header decorators).
+ - `queries`: A list of URLs of SPARQL queries (with header decorators). Alternatively a query can be defined as a dictionary with a `name` and a `url`.
 
 For example:
 ```YAML
@@ -104,6 +104,8 @@ queries:
   - https://www.mywebsite.org/query1.rq
   - https://www.mywebsite.org/query2.rq
   - https://www.otherwebsite.org/query3.rq
+  - name: QueryFour
+    url: https://www.mywebsite.org/query4.rq
 ```
 
 ### grlc generated API
@@ -395,6 +397,8 @@ Quotes from grlc users:
 
 ## Academic publications
 
+- Albert Meroño-Peñuela, Carlos Martinez-Ortiz. “grlc: the git repository linked data API constructor.“ Journal of Open Source Software, 6(67), 2731 (2021), <https://doi.org/10.21105/joss.02731>
+- Albert Meroño-Peñuela, Pasquale Lisena, Carlos Martínez-Ortiz. “Web Data APIs for Knowledge Graphs: Easing Access to Semantic Data for Application Developers”. Synthesis Lectures on Data, Semantics, and Knowledge, 12(1), pp.1-118 (2021) (Morgan & Claypool) <https://doi.org/10.2200/S01114ED1V01Y202107DSK021>
 - Albert Meroño-Peñuela, Rinke Hoekstra. “grlc Makes GitHub Taste Like Linked Data APIs”. The Semantic Web – ESWC 2016 Satellite Events, Heraklion, Crete, Greece, May 29 – June 2, 2016, Revised Selected Papers. LNCS 9989, pp. 342-353 (2016). ([PDF](https://link.springer.com/content/pdf/10.1007%2F978-3-319-47602-5_48.pdf))
 - Albert Meroño-Peñuela, Rinke Hoekstra. “SPARQL2Git: Transparent SPARQL and Linked Data API Curation via Git”. In: Proceedings of the 14th Extended Semantic Web Conference (ESWC 2017), Poster and Demo Track. Portoroz, Slovenia, May 28th – June 1st, 2017 (2017). ([PDF](https://www.albertmeronyo.org/wp-content/uploads/2017/04/sparql2git-transparent-sparql-4.pdf))
 - Albert Meroño-Peñuela, Rinke Hoekstra. “Automatic Query-centric API for Routine Access to Linked Data”. In: The Semantic Web – ISWC 2017, 16th International Semantic Web Conference. Lecture Notes in Computer Science, vol 10587, pp. 334-339 (2017). ([PDF](https://www.albertmeronyo.org/wp-content/uploads/2017/07/ISWC2017_paper_430.pdf))

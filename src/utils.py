@@ -7,7 +7,7 @@ import grlc.gquery as gquery
 import grlc.pagination as pageUtils
 import grlc.swagger as swagger
 from grlc.prov import grlcPROV
-from grlc.fileLoaders import GithubLoader, LocalLoader, URLLoader
+from grlc.fileLoaders import GithubLoader, LocalLoader, URLLoader, GitlabLoader
 from grlc.queryTypes import qType
 from grlc import __version__ as grlc_version
 
@@ -23,14 +23,19 @@ import grlc.glogging as glogging
 
 glogger = glogging.getGrlcLogger(__name__)
 
-def getLoader(user, repo, subdir=None, spec_url=None, sha=None, prov=None):
+def getLoader(user, repo, subdir=None, spec_url=None, sha=None, prov=None, git_type=None, branch='main'):
     """Build a fileLoader (LocalLoader, GithubLoader, URLLoader) for the given parameters."""
     if user is None and repo is None and not spec_url:
         loader = LocalLoader()
     elif spec_url:
        loader = URLLoader(spec_url)
     else:
-        loader = GithubLoader(user, repo, subdir, sha, prov)
+        if git_type == static.TYPE_GITHUB:
+            glogger.debug("Building GithubLoader....")
+            loader = GithubLoader(user, repo, subdir, sha, prov)
+        else:
+            glogger.debug("Building GitlabLoader....")
+            loader = GitlabLoader(user, repo, subdir, sha, prov, branch)
     return loader
 
 
@@ -44,7 +49,7 @@ def build_spec(user, repo, subdir=None, sha=None, prov=None, extraMetadata=[]):
     return items
 
 
-def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName):
+def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName, git_type, branch='main'):
     """Build grlc specification for the given github user / repo in swagger format."""
     if user and repo:
         # Init provenance recording
@@ -56,7 +61,7 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName):
     swag['host'] = serverName
 
     try:
-        loader = getLoader(user, repo, subdir, spec_url, sha, prov_g)
+        loader = getLoader(user, repo, subdir, spec_url, sha, prov_g, git_type, branch)
     except Exception as e:
         # If repo does not exits
         swag['info'] = {
@@ -74,14 +79,14 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName):
     swag['basePath'] = basePath
 
     # TODO: can we pass loader to build_spec ? --> Ideally yes!
-    spec, warnings = swagger.build_spec(user, repo, subdir, spec_url, sha, prov_g)
+    spec, warnings = swagger.build_spec(user, repo, subdir, spec_url, sha, prov_g, [], git_type, branch)
     # Use items to build API paths
     for item in spec:
         swag['paths'][item['call_name']] = swagger.get_path_for_item(item)
 
      # TODO: Add bootstrap style to top level HTML
     # Without a better place to display warnings, we can make them part of the description.
-    if 'description' not in swag['info']:
+    if 'description' not in swag['info'] or swag['info']['description'] is None:
         swag['info']['description'] = ''
     for warn in warnings:
         swag['info']['description'] += swagger.get_warning_div(warn)
@@ -94,15 +99,15 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName):
 
 def dispatch_query(user, repo, query_name, subdir=None, spec_url=None, sha=None, 
         content=None, requestArgs={}, acceptHeader='application/json',
-        requestUrl='http://', formData={}):
+        requestUrl='http://', formData={}, method="POST", git_type=None, branch='main'):
     """Executes the specified SPARQL or TPF query."""
-    loader = getLoader(user, repo, subdir, spec_url, sha=sha, prov=None)
+    loader = getLoader(user, repo, subdir, spec_url, sha=sha, prov=None, git_type=git_type, branch=branch)
     query, q_type = loader.getTextForName(query_name)
 
     # Call name implemented with SPARQL query
     if q_type == qType['SPARQL'] or q_type == qType['JSON']:
         resp, status, headers = dispatchSPARQLQuery(query, loader, requestArgs, acceptHeader, content, formData,
-                                                    requestUrl)
+                                                    requestUrl, method)
 
         if acceptHeader == 'application/json':
             # TODO: transform JSON result if suitable
@@ -118,7 +123,7 @@ def dispatch_query(user, repo, query_name, subdir=None, spec_url=None, sha=None,
 
 
 def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, content, 
-        formData, requestUrl):
+        formData, requestUrl, method="GET"):
     """Executes the specified SPARQL query."""
     endpoint, auth = gquery.guess_endpoint_uri(raw_sparql_query, loader)
     if endpoint == '':
@@ -178,6 +183,10 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
     # Check for INSERT/POST
     elif query_metadata['type'] == 'InsertData':
         glogger.debug("Processing INSERT query")
+        if method != 'POST':
+            glogger.debug('INSERT queries must use POST method')
+            return { 'error': 'INSERT queries must use POST method' }, 400, headers
+
         # Rewrite INSERT
         rewritten_query = rewritten_query.replace("?_g_iri", "{}".format(formData.get('g')))
         rewritten_query = rewritten_query.replace("<s> <p> <o>", formData.get('data'))
@@ -212,6 +221,8 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
 
         # Response headers
         resp = response.text
+
+        glogger.debug('Got HTTP response from to SPARQL endpoint: {}'.format(resp))
         headers['Content-Type'] = response.headers['Content-Type']
 
     # If the query is paginated, set link HTTP headers

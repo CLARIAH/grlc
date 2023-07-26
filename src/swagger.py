@@ -6,7 +6,7 @@ import json
 import grlc.utils
 import grlc.gquery as gquery
 import grlc.pagination as pageUtils
-from grlc.fileLoaders import GithubLoader, LocalLoader, URLLoader
+from grlc.fileLoaders import GithubLoader, LocalLoader, URLLoader, GitlabLoader
 
 import traceback
 import grlc.glogging as glogging
@@ -66,6 +66,11 @@ def get_repo_info(loader, sha, prov_g):
         basePath = '/api-git/' + user_repo + '/'
         basePath += ('subdir/' + loader.subdir + '/') if loader.subdir else ''
         basePath += ('commit/' + sha + '/') if sha else ''
+    if type(loader) is GitlabLoader:
+        basePath = '/api-gitlab/' + user_repo + '/query/' 
+        basePath += ('branch/' + loader.branch + '/') if loader.branch else ''
+        basePath += ('subdir/' + loader.subdir.strip('/') + '/') if loader.subdir else ''
+        basePath += ('commit/' + sha + '/') if sha else ''
     elif type(loader) is LocalLoader:
         basePath = '/api-local/'
     elif type(loader) is URLLoader:
@@ -121,9 +126,9 @@ def get_path_for_item(item):
     return item_path
 
 
-def build_spec(user, repo, subdir=None, query_url=None, sha=None, prov=None, extraMetadata=[]):
+def build_spec(user, repo, subdir=None, query_url=None, sha=None, prov=None, extraMetadata=[], git_type=None, branch='main'):
     """Build grlc specification for the given github user / repo."""
-    loader = grlc.utils.getLoader(user, repo, subdir, query_url, sha=sha, prov=prov)
+    loader = grlc.utils.getLoader(user, repo, subdir, query_url, sha=sha, prov=prov, git_type=git_type, branch=branch)
 
     files = loader.fetchFiles()
     raw_repo_uri = loader.getRawRepoUri()
@@ -165,7 +170,11 @@ def build_spec(user, repo, subdir=None, query_url=None, sha=None, prov=None, ext
 
             if item:
                 items.append(item)
-    # TODO: we should then return two things: list of items and list of errors
+
+    # Add a warning if no license is found
+    if loader.getLicenceURL() is None:
+        warnings.append("Queries behind this API do not have a license. You may not be allowed to use them.")
+
     return items, warnings
 
 
@@ -311,12 +320,16 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
     elif query_metadata['type'] == 'ConstructQuery':
         if not method:
             method = 'get'
+    elif query_metadata['type'] == 'InsertData' or query_metadata['type'] == 'Modify': # UPDATE queries should map here
+        if not method:
+            method = 'post'
     elif query_metadata['type'] == 'UNKNOWN':
         glogger.warning("grlc could not parse this query; assuming a plain, non-parametric SELECT in the API spec")
         if not method:
             method = 'get'
     else:
         # TODO: process all other kinds of queries
+        glogger.debug('Could not parse query {}: Query of type {} is currently unsupported'.format(call_name, query_metadata['type']))
         raise Exception('Could not parse query {}: Query of type {} is currently unsupported'.format(call_name, query_metadata['type']))
 
     # Finally: main structure of the callname spec
