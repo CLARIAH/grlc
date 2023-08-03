@@ -238,7 +238,8 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
 
     if 'transform' in query_metadata and acceptHeader == 'application/json':  # SPARQLTransformer
         if '@graph' in query_metadata['transform']:     # SPARQLTransformer for JSON-LD
-            proto = query_metadata['transform']['@graph'][0]
+            graph = query_metadata['transform']['@graph']
+            proto = graph[0] if isinstance(graph, list) else graph
             rq = query_metadata['transform']
         else:	# SPARQLTransformer for standard JSON
             proto = query_metadata['transform']
