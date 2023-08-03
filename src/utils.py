@@ -236,10 +236,16 @@ def dispatchSPARQLQuery(raw_sparql_query, loader, requestArgs, acceptHeader, con
     if 'proto' in query_metadata:  # sparql transformer
         resp = SPARQLTransformer.post_process(json.loads(resp), query_metadata['proto'], query_metadata['opt'])
 
-    if 'transform' in query_metadata and acceptHeader == 'application/json':  # sparql transformer
-        rq = { 'proto': query_metadata['transform'] }
+    if 'transform' in query_metadata and acceptHeader == 'application/json':  # SPARQLTransformer
+        if '@graph' in query_metadata['transform']:     # SPARQLTransformer for JSON-LD
+            proto = query_metadata['transform']['@graph'][0]
+            rq = query_metadata['transform']
+        else:	# SPARQLTransformer for standard JSON
+            proto = query_metadata['transform']
+            rq = { 'proto': proto }
+
         _, _, opt = SPARQLTransformer.pre_process(rq)
-        resp = SPARQLTransformer.post_process(json.loads(resp), query_metadata['transform'], opt)
+        resp = SPARQLTransformer.post_process(json.loads(resp), proto, opt)
 
     headers['Server'] = 'grlc/' + grlc_version
     return resp, 200, headers
