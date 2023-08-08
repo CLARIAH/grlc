@@ -23,7 +23,7 @@ import grlc.glogging as glogging
 
 glogger = glogging.getGrlcLogger(__name__)
 
-def getLoader(user, repo, subdir=None, spec_url=None, sha=None, prov=None, git_type=None, branch='main'):
+def getLoader(user, repo, subdir=None, spec_url=None, sha=None, prov=None, git_type=None, branch=None):
     """Build a fileLoader (LocalLoader, GithubLoader, URLLoader) for the given parameters."""
     if user is None and repo is None and not spec_url:
         loader = LocalLoader()
@@ -49,7 +49,7 @@ def build_spec(user, repo, subdir=None, sha=None, prov=None, extraMetadata=[]):
     return items
 
 
-def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName, git_type, branch='main'):
+def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName, git_type, branch=None):
     """Build grlc specification for the given github user / repo in swagger format."""
     if user and repo:
         # Init provenance recording
@@ -99,7 +99,7 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName, git_type, 
 
 def dispatch_query(user, repo, query_name, subdir=None, spec_url=None, sha=None, 
         content=None, requestArgs={}, acceptHeader='application/json',
-        requestUrl='http://', formData={}, method="POST", git_type=None, branch='main'):
+        requestUrl='http://', formData={}, method="POST", git_type=None, branch=None):
     """Executes the specified SPARQL or TPF query."""
     loader = getLoader(user, repo, subdir, spec_url, sha=sha, prov=None, git_type=git_type, branch=branch)
     query, q_type = loader.getTextForName(query_name)
@@ -255,9 +255,9 @@ def dispatchTPFQuery(raw_tpf_query, loader, acceptHeader, content):
     # TODO: pagination for TPF
 
     # Preapre HTTP request
-    reqHeaders = {'Accept': acceptHeader, 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
+    reqHeaders = {'Accept': acceptHeader, 'Authorization': 'token {}'.format(static.TPF_ACCESS_TOKEN)}
     if content:
-        reqHeaders = {'Accept': static.mimetypes[content], 'Authorization': 'token {}'.format(static.ACCESS_TOKEN)}
+        reqHeaders = {'Accept': static.mimetypes[content], 'Authorization': 'token {}'.format(static.TPF_ACCESS_TOKEN)}
     tpf_list = re.split('\n|=', raw_tpf_query)
     subject = tpf_list[tpf_list.index('subject') + 1]
     predicate = tpf_list[tpf_list.index('predicate') + 1]

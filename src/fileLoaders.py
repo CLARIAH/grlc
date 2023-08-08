@@ -18,6 +18,7 @@ from glob import glob
 from github import Github
 from github.GithubObject import NotSet
 from github.GithubException import BadCredentialsException
+from gitlab.exceptions import GitlabAuthenticationError
 from configparser import ConfigParser
 from urllib.parse import urljoin
 
@@ -81,7 +82,7 @@ class GithubLoader(BaseLoader):
         self.subdir = (subdir + "/") if subdir else ""
         self.sha = sha if sha else NotSet
         self.prov = prov
-        gh = Github(static.ACCESS_TOKEN)
+        gh = Github(static.GITHUB_ACCESS_TOKEN)
         try:
             self.gh_repo = gh.get_repo(user + '/' + repo, lazy=False)
         except BadCredentialsException:
@@ -171,7 +172,7 @@ class GithubLoader(BaseLoader):
 
 class GitlabLoader(BaseLoader):
 
-    def __init__(self, user, repo, subdir=None, sha=None, prov=None, branch='main'):
+    def __init__(self, user, repo, subdir=None, sha=None, prov=None, branch=None):
         """Create a new GithubLoader.
         # TODO: Update to GITLAB !
 
@@ -190,12 +191,14 @@ class GitlabLoader(BaseLoader):
         self.prov = prov
         gl = gitlab.Gitlab(
             url=static.GITLAB_URL, 
-            private_token=static.ACCESS_TOKEN
+            private_token=static.GITLAB_ACCESS_TOKEN
         )
         try:
             self.gl_repo = gl.projects.get(user + '/' + repo)
-        except BadCredentialsException:
-            raise Exception('BadCredentials: have you set up github_access_token on config.ini ?')
+            if not self.branch:     # Use default branch if not specified
+                self.branch = self.gl_repo.default_branch
+        except GitlabAuthenticationError:
+            raise Exception('GitlabAuthenticationError: have you set up gitlab_access_token on config.ini ?')
         except Exception:
             raise Exception('Repo not found: ' + user + '/' + repo)
 
@@ -203,7 +206,7 @@ class GitlabLoader(BaseLoader):
         """Returns a list of file items contained on the github repo."""
         gitlab_files = self.gl_repo.repository_tree(path=self.subdir.strip('/'), ref=self.branch, all=True)
         files = []
-        for gitlab_file in gitlab_files:            
+        for gitlab_file in gitlab_files:
             if gitlab_file['type'] == 'blob':
                 name = gitlab_file['name']
                 files.append({
@@ -214,8 +217,7 @@ class GitlabLoader(BaseLoader):
         return files
 
     def getRawRepoUri(self):
-        """Returns the root url of the github repo."""
-        # TODO: replace by gh_repo.html_url ?
+        """Returns the root url of the gitlab repo."""
         return path.join(static.GITLAB_URL, self.user, self.repo, '-', 'raw', self.branch)
 
     def getTextFor(self, fileItem):

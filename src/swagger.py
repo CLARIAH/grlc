@@ -126,7 +126,7 @@ def get_path_for_item(item):
     return item_path
 
 
-def build_spec(user, repo, subdir=None, query_url=None, sha=None, prov=None, extraMetadata=[], git_type=None, branch='main'):
+def build_spec(user, repo, subdir=None, query_url=None, sha=None, prov=None, extraMetadata=[], git_type=None, branch=None):
     """Build grlc specification for the given github user / repo."""
     loader = grlc.utils.getLoader(user, repo, subdir, query_url, sha=sha, prov=prov, git_type=git_type, branch=branch)
 
