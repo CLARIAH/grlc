@@ -30,7 +30,7 @@ If you use grlc in your work, please cite it as:
 ```
 
 ## What is grlc?
-grlc is a lightweight server that takes SPARQL queries (stored in a GitHub repository, in your local filesystem, or listed in a URL), and translates them to Linked Data Web APIs. This enables universal access to Linked Data. Users are not required to know SPARQL to query their data, but instead can access a web API.
+grlc is a lightweight server that takes SPARQL queries (stored in a GitHub or GitLab repository, in your local filesystem, or listed in a URL), and translates them to Linked Data Web APIs. This enables universal access to Linked Data. Users are not required to know SPARQL to query their data, but instead can access a web API.
 
 ## Quick tutorial
 For a quick usage tutorial check out our wiki [walkthrough](https://github.com/CLARIAH/grlc/wiki/Quick-tutorial) and [list of features](https://github.com/CLARIAH/grlc/wiki/Features).
@@ -43,7 +43,7 @@ Your queries can add API parameters to each operation by using the [parameter ma
 Your queries can include special [decorators](#decorator-syntax) to add extra functionality to your API.
 
 ### Query location
-grlc can load your query collection from different locations: from a GitHub repository (`api-git`), from local storage (`api-local`), and from a specification file (`api-url`). Each type of location has specific features and is accessible via different paths. However all location types produce the same beautiful APIs.
+grlc can load your query collection from different locations: from a GitHub repository (`api-git`), from a GitLab repository (`api-gitlab`), from local storage (`api-local`), and from a specification file (`api-url`). Each type of location has specific features and is accessible via different paths. However all location types produce the same beautiful APIs.
 
 #### From a GitHub repository
 > API path:
@@ -57,6 +57,19 @@ For example, assuming your queries are stored on a Github repo: `https://github.
 grlc can make use of git's version control mechanism to generate an API based on a specific version of queries in the repository. This can be done by including the commit sha in the URL path (`http://grlc-server/api-git/<user>/<repo>/commit/<sha>`), for example: `http://grlc.io/api-git/CLARIAH/grlc-queries/commit/79ceef2ee814a12e2ec572ffaa2f8212a22bae23`
 
 grlc can also use a subdirectory inside your Github repo. This can be done by including a subdirectory in the URL path (`http://grlc-server/api-git/<user>/<repo>/subdir/<subdir>`).
+
+#### From a GitLab repository
+> API path:
+`http://grlc-server/api-gitlab/<user>/<repo>`
+
+grlc can build an API from any GitLab repository, specified by the GitLab user name of the owner (`<user>`) and repository name (`<repo>`).
+
+For example, assuming your queries are stored on a GitLAb repo: `https://gitlab.com/c-martinez/grlc-queries`, point your browser to the following location
+`http://grlc.io/api-gitlab/c-martinez/grlc-queries/`
+
+grlc can make use of git's version control mechanism to generate an API based on a specific version of queries in the repository. This can be done by including the name of a branch in the URL path (`http://grlc-server/api-gitlab/<user>/<repo>/branch/<branch>`), for example: `http://grlc.io/api-gitlab/c-martinez/grlc-queries/branch/master`
+
+grlc can also use a subdirectory inside your GitLab repo. This can be done by including a subdirectory in the URL path (`http://grlc-server/api-gitlab/<user>/<repo>/subdir/<subdir>`), for example: `http://grlc-server/api-gitlab/c-martinez/grlc-queries/subdir/subdir`.
 
 #### From local storage
 > API path:
@@ -255,6 +268,7 @@ Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/transform.rq
 
 Check these out:
 - http://grlc.io/api-git/CLARIAH/grlc-queries
+- http://grlc.io/api-gitlab/c-martinez/grlc-queries
 - http://grlc.io/api-url?specUrl=https://raw.githubusercontent.com/CLARIAH/grlc-queries/master/urls.yml
 - http://grlc.io/api-git/CLARIAH/wp4-queries-hisco
 - http://grlc.io/api-git/albertmeronyo/lodapi
@@ -282,9 +296,9 @@ To run grlc via [docker](https://www.docker.com/), you'll need a working install
 docker run -it --rm -p 8088:80 clariah/grlc
 ```
 
-The docker image allows you to setup several environment variable such as `GRLC_SERVER_NAME` `GRLC_GITHUB_ACCESS_TOKEN` and `GRLC_SPARQL_ENDPOINT`:
+The docker image allows you to setup several environment variable such as `GRLC_SERVER_NAME` `GRLC_GITHUB_ACCESS_TOKEN`,`GRLC_GITLAB_ACCESS_TOKEN` and `GRLC_SPARQL_ENDPOINT`:
 ```bash
-docker run -it --rm -p 8088:80 -e GRLC_SERVER_NAME=grlc.io -e GRLC_GITHUB_ACCESS_TOKEN=xxx -e GRLC_SPARQL_ENDPOINT=http://dbpedia.org/sparql -e DEBUG=true clariah/grlc
+docker run -it --rm -p 8088:80 -e GRLC_SERVER_NAME=grlc.io -e GRLC_GITHUB_ACCESS_TOKEN=xxx -e GRLC_GITLAB_ACCESS_TOKEN=yyy -e GRLC_SPARQL_ENDPOINT=http://dbpedia.org/sparql -e DEBUG=true clariah/grlc
 ```
 
 ### Pip
@@ -346,19 +360,21 @@ You can use grlc as a library directly from your own python script. See the [usa
 Regardless of how you are running your grlc server, you will need to configure it using the `config.ini` file. Have a look at the [example config file](./config.default.ini) to see how it this file is structured.
 
 The configuration file contains the following variables:
- - `github_access_token` [access token](#github-access-token) to communicate with Github API.
+ - `github_access_token` [access token](#gitaccess-token) to communicate with Github API.
+ - `gitlab_access_token` [access token](#git-access-token) to communicate with GitLab API.
  - `local_sparql_dir` local storage directory where [local queries](#from-local-storage) are located.
  - `server_name` name of the server (e.g. grlc.io)
  - `sparql_endpoint` default SPARQL endpoint
  - `user` and `password` SPARQL endpoint default authentication (if required, specify `'none'` if not required)
  - `debug` enable debug level logging.
+ - `gitlab_url` to specify the base url of your GitLab instance.
 
-##### GitHub access token
-In order for grlc to communicate with GitHub, you'll need to tell grlc what your access token is:
+##### Git access token
+In order for grlc to communicate with GitHub and/or GitLab, you'll need to tell grlc what your access token is:
 
-1. Get a GitHub personal access token. In your GitHub's profile page, go to _Settings_, then _Developer settings_, _Personal access tokens_, and _Generate new token_
-2. You'll get an access token string, copy it and save it somewhere safe (GitHub won't let you see it again!)
-3. Edit your `config.ini` or `docker-compose.yml` as value of the environment variable `GRLC_GITHUB_ACCESS_TOKEN`.
+1. Get a [GitHub personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/about-authentication-to-github#authenticating-to-the-api-with-a-personal-access-token) or [GitLab personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token).
+2. You'll get an access token string, copy it and save it somewhere safe.
+3. Edit your `config.ini` (`github_access_token` and `gitlab_access_token` respectively) and/or `docker-compose.yml` (`GRLC_GITHUB_ACCESS_TOKEN` and `GRLC_GITLAB_ACCESS_TOKEN` environment variables).
 
 # Contribute!
 grlc needs **you** to continue bringing Semantic Web content to developers, applications and users. No matter if you are just a curious user, a developer, or a researcher; there are many ways in which you can contribute:
