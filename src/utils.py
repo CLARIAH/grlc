@@ -255,9 +255,9 @@ def dispatchTPFQuery(raw_tpf_query, loader, acceptHeader, content):
     # TODO: pagination for TPF
 
     # Preapre HTTP request
-    reqHeaders = {'Accept': acceptHeader, 'Authorization': 'token {}'.format(static.TPF_ACCESS_TOKEN)}
+    reqHeaders = {'Accept': acceptHeader, 'Authorization': 'token {}'.format(static.SPARQL_ACCESS_TOKEN)}
     if content:
-        reqHeaders = {'Accept': static.mimetypes[content], 'Authorization': 'token {}'.format(static.TPF_ACCESS_TOKEN)}
+        reqHeaders = {'Accept': static.mimetypes[content], 'Authorization': 'token {}'.format(static.SPARQL_ACCESS_TOKEN)}
     tpf_list = re.split('\n|=', raw_tpf_query)
     subject = tpf_list[tpf_list.index('subject') + 1]
     predicate = tpf_list[tpf_list.index('predicate') + 1]

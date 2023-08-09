@@ -39,7 +39,7 @@ CACHE_CONTROL_POLICY = 'no-cache'
 config_fallbacks = {
     'github_access_token': '',
     'gitlab_access_token': '',
-    'tpf_access_token': '',
+    'sparql_access_token': '',
     'sparql_endpoint': '',
     'user': '',
     'password': '',
@@ -59,7 +59,7 @@ print('Reading config file: ', config_filename)
 config.read(config_filename)
 GITHUB_ACCESS_TOKEN = config.get('auth', 'github_access_token')
 GITLAB_ACCESS_TOKEN = config.get('auth', 'gitlab_access_token')
-TPF_ACCESS_TOKEN = config.get('auth', 'tpf_access_token')
+SPARQL_ACCESS_TOKEN = config.get('auth', 'sparql_access_token')
 
 # Default endpoint, if none specified elsewhere
 DEFAULT_ENDPOINT = config.get('defaults', 'sparql_endpoint')
