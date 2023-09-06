@@ -58,6 +58,7 @@ services:
      - USERMAP_GID=1000
      - USERMAP_UID=1000
      - GRLC_GITHUB_ACCESS_TOKEN=xxx
+     - GRLC_GITLAB_ACCESS_TOKEN=yyy
      - GRLC_SERVER_NAME=grlc.io
 ```
 

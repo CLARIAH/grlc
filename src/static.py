@@ -38,6 +38,8 @@ CACHE_CONTROL_POLICY = 'no-cache'
 # Setting headers to use access_token for the GitHub API
 config_fallbacks = {
     'github_access_token': '',
+    'gitlab_access_token': '',
+    'sparql_access_token': '',
     'sparql_endpoint': '',
     'user': '',
     'password': '',
@@ -51,10 +53,13 @@ config.add_section('auth')
 config.add_section('defaults')
 config.add_section('local')
 config.add_section('api_gitlab')
+
 config_filename = os.path.join(os.getcwd(), 'config.ini')
 print('Reading config file: ', config_filename)
 config.read(config_filename)
-ACCESS_TOKEN = config.get('auth', 'github_access_token')
+GITHUB_ACCESS_TOKEN = config.get('auth', 'github_access_token')
+GITLAB_ACCESS_TOKEN = config.get('auth', 'gitlab_access_token')
+SPARQL_ACCESS_TOKEN = config.get('auth', 'sparql_access_token')
 
 # Default endpoint, if none specified elsewhere
 DEFAULT_ENDPOINT = config.get('defaults', 'sparql_endpoint')

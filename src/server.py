@@ -31,7 +31,7 @@ def api_docs_template():
     """Generate Grlc API page."""
     return render_template('api-docs.html', relative_path=relative_path())
 
-def swagger_spec(user, repo, subdir=None, spec_url=None, sha=None, content=None, git_type=None, branch='main'):
+def swagger_spec(user, repo, subdir=None, spec_url=None, sha=None, content=None, git_type=None, branch=None):
     """ Generate swagger specification """
     glogger.info("-----> Generating swagger spec for /{}/{} ({}), subdir {}, params {}, on commit {}".format(user, repo, git_type, subdir, spec_url, sha))
 
@@ -45,7 +45,7 @@ def swagger_spec(user, repo, subdir=None, spec_url=None, sha=None, content=None,
     glogger.info("-----> API spec generation for /{}/{}, subdir {}, params {}, on commit {} complete".format(user, repo, subdir, spec_url, sha))
     return resp_spec
 
-def query(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=None, git_type=None, branch='main'):
+def query(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=None, git_type=None, branch=None):
     """Execute SPARQL query for a specific grlc-generated API endpoint"""
     glogger.info("-----> Executing call name at /{}/{} ({})/{}/{} on commit {}".format(user, repo, git_type, subdir, query_name, sha))
     glogger.debug("Request accept header: " + request.headers["Accept"])
@@ -210,7 +210,7 @@ def query_git(user, repo, query_name, subdir=None, sha=None, content=None):
 @app.route('/api-gitlab/<user>/<repo>/commit/<sha>/api-docs')
 @app.route('/api-gitlab/<user>/<repo>/subdir/<path:subdir>/commit/<sha>')
 @app.route('/api-gitlab/<user>/<repo>/subdir/<path:subdir>/commit/<sha>/api-docs')
-def api_docs_gitlab(user, repo, subdir=None, sha=None, branch='main'):
+def api_docs_gitlab(user, repo, subdir=None, sha=None, branch=None):
     """Grlc API page for specifications loaded from a Github repo."""
     glogger.debug("Entry in function: __main__.api_docs_gitlab")
     return api_docs_template()
@@ -223,7 +223,7 @@ def api_docs_gitlab(user, repo, subdir=None, sha=None, branch='main'):
 @app.route('/api-gitlab/<user>/<repo>/commit/<sha>/swagger')
 @app.route('/api-gitlab/<user>/<repo>/subdir/<path:subdir>/commit/<sha>/swagger')
 @app.route('/api-gitlab/<user>/<repo>/<path:subdir>/commit/<sha>/swagger')
-def swagger_spec_gitlab(user, repo, subdir=None, sha=None, branch='main'):
+def swagger_spec_gitlab(user, repo, subdir=None, sha=None, branch=None):
     """Swagger spec for specifications loaded from a Github repo."""
     glogger.debug("Entry in function: __main__.swagger_spec_gitlab")
     return swagger_spec(user, repo, subdir=subdir, spec_url=None, sha=sha, content=None, git_type=static.TYPE_GITLAB, branch=branch)
@@ -239,7 +239,7 @@ def swagger_spec_gitlab(user, repo, subdir=None, sha=None, branch='main'):
 @app.route('/api-gitlab/<user>/<repo>/query/subdir/<path:subdir>/commit/<sha>/<query_name>', methods=['GET', 'POST'])
 @app.route('/api-gitlab/<user>/<repo>/query/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
 @app.route('/api-gitlab/<user>/<repo>/query/subdir/<path:subdir>/commit/<sha>/<query_name>.<content>', methods=['GET', 'POST'])
-def query_gitlab(user, repo, query_name, subdir=None, sha=None, content=None, branch='main'):
+def query_gitlab(user, repo, query_name, subdir=None, sha=None, content=None, branch=None):
     """SPARQL query execution for specifications loaded from a Github repo."""
     glogger.debug("Entry in function: __main__.query_gitlab")
     return query(user, repo, query_name, subdir=subdir, sha=sha, content=content, git_type=static.TYPE_GITLAB, branch=branch)
