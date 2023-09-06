@@ -55,7 +55,8 @@ class BaseLoader:
         return '', None
 
     def _getText(self, queryFullName):
-        """To be implemented by sub-classes"""
+        """To be implemented by sub-classes. 
+        Returns None if the file does not exist."""
         raise NotImplementedError("Subclasses must override _getText()!")
 
     def fetchFiles(self):
@@ -122,7 +123,8 @@ class GithubLoader(BaseLoader):
         return str(fileItem['decoded_content'], 'utf-8')
 
     def _getText(self, query_name):
-        """Return the content of the specified file contained in the github repo."""
+        """Return the content of the specified file contained in the github repo.
+        Returns None if the file does not exist."""
         try:
             c = self.gh_repo.get_contents(self.subdir + query_name)
             return str(c.decoded_content, 'utf-8')
@@ -214,12 +216,11 @@ class GitlabLoader(BaseLoader):
         return files
 
     def getRawRepoUri(self):
-        """Returns the root url of the github repo."""
-        # TODO: replace by gh_repo.html_url ?
+        """Returns the root url of the gitlab repo."""
         return path.join(static.GITLAB_URL, self.user, self.repo, '-', 'raw', self.branch)
 
     def getTextFor(self, fileItem):
-        """Returns the contents of the given file item on the github repo."""
+        """Returns the contents of the given file item on the gitlab repo."""
         raw_query_uri = fileItem['download_url']
 
         # Add query URI as used entity by the logged activity
@@ -228,7 +229,8 @@ class GitlabLoader(BaseLoader):
         return str(fileItem['decoded_content'], 'utf-8')  
 
     def _getText(self, query_name):
-        """Return the content of the specified file contained in the github repo."""
+        """Return the content of the specified file contained in the gitlab repo.
+        Returns None if the file does not exist."""
         try:
             file_path = path.join(self.subdir, query_name)
             f = self.gl_repo.files.get(file_path=file_path, ref=self.branch)
@@ -238,7 +240,7 @@ class GitlabLoader(BaseLoader):
             return None
     
     def getRepoTitle(self):
-        """Return the title of the github repo."""
+        """Return the title of the gitlab repo."""
         return self.gl_repo.name
 
     def getContactName(self):
@@ -329,7 +331,8 @@ class LocalLoader(BaseLoader):
         return self._getText(fileItem['download_url'])
 
     def _getText(self, filename):
-        """Return the content of the specified file contained in the local repo."""
+        """Return the content of the specified file contained in the local repo.
+        Returns None if the file does not exist."""
         targetFile = path.join(self.baseDir, filename)
         if path.exists(targetFile):
             with open(targetFile, 'r') as f:
@@ -446,7 +449,8 @@ class URLLoader(BaseLoader):
             return '', None
 
     def _getText(self, itemName):
-        """Return the content of the specified item in the specification."""
+        """Return the content of the specified item in the specification.
+        Returns None if the file does not exist."""
         if itemName in self.spec['files']:
             headers = {'Accept' : 'text/plain'}
             itemUrl = self.spec['files'][itemName]['download_url']
