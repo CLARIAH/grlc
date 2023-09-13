@@ -28,7 +28,7 @@ def getLoader(user, repo, subdir=None, spec_url=None, sha=None, prov=None, git_t
     if user is None and repo is None and not spec_url:
         loader = LocalLoader()
     elif spec_url:
-       loader = URLLoader(spec_url)
+        loader = URLLoader(spec_url)
     else:
         if git_type == static.TYPE_GITHUB:
             glogger.debug("Building GithubLoader....")
@@ -63,6 +63,8 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName, git_type, 
     try:
         loader = getLoader(user, repo, subdir, spec_url, sha, prov_g, git_type, branch)
     except Exception as e:
+        print('xxxxx')
+        print(e)
         # If repo does not exits
         swag['info'] = {
             'title': 'ERROR!',

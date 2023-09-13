@@ -9,7 +9,6 @@
 from rdflib import Graph, URIRef, Namespace, RDF, Literal
 from datetime import datetime
 from subprocess import check_output
-from six import PY3
 
 # grlc modules
 import grlc.static as static
@@ -105,7 +104,4 @@ class grlcPROV():
         """
         Serialize provenance graph in the specified format
         """
-        if PY3:
-            return self.prov_g.serialize(format=format).decode('utf-8')
-        else:
-            return self.prov_g.serialize(format=format)
+        return self.prov_g.serialize(format=format)

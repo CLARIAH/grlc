@@ -393,7 +393,7 @@ class URLLoader(BaseLoader):
         headers = {'Accept' : 'text/yaml'}
         resp = requests.get(spec_url, headers=headers)
         if resp.status_code == 200:
-            self.spec = yaml.load(resp.text)
+            self.spec = yaml.safe_load(resp.text)
             self.spec['url'] = spec_url
             self.spec['files'] = {}
 

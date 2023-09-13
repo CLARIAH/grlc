@@ -52,6 +52,7 @@ class MockGitlabModule:
 
         gl_repo.repository_tree = Mock(return_value=mock_gl_files)
         gl_repo.files.get.side_effect = self.gl_files_content
+        gl_repo.default_branch = 'main'
     
         self.projects = Mock()
         self.projects.get.return_value = gl_repo
