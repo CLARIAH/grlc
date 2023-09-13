@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-FROM python:3.8.16
+FROM python:3.11-slim
 MAINTAINER albert.merono@vu.nl
 
 # Default values for env variables

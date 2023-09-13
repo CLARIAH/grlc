@@ -63,8 +63,6 @@ def build_swagger_spec(user, repo, subdir, spec_url, sha, serverName, git_type, 
     try:
         loader = getLoader(user, repo, subdir, spec_url, sha, prov_g, git_type, branch)
     except Exception as e:
-        print('xxxxx')
-        print(e)
         # If repo does not exits
         swag['info'] = {
             'title': 'ERROR!',
