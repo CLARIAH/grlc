@@ -8,7 +8,11 @@ from glob import glob
 
 from collections import namedtuple
 from grlc.fileLoaders import LocalLoader
+from grlc import static
+
 import base64
+
+static.GITHUB_ACCESS_TOKEN = 'fake-token' # Manually overwrite access token to avoid empty token
 
 base_url = path.join('tests', 'repo')
 

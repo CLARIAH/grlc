@@ -15,7 +15,7 @@ import base64
 import os
 from os import path
 from glob import glob
-from github import Github
+from github import Github, Auth
 from github.GithubObject import NotSet
 from github.GithubException import BadCredentialsException
 from gitlab.exceptions import GitlabAuthenticationError
@@ -83,7 +83,7 @@ class GithubLoader(BaseLoader):
         self.subdir = (subdir + "/") if subdir else ""
         self.sha = sha if sha else NotSet
         self.prov = prov
-        gh = Github(static.GITHUB_ACCESS_TOKEN)
+        gh = Github(auth=Auth.Token(static.GITHUB_ACCESS_TOKEN))
         try:
             self.gh_repo = gh.get_repo(user + '/' + repo, lazy=False)
         except BadCredentialsException:
