@@ -13,6 +13,8 @@ import grlc.gquery as gquery
 
 from flask import Flask
 
+from rdflib.plugins.sparql.parser import Query
+
 
 class TestGQuery(unittest.TestCase):
     @classmethod
@@ -39,7 +41,9 @@ class TestGQuery(unittest.TestCase):
     def test_get_parameters(self):
         rq, _ = self.loader.getTextForName('test-rq')
 
-        params = gquery.get_parameters(rq, '', '', {})
+        params = gquery.get_parameters(rq, '', {})
+
+        self.assertGreaterEqual(len(params), 7, 'Should find some parameters')
         for paramName, param in params.items():
             self.assertIn('name', param, 'Should have a name')
             self.assertIn('type', param, 'Should have a type')
@@ -56,7 +60,7 @@ class TestGQuery(unittest.TestCase):
                 self.assertEqual(param['type'], 'literal',
                                  'Should be type literal')
             if '_en' in orig:
-                self.assertEqual(param['type'], 'literal',
+                self.assertEqual(param['type'], 'string',
                                  'Should be type literal')
                 self.assertEqual(param['lang'], 'en', 'Should be en language')
             if '_integer' in orig:
@@ -65,6 +69,14 @@ class TestGQuery(unittest.TestCase):
             if '_xsd_date' in orig:
                 self.assertEqual(param['datatype'],
                                  'xsd:date', 'Should be type xsd:date')
+
+        self.assertEqual(params['o1']['type'], 'string', 'o1 should be a string')
+        self.assertEqual(params['o2']['format'], 'iri', 'o2 should be format iri')
+        self.assertEqual(params['o3']['type'], 'number', 'o3 should be a number')
+        self.assertEqual(params['o4']['type'], 'literal', 'o4 should be a literal')
+        self.assertEqual(params['o5']['lang'], 'en', 'o5 should be a English')
+        self.assertEqual(params['o6']['datatype'], 'xsd:integer', 'o6 should be a integer')
+        self.assertEqual(params['o7']['datatype'], 'xsd:date', 'o7 should be a date')
 
     @patch('requests.get')
     def test_get_enumeration(self, mock_get):

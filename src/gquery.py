@@ -106,7 +106,7 @@ def _getDictWithKey(key, dict_list):
     return None
 
 
-def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
+def get_parameters(query, endpoint, query_metadata, auth=None):
     """
         ?_name The variable specifies the API mandatory parameter name. The value is incorporated in the query as plain literal.
         ?__name The parameter name is optional.
@@ -115,72 +115,51 @@ def get_parameters(rq, variables, endpoint, query_metadata, auth=None):
         ?_name_integer The parameter value is considered as literal and the XSD datatype 'integer' is added during substitution.
         ?_name_prefix_datatype The parameter value is considered as literal and the datatype 'prefix:datatype' is added during substitution. The prefix must be specified according to the SPARQL syntax.
     """
-
-    # variables = translateQuery(Query.parseString(rq, parseAll=True)).algebra['_vars']
-
-    ## Aggregates
-    internal_matcher = re.compile("__agg_\d+__")
     ## Basil-style variables
-    variable_matcher = re.compile(
-        "(?P<required>[_]{1,2})(?P<name>[^_]+)_?(?P<type>[a-zA-Z0-9]+)?_?(?P<userdefined>[a-zA-Z0-9]+)?.*$")
-
+    re1 = "\?"  # Start with a '?'
+    re2 = "(?P<required>[_]{1,2})"  # ...followed by one (for required vars) or two (for optional vars) '_'
+    re3 = "(?P<name>[a-zA-Z0-9]+)"  # ...then the name of the var
+    re4 = "([_](?P<type>(iri)|(number)|(literal)|(integer)))?"  # ...optionally with a type (iri, number, literal, integer)
+    re5 = "([_](?P<prefix>[a-zA-Z0-9]+)[_](?P<userdefined>[a-zA-Z0-9]+))?" # ... OR a user defined type, with a prefix
+    re6 = "([_](?P<lang>[a-zA-Z0-9]+))?"  # ...OR a language
+    variable_matcher = re.compile(re1 + re2 + re3 + re4 + re5 + re6)
+    
     parameters = {}
-    for v in variables:
-        if internal_matcher.match(v):
-            continue
+    for match in  variable_matcher.finditer(query):
+        p = {}
+        vname = match.group('name')
+    
+        p['original'] = match.group(0)
+        p['required'] = len(match.group('required'))==1
+        p['name'] = vname
+    
+    
+        mtype = match.group('type')
+        if mtype in ['number', 'literal', 'string']:
+            p['type'] = mtype
+        elif mtype in ['iri']:
+            p['type'] = 'string'
+            p['format'] = 'iri'
+        else:
+            p['type'] = 'string'
+            if mtype in static.XSD_DATATYPES:
+                p['datatype'] = 'xsd:{}'.format(mtype)
+            elif match.group('prefix') and match.group('userdefined'):
+                p['datatype'] = '{}:{}'.format(match.group('prefix'), match.group('userdefined'))
+    
+        vcodes = get_enumeration(query, vname, endpoint, query_metadata, auth)
+        if vcodes is not None:
+            p['enum'] = sorted(vcodes)
+        vdefault = get_defaults(query, vname, query_metadata)
+        if vdefault is not None:
+            p['default'] = vdefault
+    
+        if match.group('lang') is not None:
+            p['lang'] = match.group('lang')
+    
+        parameters[vname] = p
 
-        match = variable_matcher.match(v)
-        # TODO: currently only one parameter per triple pattern is supported
-        if match:
-            vname = match.group('name')
-            vrequired = True if match.group('required') == '_' else False
-            vtype = 'string'
-            # All these can be None
-            vcodes = get_enumeration(rq, vname, endpoint, query_metadata, auth)
-            vdefault = get_defaults(rq, vname, query_metadata)
-            vlang = None
-            vdatatype = None
-            vformat = None
-
-            mtype = match.group('type')
-            muserdefined = match.group('userdefined')
-
-            if mtype in ['number', 'literal', 'string']:
-                vtype = mtype
-            elif mtype in ['iri']:  # TODO: proper form validation of input parameter uris
-                vtype = 'string'
-                vformat = 'iri'
-            elif mtype:
-                vtype = 'string'
-
-                if mtype in static.XSD_DATATYPES:
-                    vdatatype = 'xsd:{}'.format(mtype)
-                elif len(mtype) == 2:
-                    vlang = mtype
-                elif muserdefined:
-                    vdatatype = '{}:{}'.format(mtype, muserdefined)
-
-            parameters[vname] = {
-                'original': '?{}'.format(v),
-                'required': vrequired,
-                'name': vname,
-                'type': vtype
-            }
-
-            # Possibly None parameter attributes
-            if vcodes is not None:
-                parameters[vname]['enum'] = sorted(vcodes)
-            if vlang is not None:
-                parameters[vname]['lang'] = vlang
-            if vdatatype is not None:
-                parameters[vname]['datatype'] = vdatatype
-            if vformat is not None:
-                parameters[vname]['format'] = vformat
-            if vdefault is not None:
-                parameters[vname]['default'] = vdefault
-
-            glogger.debug('Finished parsing the following parameters: {}'.format(parameters))
-
+    glogger.debug('Finished parsing the following parameters: {}'.format(parameters))
     return parameters
 
 
@@ -330,10 +309,10 @@ def get_metadata(rq, endpoint):
             # Projection variables
             query_metadata['variables'] = parsed_query.algebra['PV']
             # Parameters
-            query_metadata['parameters'] = get_parameters(rq, parsed_query.algebra['_vars'], endpoint, query_metadata)
+            query_metadata['parameters'] = get_parameters(rq, endpoint, query_metadata)
         elif query_metadata['type'] == 'ConstructQuery':
             # Parameters
-            query_metadata['parameters'] = get_parameters(rq, parsed_query.algebra['_vars'], endpoint, query_metadata)
+            query_metadata['parameters'] = get_parameters(rq, endpoint, query_metadata)
         else:
             glogger.warning(
                 "Query type {} is currently unsupported and no metadata was parsed!".format(query_metadata['type']))
@@ -401,25 +380,21 @@ def rewrite_query(query, parameters, get_args):
     """Rewrite query to replace query parameters for given values."""
     glogger.debug("Query parameters")
     glogger.debug(parameters)
-    requireXSD = False
 
-    required_params = {}
-    for k, v in parameters.items():
-        if parameters[k]['required']:
-            required_params[k] = v
-    requiredParams = set(required_params.keys())
+    # Check that all required parameters are present
+    requiredParams = set( k for k, v in parameters.items() if v['required'] )  # Set of required parameters
     providedParams = set(get_args.keys())
     glogger.debug("Required parameters: {} Request args: {}".format(requiredParams, providedParams))
     assert requiredParams.issubset(providedParams), 'Provided parameters do not cover the required parameters!'
 
-    for pname, p in list(parameters.items()):
-        # Get the parameter value from the GET request
-        v = get_args.get(pname, None)
-        # If the parameter has a value
-        if not v:
-            continue
+    if isinstance(query, dict):  # json query (sparql transformer)
+        for pname, p in parameters.items():
+            # Get the parameter value from the GET request
+            v = get_args.get(pname, None)
+            # If the parameter has a value
+            if not v:
+                continue
 
-        if isinstance(query, dict):  # json query (sparql transformer)
             if '$values' not in query:
                 query['$values'] = {}
             values = query['$values']
@@ -431,35 +406,37 @@ def rewrite_query(query, parameters, get_args):
             else:
                 values[p['original']] = [values[p['original']], v]
 
-            continue
-
-        # IRI
-        if p['type'] == 'iri':  # TODO: never reached anymore, since iris are now type=string with format=iri
-            query = query.replace(p['original'], "{}{}{}".format('<', v, '>'))
-        # A number (without a datatype)
-        elif p['type'] == 'number':
-            query = query.replace(p['original'], v)
-        # Literals
-        elif p['type'] == 'literal' or p['type'] == 'string':
-            # If it's a iri
-            if 'format' in p and p['format'] == 'iri':
-                query = query.replace(p['original'], "{}{}{}".format('<', v, '>'))
-            # If there is a language tag
-            if 'lang' in p and p['lang']:
-                query = query.replace(p['original'], "\"{}\"@{}".format(v, p['lang']))
-            elif 'datatype' in p and p['datatype']:
-                query = query.replace(p['original'], "\"{}\"^^{}".format(v, p['datatype']))
-                if 'xsd' in p['datatype']:
-                    requireXSD = True
-            else:
-                query = query.replace(p['original'], "\"{}\"".format(v))
-
-    if isinstance(query, dict):  # json query (sparql transformer)
         rq, proto, opt = SPARQLTransformer.pre_process(query)
         query = rq.strip()
+    
+    else:
+        requireXSD = False
+        for pname, p in parameters.items():
+            # Get the parameter value from the GET request
+            v = get_args.get(pname, None)
+            # If the parameter has a value
+            if not v:
+                continue
 
-    if requireXSD and XSD_PREFIX not in query:
-        query = query.replace('SELECT', XSD_PREFIX + '\n\nSELECT')
+            # Number (without a datatype)
+            if p['type'] == 'number':
+                query = query.replace(p['original'], v)
+            # Literal
+            elif p['type'] == 'literal' or p['type'] == 'string':
+                # If it's a iri
+                if 'format' in p and p['format'] == 'iri':
+                    query = query.replace(p['original'], "{}{}{}".format('<', v, '>'))
+                # If there is a language tag
+                if 'lang' in p and p['lang']:
+                    query = query.replace(p['original'], "\"{}\"@{}".format(v, p['lang']))
+                elif 'datatype' in p and p['datatype']:
+                    query = query.replace(p['original'], "\"{}\"^^{}".format(v, p['datatype']))
+                    if 'xsd' in p['datatype']:
+                        requireXSD = True
+                else:
+                    query = query.replace(p['original'], "\"{}\"".format(v))
+        if requireXSD and XSD_PREFIX not in query:
+            query = query.replace('SELECT', XSD_PREFIX + '\n\nSELECT')
 
     glogger.debug("Query rewritten as: " + query)
 
