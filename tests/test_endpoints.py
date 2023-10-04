@@ -21,7 +21,7 @@ class TestGrlcHome:
         rv = client.get('/')
         assert rv.status_code == 200
         assert 'text/html' in rv.content_type
-        body = str(object=rv.data, encoding=rv.charset, errors='strict')
+        body = str(object=rv.data, errors='strict')
         assert '<title>grlc</title>' in body
         assert 'grlc generates RESTful APIs using SPARQL queries stored in GitHub repositories' in body
 
@@ -31,7 +31,7 @@ class TestGrlcFrontEnd:
     def validate(self, response):
         assert response.status_code == 200
         assert 'text/html' in response.content_type
-        body = str(object=response.data, encoding=response.charset, errors='strict')
+        body = str(object=response.data, errors='strict')
         assert '<div id="swagger-ui"></div>' in body
 
     def test_repo(self, client):
