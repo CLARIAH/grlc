@@ -61,7 +61,7 @@ def query(user, repo, query_name, subdir=None, spec_url=None, sha=None, content=
                                                            acceptHeader=acceptHeader, requestUrl=requestUrl, 
                                                            formData=formData, method=method, git_type=git_type, 
                                                            branch=branch)
-    if isinstance(query_response, list):
+    if isinstance(query_response, list) or isinstance(query_response, dict):
         query_response = jsonify(query_response)
 
     return make_response(query_response, status, headers)
