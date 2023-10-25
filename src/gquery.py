@@ -269,6 +269,8 @@ def get_yaml_decorators(rq):
         if "grlc" in rq:
             yaml_string = rq["grlc"]
             query_string = rq
+            query_metadata = yaml_string
+
     else:  # classic query
         yaml_string = "\n".join(
             [row.lstrip("#+") for row in rq.split("\n") if row.startswith("#+")]
@@ -277,10 +279,6 @@ def get_yaml_decorators(rq):
             [row for row in rq.split("\n") if not row.startswith("#+")]
         )
 
-    query_metadata = None
-    if type(yaml_string) == dict:
-        query_metadata = yaml_string
-    elif type(yaml_string) == str:
         try:  # Invalid YAMLs will produce empty metadata
             query_metadata = yaml.safe_load(yaml_string)
         except (yaml.parser.ParserError, yaml.scanner.ScannerError):
@@ -452,58 +450,67 @@ def rewrite_query(query, parameters, get_args):
     ), "Provided parameters do not cover the required parameters!"
 
     if isinstance(query, dict):  # json query (sparql transformer)
-        for pname, p in parameters.items():
-            # Get the parameter value from the GET request
-            v = get_args.get(pname, None)
-            # If the parameter has a value
-            if not v:
-                continue
-
-            if "$values" not in query:
-                query["$values"] = {}
-            values = query["$values"]
-
-            if not p["original"] in values:
-                values[p["original"]] = v
-            elif isinstance(values[p["original"]], list):
-                values[p["original"]].append(v)
-            else:
-                values[p["original"]] = [values[p["original"]], v]
-
-        rq, proto, opt = SPARQLTransformer.pre_process(query)
-        query = rq.strip()
-
+        query = rewrite_query_json(query, parameters, get_args)
     else:
-        requireXSD = False
-        for pname, p in parameters.items():
-            # Get the parameter value from the GET request
-            v = get_args.get(pname, None)
-            # If the parameter has a value
-            if not v:
-                continue
-
-            # Number (without a datatype)
-            if p["type"] == "number":
-                query = query.replace(p["original"], v)
-            # Literal
-            elif p["type"] == "literal" or p["type"] == "string":
-                # If it's a iri
-                if "format" in p and p["format"] == "iri":
-                    query = query.replace(p["original"], "{}{}{}".format("<", v, ">"))
-                # If there is a language tag
-                if "lang" in p and p["lang"]:
-                    query = query.replace(p["original"], '"{}"@{}'.format(v, p["lang"]))
-                elif "datatype" in p and p["datatype"]:
-                    query = query.replace(
-                        p["original"], '"{}"^^{}'.format(v, p["datatype"])
-                    )
-                    if "xsd" in p["datatype"]:
-                        requireXSD = True
-                else:
-                    query = query.replace(p["original"], '"{}"'.format(v))
-        if requireXSD and XSD_PREFIX not in query:
-            query = query.replace("SELECT", XSD_PREFIX + "\n\nSELECT")
+        query = rewrite_query_standard(query, parameters, get_args)
 
     glogger.debug("Query rewritten as: " + query)
 
+    return query
+
+
+def rewrite_query_json(query, parameters, get_args):
+    for pname, p in parameters.items():
+        # Get the parameter value from the GET request
+        v = get_args.get(pname, None)
+        # If the parameter has a value
+        if not v:
+            continue
+
+        if "$values" not in query:
+            query["$values"] = {}
+        values = query["$values"]
+
+        if not p["original"] in values:
+            values[p["original"]] = v
+        elif isinstance(values[p["original"]], list):
+            values[p["original"]].append(v)
+        else:
+            values[p["original"]] = [values[p["original"]], v]
+
+    rq, proto, opt = SPARQLTransformer.pre_process(query)
+    query = rq.strip()
+    return query
+
+
+def rewrite_query_standard(query, parameters, get_args):
+    requireXSD = False
+    for pname, p in parameters.items():
+        # Get the parameter value from the GET request
+        v = get_args.get(pname, None)
+        # If the parameter has a value
+        if not v:
+            continue
+
+        # Number (without a datatype)
+        if p["type"] == "number":
+            query = query.replace(p["original"], v)
+        # Literal
+        elif p["type"] == "literal" or p["type"] == "string":
+            # If it's a iri
+            if "format" in p and p["format"] == "iri":
+                query = query.replace(p["original"], "{}{}{}".format("<", v, ">"))
+            # If there is a language tag
+            if "lang" in p and p["lang"]:
+                query = query.replace(p["original"], '"{}"@{}'.format(v, p["lang"]))
+            elif "datatype" in p and p["datatype"]:
+                query = query.replace(
+                    p["original"], '"{}"^^{}'.format(v, p["datatype"])
+                )
+                if "xsd" in p["datatype"]:
+                    requireXSD = True
+            else:
+                query = query.replace(p["original"], '"{}"'.format(v))
+    if requireXSD and XSD_PREFIX not in query:
+        query = query.replace("SELECT", XSD_PREFIX + "\n\nSELECT")
     return query

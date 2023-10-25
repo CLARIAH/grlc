@@ -269,122 +269,32 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
     except Exception as e:
         raise Exception("Could not parse query {}: {}".format(call_name, str(e)))
 
-    tags = query_metadata["tags"] if "tags" in query_metadata else []
-
-    summary = query_metadata["summary"] if "summary" in query_metadata else ""
-
-    description = (
-        query_metadata["description"] if "description" in query_metadata else ""
-    )
-
-    method = query_metadata["method"].lower() if "method" in query_metadata else ""
-    if method not in ["get", "post", "head", "put", "delete", "options", "connect"]:
-        method = ""
-
-    pagination = query_metadata["pagination"] if "pagination" in query_metadata else ""
-
-    endpoint_in_url = (
-        query_metadata["endpoint_in_url"]
-        if "endpoint_in_url" in query_metadata
-        else True
+    tags, summary, description, method, pagination, endpoint_in_url = unpack_metadata(
+        query_metadata
     )
 
     # Processing of the parameters
     params = []
 
-    # PV properties
-    item_properties = {}
-
     # If this query allows pagination, add page number as parameter
     if pagination:
         params.append(pageUtils.getSwaggerPaginationDef(pagination))
 
-    if query_metadata["type"] in ["SelectQuery", "ConstructQuery", "InsertData"]:
-        # TODO: do something intelligent with the parameters!
-        # As per #3, prefetching IRIs via SPARQL and filling enum
-        parameters = query_metadata["parameters"]
-
-        for _, p in list(parameters.items()):
-            param = {}
-            param["name"] = p["name"]
-            param["type"] = p["type"]
-            param["required"] = p["required"]
-            param["in"] = "query"
-            param[
-                "description"
-            ] = "A value of type {} that will substitute {} in the original query".format(
-                p["type"], p["original"]
-            )
-            if "lang" in p:
-                param[
-                    "description"
-                ] = "A value of type {}@{} that will substitute {} in the original query".format(
-                    p["type"], p["lang"], p["original"]
-                )
-            if "format" in p:
-                param["format"] = p["format"]
-                param[
-                    "description"
-                ] = "A value of type {} ({}) that will substitute {} in the original query".format(
-                    p["type"], p["format"], p["original"]
-                )
-            if "enum" in p:
-                param["enum"] = p["enum"]
-            if "default" in p:
-                param["default"] = p["default"]
-
-            params.append(param)
-
     if endpoint_in_url:
-        endpoint_param = {}
-        endpoint_param["name"] = "endpoint"
-        endpoint_param["type"] = "string"
-        endpoint_param["in"] = "query"
-        endpoint_param["description"] = "Alternative endpoint for SPARQL query"
-        endpoint_param["default"] = endpoint
-        params.append(endpoint_param)
+        params.append(pack_endpoint(endpoint))
 
     # If this is a URL generated spec we need to force API calls with the specUrl parameter set
     if type(loader) is URLLoader:
-        specUrl_param = {}
-        specUrl_param["name"] = "specUrl"
-        specUrl_param["type"] = "string"
-        specUrl_param["in"] = "query"
-        specUrl_param["description"] = "URL of the API specification"
-        specUrl_param["default"] = loader.getRawRepoUri()
-        params.append(specUrl_param)
+        params.append(pack_specURL(loader))
 
-    if query_metadata["type"] == "SelectQuery":
-        # Fill in the spec for SELECT
-        if not method:
-            method = "get"
-        for pv in query_metadata["variables"]:
-            item_properties[pv] = {
-                "name": pv,
-                "type": "object",
-                "required": ["type", "value"],
-                "properties": {
-                    "type": {"type": "string"},
-                    "value": {"type": "string"},
-                    "xml:lang": {"type": "string"},
-                    "datatype": {"type": "string"},
-                },
-            }
-
-    elif query_metadata["type"] == "ConstructQuery":
-        if not method:
-            method = "get"
-    elif (
-        query_metadata["type"] == "InsertData" or query_metadata["type"] == "Modify"
-    ):  # UPDATE queries should map here
-        if not method:
-            method = "post"
+    # ONLY SELECT CONSTRUTCT AND INSERT CURRENTLY SUPPORTED!
+    if query_metadata["type"] in ["SelectQuery", "ConstructQuery", "InsertData"]:
+        for _, p in query_metadata["parameters"].items():
+            params.append(build_parameter(p))
     elif query_metadata["type"] == "UNKNOWN":
         glogger.warning(
             "grlc could not parse this query; assuming a plain, non-parametric SELECT in the API spec"
         )
-        if not method:
-            method = "get"
     else:
         # TODO: process all other kinds of queries
         glogger.debug(
@@ -411,6 +321,84 @@ def process_sparql_query_text(query_text, loader, call_name, extraMetadata):
     )
 
     return item
+
+
+def unpack_metadata(query_metadata):
+    tags = query_metadata["tags"] if "tags" in query_metadata else []
+
+    summary = query_metadata["summary"] if "summary" in query_metadata else ""
+
+    description = (
+        query_metadata["description"] if "description" in query_metadata else ""
+    )
+
+    method = query_metadata["method"].lower() if "method" in query_metadata else ""
+    if method not in ["get", "post", "head", "put", "delete", "options", "connect"]:
+        if query_metadata["type"] == "InsertData":
+            method = "post"
+        else:
+            method = "get"
+
+    pagination = query_metadata["pagination"] if "pagination" in query_metadata else ""
+
+    endpoint_in_url = (
+        query_metadata["endpoint_in_url"]
+        if "endpoint_in_url" in query_metadata
+        else True
+    )
+    return tags, summary, description, method, pagination, endpoint_in_url
+
+
+def build_parameter(p):
+    param = {}
+    param["name"] = p["name"]
+    param["type"] = p["type"]
+    param["required"] = p["required"]
+    param["in"] = "query"
+    # TODO: can we simplify the description
+    param[
+        "description"
+    ] = "A value of type {} that will substitute {} in the original query".format(
+        p["type"], p["original"]
+    )
+    if "lang" in p:
+        param[
+            "description"
+        ] = "A value of type {}@{} that will substitute {} in the original query".format(
+            p["type"], p["lang"], p["original"]
+        )
+    if "format" in p:
+        param["format"] = p["format"]
+        param[
+            "description"
+        ] = "A value of type {} ({}) that will substitute {} in the original query".format(
+            p["type"], p["format"], p["original"]
+        )
+    if "enum" in p:
+        param["enum"] = p["enum"]
+    if "default" in p:
+        param["default"] = p["default"]
+    return param
+
+
+def pack_endpoint(endpoint):
+    endpoint_param = {}
+    endpoint_param["name"] = "endpoint"
+    endpoint_param["type"] = "string"
+    endpoint_param["in"] = "query"
+    endpoint_param["description"] = "Alternative endpoint for SPARQL query"
+    endpoint_param["default"] = endpoint
+    return endpoint_param
+
+
+def pack_specURL(loader):
+    specUrl_param = {}
+    specUrl_param["name"] = "specUrl"
+    specUrl_param["type"] = "string"
+    specUrl_param["in"] = "query"
+    specUrl_param["description"] = "URL of the API specification"
+    specUrl_param["default"] = loader.getRawRepoUri()
+    return specUrl_param
 
 
 def packItem(

@@ -170,6 +170,136 @@ def dispatch_query(
         )
 
 
+def _dispatchQueryDump(
+    raw_sparql_query, endpoint, mime_type, rewritten_query, acceptHeader, content
+):
+    glogger.debug(
+        "Detected {} MIME type, proceeding with locally loading remote dump".format(
+            mime_type
+        )
+    )
+
+    g = Graph()
+    try:
+        g.parse(endpoint, format=mime_type)
+        glogger.debug(
+            "Local RDF graph loaded successfully with {} triples".format(len(g))
+        )
+    except Exception as e:
+        glogger.error(e)
+
+    results = g.query(rewritten_query, result="sparql")
+
+    # Prepare return format as requested
+    if "application/json" in acceptHeader or (
+        content and "application/json" in static.mimetypes[content]
+    ):
+        resp = results.serialize(format="json")
+        code = 200
+        glogger.debug(
+            "Results of SPARQL query against locally loaded dump: {}".format(resp)
+        )
+    elif "text/csv" in acceptHeader or (
+        content and "text/csv" in static.mimetypes[content]
+    ):
+        resp = results.serialize(format="csv")
+        code = 200
+        glogger.debug(
+            "Results of SPARQL query against locally loaded dump: {}".format(resp)
+        )
+    else:
+        resp = "Unacceptable requested format"
+        code = 415
+        headers = {}
+    glogger.debug("Finished processing query against RDF dump, end of use case")
+    del g
+    return resp, code, headers
+
+
+def _dispatchQueryInsert(
+    method, rewritten_query, formData, acceptHeader, endpoint, auth, headers
+):
+    glogger.debug("Processing INSERT query")
+    if method != "POST":
+        glogger.debug("INSERT queries must use POST method")
+        return {"error": "INSERT queries must use POST method"}, 400, headers
+
+    # Rewrite INSERT
+    rewritten_query = rewritten_query.replace("?_g_iri", "{}".format(formData.get("g")))
+    rewritten_query = rewritten_query.replace("<s> <p> <o>", formData.get("data"))
+    glogger.debug("INSERT query rewritten as {}".format(rewritten_query))
+
+    # Prepare HTTP POST request
+    reqHeaders = {
+        "Accept": acceptHeader,
+        "Content-Type": "application/sparql-update",
+    }
+    response = requests.post(
+        endpoint, data=rewritten_query, headers=reqHeaders, auth=auth
+    )
+    glogger.debug("Response header from endpoint: " + response.headers["Content-Type"])
+
+    # Response headers
+    resp = response.text
+    code = 200
+    headers["Content-Type"] = response.headers["Content-Type"]
+
+    return resp, code, headers
+
+
+def _dispatchQuerySelect(
+    acceptHeader, content, rewritten_query, endpoint, auth, headers
+):
+    reqHeaders = {"Accept": acceptHeader}
+    if content:
+        reqHeaders = {"Accept": static.mimetypes[content]}
+    data = {"query": rewritten_query}
+
+    glogger.debug(
+        "Sending HTTP request to SPARQL endpoint with params: {}".format(data)
+    )
+    glogger.debug(
+        "Sending HTTP request to SPARQL endpoint with headers: {}".format(reqHeaders)
+    )
+    glogger.debug("Sending HTTP request to SPARQL endpoint with auth: {}".format(auth))
+    try:
+        response = requests.get(endpoint, params=data, headers=reqHeaders, auth=auth)
+        # Response headers
+        resp = response.text
+        code = 200
+        glogger.debug(
+            "Response header from endpoint: " + response.headers["Content-Type"]
+        )
+    except Exception as e:
+        # Error contacting SPARQL endpoint
+        glogger.debug("Exception encountered while connecting to SPARQL endpoint")
+        return {"error": str(e)}, 400, headers
+
+    glogger.debug("Got HTTP response from to SPARQL endpoint: {}".format(resp))
+    headers["Content-Type"] = response.headers["Content-Type"]
+
+    return resp, code, headers
+
+
+def _dispatchTransformerPostprocess(query_metadata, resp):
+    if "proto" in query_metadata:
+        resp = SPARQLTransformer.post_process(
+            json.loads(resp), query_metadata["proto"], query_metadata["opt"]
+        )
+    else:  # case ("transform" in query_metadata and acceptHeader == "application/json")
+        if "@graph" in query_metadata["transform"]:  # SPARQLTransformer for JSON-LD
+            graph = query_metadata["transform"]["@graph"]
+            proto = graph[0] if isinstance(graph, list) else graph
+            rq = query_metadata["transform"]
+        else:  # SPARQLTransformer for standard JSON
+            proto = query_metadata["transform"]
+            rq = {"proto": proto}
+
+        _, _, opt = SPARQLTransformer.pre_process(rq)
+        resp = SPARQLTransformer.post_process(json.loads(resp), proto, opt)
+    return resp
+
+
 def dispatchSPARQLQuery(
     raw_sparql_query,
     loader,
@@ -199,7 +329,6 @@ def dispatchSPARQLQuery(
         "application/json" if isinstance(raw_sparql_query, dict) else acceptHeader
     )
     pagination = query_metadata["pagination"] if "pagination" in query_metadata else ""
-
     rewritten_query = query_metadata["query"]
 
     # Rewrite query using parameter values
@@ -218,115 +347,31 @@ def dispatchSPARQLQuery(
         )
 
     resp = None
+    code = 0
     headers = {}
 
     # If we have a mime field, we load the remote dump and query it locally
     if "mime" in query_metadata and query_metadata["mime"]:
-        glogger.debug(
-            "Detected {} MIME type, proceeding with locally loading remote dump".format(
-                query_metadata["mime"]
-            )
+        resp, code, headers = _dispatchQueryDump(
+            raw_sparql_query,
+            endpoint,
+            query_metadata["mime"],
+            rewritten_query,
+            acceptHeader,
+            content,
         )
-        g = Graph()
-        try:
-            query_metadata = gquery.get_metadata(raw_sparql_query, endpoint)
-            g.parse(endpoint, format=query_metadata["mime"])
-            glogger.debug(
-                "Local RDF graph loaded successfully with {} triples".format(len(g))
-            )
-        except Exception as e:
-            glogger.error(e)
-        results = g.query(rewritten_query, result="sparql")
-        # Prepare return format as requested
-        resp_string = ""
-        if "application/json" in acceptHeader or (
-            content and "application/json" in static.mimetypes[content]
-        ):
-            resp_string = results.serialize(format="json")
-            glogger.debug(
-                "Results of SPARQL query against locally loaded dump: {}".format(
-                    resp_string
-                )
-            )
-        elif "text/csv" in acceptHeader or (
-            content and "text/csv" in static.mimetypes[content]
-        ):
-            resp_string = results.serialize(format="csv")
-            glogger.debug(
-                "Results of SPARQL query against locally loaded dump: {}".format(
-                    resp_string
-                )
-            )
-        else:
-            return "Unacceptable requested format", 415, {}
-        glogger.debug("Finished processing query against RDF dump, end of use case")
-        del g
 
     # Check for INSERT/POST
     elif query_metadata["type"] == "InsertData":
-        glogger.debug("Processing INSERT query")
-        if method != "POST":
-            glogger.debug("INSERT queries must use POST method")
-            return {"error": "INSERT queries must use POST method"}, 400, headers
-
-        # Rewrite INSERT
-        rewritten_query = rewritten_query.replace(
-            "?_g_iri", "{}".format(formData.get("g"))
+        resp, code, headers = _dispatchQueryInsert(
+            method, rewritten_query, formData, acceptHeader, endpoint, auth, headers
         )
-        rewritten_query = rewritten_query.replace("<s> <p> <o>", formData.get("data"))
-        glogger.debug("INSERT query rewritten as {}".format(rewritten_query))
-
-        # Prepare HTTP POST request
-        reqHeaders = {
-            "Accept": acceptHeader,
-            "Content-Type": "application/sparql-update",
-        }
-        response = requests.post(
-            endpoint, data=rewritten_query, headers=reqHeaders, auth=auth
-        )
-        glogger.debug(
-            "Response header from endpoint: " + response.headers["Content-Type"]
-        )
-
-        # Response headers
-        resp = response.text
-        headers["Content-Type"] = response.headers["Content-Type"]
 
     # If there's no mime type, the endpoint is an actual SPARQL endpoint
     else:
-        reqHeaders = {"Accept": acceptHeader}
-        if content:
-            reqHeaders = {"Accept": static.mimetypes[content]}
-        data = {"query": rewritten_query}
-
-        glogger.debug(
-            "Sending HTTP request to SPARQL endpoint with params: {}".format(data)
+        resp, code, headers = _dispatchQuerySelect(
+            acceptHeader, content, rewritten_query, endpoint, auth, headers
         )
-        glogger.debug(
-            "Sending HTTP request to SPARQL endpoint with headers: {}".format(
-                reqHeaders
-            )
-        )
-        glogger.debug(
-            "Sending HTTP request to SPARQL endpoint with auth: {}".format(auth)
-        )
-        try:
-            response = requests.get(
-                endpoint, params=data, headers=reqHeaders, auth=auth
-            )
-        except Exception as e:
-            # Error contacting SPARQL endpoint
-            glogger.debug("Exception encountered while connecting to SPARQL endpoint")
-            return {"error": str(e)}, 400, headers
-        glogger.debug(
-            "Response header from endpoint: " + response.headers["Content-Type"]
-        )
-
-        # Response headers
-        resp = response.text
-
-        glogger.debug("Got HTTP response from to SPARQL endpoint: {}".format(resp))
-        headers["Content-Type"] = response.headers["Content-Type"]
 
     # If the query is paginated, set link HTTP headers
     if pagination:
@@ -338,27 +383,13 @@ def dispatchSPARQLQuery(
         )
         headers["Link"] = headerLink
 
-    if "proto" in query_metadata:  # sparql transformer
-        resp = SPARQLTransformer.post_process(
-            json.loads(resp), query_metadata["proto"], query_metadata["opt"]
-        )
-
-    if (
+    if "proto" in query_metadata or (
         "transform" in query_metadata and acceptHeader == "application/json"
-    ):  # SPARQLTransformer
-        if "@graph" in query_metadata["transform"]:  # SPARQLTransformer for JSON-LD
-            graph = query_metadata["transform"]["@graph"]
-            proto = graph[0] if isinstance(graph, list) else graph
-            rq = query_metadata["transform"]
-        else:  # SPARQLTransformer for standard JSON
-            proto = query_metadata["transform"]
-            rq = {"proto": proto}
-
-        _, _, opt = SPARQLTransformer.pre_process(rq)
-        resp = SPARQLTransformer.post_process(json.loads(resp), proto, opt)
+    ):
+        resp = _dispatchTransformerPostprocess(query_metadata, resp)
 
     headers["Server"] = "grlc/" + grlc_version
-    return resp, 200, headers
+    return resp, code, headers
 
 
 def dispatchTPFQuery(raw_tpf_query, loader, acceptHeader, content):
