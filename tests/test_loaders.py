@@ -15,11 +15,13 @@ from tests.mock_data import MockGithubRepo, MockGitlabModule, mock_requestsUrl
 
 class TestGithubLoader(unittest.TestCase):
     @classmethod
-    @patch('grlc.fileLoaders.Github.get_repo', return_value=MockGithubRepo())
+    @patch("grlc.fileLoaders.Github.get_repo", return_value=MockGithubRepo())
     def setUpClass(self, mocked_repo):
-        self.user = 'fakeuser'
-        self.repo = 'fakerepo'
-        self.loader = GithubLoader(self.user, self.repo, subdir=None, sha=None, prov=None)
+        self.user = "fakeuser"
+        self.repo = "fakerepo"
+        self.loader = GithubLoader(
+            self.user, self.repo, subdir=None, sha=None, prov=None
+        )
 
     def test_fetchFiles(self):
         files = self.loader.fetchFiles()
@@ -32,7 +34,9 @@ class TestGithubLoader(unittest.TestCase):
 
         # File items should have a download_url
         for fItem in files:
-            self.assertIn('download_url', fItem, "File items should have a download_url")
+            self.assertIn(
+                "download_url", fItem, "File items should have a download_url"
+            )
 
     def test_getRawRepoUri(self):
         repoUri = self.loader.getRawRepoUri()
@@ -58,18 +62,24 @@ class TestGithubLoader(unittest.TestCase):
             self.assertGreater(len(text), 0, "Should be non-empty")
 
         # Should raise exception for invalid file items
-        with self.assertRaises(Exception, msg="Should raise exception for invalid file items"):
+        with self.assertRaises(
+            Exception, msg="Should raise exception for invalid file items"
+        ):
             text = self.loader.getTextFor({})
 
     def test_getTextForName(self):
         testableNames = [
-            ('test-rq', qType['SPARQL']),
-            ('test-sparql', qType['SPARQL']),
-            ('test-tpf', qType['TPF'])
+            ("test-rq", qType["SPARQL"]),
+            ("test-sparql", qType["SPARQL"]),
+            ("test-tpf", qType["TPF"]),
         ]
         for name, expectedType in testableNames:
             text, actualType = self.loader.getTextForName(name)
-            self.assertEqual(expectedType, actualType, "Query type should match %s != %s" % (expectedType, actualType))
+            self.assertEqual(
+                expectedType,
+                actualType,
+                "Query type should match %s != %s" % (expectedType, actualType),
+            )
 
     def test_getEndpointText(self):
         endpoint = self.loader.getEndpointText()
@@ -80,11 +90,13 @@ class TestGithubLoader(unittest.TestCase):
 
 class TestGitlabLoader(unittest.TestCase):
     @classmethod
-    @patch('grlc.fileLoaders.gitlab.Gitlab', return_value=MockGitlabModule())
+    @patch("grlc.fileLoaders.gitlab.Gitlab", return_value=MockGitlabModule())
     def setUpClass(self, mocked_repo):
-        self.user = 'fakeuser'
-        self.repo = 'fakerepo'
-        self.loader = GitlabLoader(self.user, self.repo, subdir=None, sha=None, prov=None)
+        self.user = "fakeuser"
+        self.repo = "fakerepo"
+        self.loader = GitlabLoader(
+            self.user, self.repo, subdir=None, sha=None, prov=None
+        )
 
     def test_fetchFiles(self):
         files = self.loader.fetchFiles()
@@ -97,7 +109,9 @@ class TestGitlabLoader(unittest.TestCase):
 
         # File items should have a download_url
         for fItem in files:
-            self.assertIn('download_url', fItem, "File items should have a download_url")
+            self.assertIn(
+                "download_url", fItem, "File items should have a download_url"
+            )
 
     def test_getRawRepoUri(self):
         repoUri = self.loader.getRawRepoUri()
@@ -123,18 +137,24 @@ class TestGitlabLoader(unittest.TestCase):
             self.assertGreater(len(text), 0, "Should be non-empty")
 
         # Should raise exception for invalid file items
-        with self.assertRaises(Exception, msg="Should raise exception for invalid file items"):
+        with self.assertRaises(
+            Exception, msg="Should raise exception for invalid file items"
+        ):
             text = self.loader.getTextFor({})
 
     def test_getTextForName(self):
         testableNames = [
-            ('test-rq', qType['SPARQL']),
-            ('test-sparql', qType['SPARQL']),
-            ('test-tpf', qType['TPF'])
+            ("test-rq", qType["SPARQL"]),
+            ("test-sparql", qType["SPARQL"]),
+            ("test-tpf", qType["TPF"]),
         ]
         for name, expectedType in testableNames:
             text, actualType = self.loader.getTextForName(name)
-            self.assertEqual(expectedType, actualType, "Query type should match %s != %s" % (expectedType, actualType))
+            self.assertEqual(
+                expectedType,
+                actualType,
+                "Query type should match %s != %s" % (expectedType, actualType),
+            )
 
     def test_getEndpointText(self):
         endpoint = self.loader.getEndpointText()
@@ -146,7 +166,7 @@ class TestGitlabLoader(unittest.TestCase):
 class TestLocalLoader(unittest.TestCase):
     @classmethod
     def setUpClass(self):
-        self.loader = LocalLoader(path.join('tests', 'repo'))
+        self.loader = LocalLoader(path.join("tests", "repo"))
 
     def test_fetchFiles(self):
         files = self.loader.fetchFiles()
@@ -159,7 +179,9 @@ class TestLocalLoader(unittest.TestCase):
 
         # File items should have a download_url
         for fItem in files:
-            self.assertIn('download_url', fItem, "File items should have a download_url")
+            self.assertIn(
+                "download_url", fItem, "File items should have a download_url"
+            )
 
     def test_getRawRepoUri(self):
         repoUri = self.loader.getRawRepoUri()
@@ -184,18 +206,24 @@ class TestLocalLoader(unittest.TestCase):
             self.assertGreater(len(text), 0, "Should be non-empty")
 
         # Should raise exception for invalid file items
-        with self.assertRaises(Exception, msg="Should raise exception for invalid file items"):
+        with self.assertRaises(
+            Exception, msg="Should raise exception for invalid file items"
+        ):
             text = self.loader.getTextFor({})
 
     def test_getTextForName(self):
         testableNames = [
-            ('test-rq', qType['SPARQL']),
-            ('test-sparql', qType['SPARQL']),
-            ('test-tpf', qType['TPF'])
+            ("test-rq", qType["SPARQL"]),
+            ("test-sparql", qType["SPARQL"]),
+            ("test-tpf", qType["TPF"]),
         ]
         for name, expectedType in testableNames:
             text, actualType = self.loader.getTextForName(name)
-            self.assertEqual(expectedType, actualType, "Query type should match %s != %s" % (expectedType, actualType))
+            self.assertEqual(
+                expectedType,
+                actualType,
+                "Query type should match %s != %s" % (expectedType, actualType),
+            )
 
     def test_getEndpointText(self):
         endpoint = self.loader.getEndpointText()
@@ -207,7 +235,9 @@ class TestLocalLoader(unittest.TestCase):
 class TestURLLoader(unittest.TestCase):
     @classmethod
     def setUp(self):
-        self.patcher = patch('grlc.fileLoaders.requests.get', side_effect=mock_requestsUrl)
+        self.patcher = patch(
+            "grlc.fileLoaders.requests.get", side_effect=mock_requestsUrl
+        )
         self.patcher.start()
 
     @classmethod
@@ -215,9 +245,9 @@ class TestURLLoader(unittest.TestCase):
         self.patcher.stop()
 
     @classmethod
-    @patch('requests.get', side_effect=mock_requestsUrl)
+    @patch("requests.get", side_effect=mock_requestsUrl)
     def setUpClass(self, x):
-        self.specURL = 'http://example.org/url.yml'
+        self.specURL = "http://example.org/url.yml"
         self.loader = URLLoader(self.specURL)
 
     def test_fetchFiles(self):
@@ -231,7 +261,9 @@ class TestURLLoader(unittest.TestCase):
 
         # File items should have a download_url
         for fItem in files:
-            self.assertIn('download_url', fItem, "File items should have a download_url")
+            self.assertIn(
+                "download_url", fItem, "File items should have a download_url"
+            )
 
     def test_getTextFor(self):
         files = self.loader.fetchFiles()
@@ -247,7 +279,9 @@ class TestURLLoader(unittest.TestCase):
             self.assertGreater(len(text), 0, "Should be non-empty")
 
         # Should raise exception for invalid file items
-        with self.assertRaises(Exception, msg="Should raise exception for invalid file items"):
+        with self.assertRaises(
+            Exception, msg="Should raise exception for invalid file items"
+        ):
             text = self.loader.getTextFor({})
 
     def test_getRawRepoUri(self):
@@ -257,17 +291,23 @@ class TestURLLoader(unittest.TestCase):
         self.assertIsInstance(repoUri, six.string_types, "Should be a string")
 
         # Should be the same one we used to create the repo
-        self.assertIn(self.specURL, repoUri, "Should be the same URL it was initialized with")
+        self.assertIn(
+            self.specURL, repoUri, "Should be the same URL it was initialized with"
+        )
 
     def test_getTextForName(self):
         testableNames = [
-            ('test-rq', qType['SPARQL']),
-            ('test-sparql', qType['SPARQL']),
-            ('test-tpf', qType['TPF'])
+            ("test-rq", qType["SPARQL"]),
+            ("test-sparql", qType["SPARQL"]),
+            ("test-tpf", qType["TPF"]),
         ]
         for name, expectedType in testableNames:
             text, actualType = self.loader.getTextForName(name)
-            self.assertEqual(expectedType, actualType, "Query type should match %s != %s" % (expectedType, actualType))
+            self.assertEqual(
+                expectedType,
+                actualType,
+                "Query type should match %s != %s" % (expectedType, actualType),
+            )
 
     def test_getEndpointText(self):
         endpoint = self.loader.getEndpointText()
@@ -276,5 +316,5 @@ class TestURLLoader(unittest.TestCase):
         self.assertIsInstance(endpoint, six.string_types, "Should be some text")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
