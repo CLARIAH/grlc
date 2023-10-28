@@ -1,12 +1,10 @@
 name: Lint
 
 on:
-  push
-#  push:
-#    paths:
-#      - 'src/*.py'
-#      - 'tests/*.py'
-
+  push:
+    paths:
+      - 'src/*.py'
+      - 'tests/*.py'
 jobs:
   linter:
     runs-on: ubuntu-latest
