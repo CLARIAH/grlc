@@ -1,0 +1,3 @@
+[flake8]
+per-file-ignores = src/__init__.py:F401
+
