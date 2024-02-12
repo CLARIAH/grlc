@@ -16,8 +16,8 @@ class TestUtils(unittest.TestCase):
     def setUpClass(self):
         self.loader = mockLoader
 
-    @patch("requests.get")
-    def test_sparql_transformer(self, mock_get):
+    @patch("requests.post")
+    def test_sparql_transformer(self, mock_post):
         mock_json = {
             "head": {},
             "results": {
@@ -56,9 +56,9 @@ class TestUtils(unittest.TestCase):
             },
         }
 
-        mock_get.return_value = Mock(ok=True)
-        mock_get.return_value.headers = {"Content-Type": "application/json"}
-        mock_get.return_value.text = json.dumps(mock_json)
+        mock_post.return_value = Mock(ok=True)
+        mock_post.return_value.headers = {"Content-Type": "application/json"}
+        mock_post.return_value.text = json.dumps(mock_json)
 
         rq, _ = self.loader.getTextForName("test-json")
 
@@ -101,9 +101,9 @@ class TestUtils(unittest.TestCase):
         return_value.text = json.dumps(mock_simpleSparqlResponse)
         return return_value
 
-    @patch("requests.get")
-    def test_dispatch_SPARQL_query(self, mock_get):
-        mock_get.return_value = self.setMockGetResponse()
+    @patch("requests.post")
+    def test_dispatch_SPARQL_query(self, mock_post):
+        mock_post.return_value = self.setMockGetResponse()
 
         rq, _ = self.loader.getTextForName("test-projection")
         resp, status, headers = utils.dispatchSPARQLQuery(
@@ -116,11 +116,35 @@ class TestUtils(unittest.TestCase):
             formData={},
         )
         self.validateTestResponse(resp)
+        self.assertTrue(
+            mock_post.called, "Should communicate with SPARQL endpoint via POST"
+        )
+
+    @patch("requests.get")
+    def test_dispatch_SPARQL_query_get(self, mock_get):
+        """Test that communication with SPARQL endpoint goes via GET method
+        When the endpoint-method decorator is present and set to GET."""
+        mock_get.return_value = self.setMockGetResponse()
+
+        rq, _ = self.loader.getTextForName("test-endpoint-get")
+        resp, status, headers = utils.dispatchSPARQLQuery(
+            rq,
+            self.loader,
+            content=None,
+            requestArgs={"id": "http://dbpedia.org/resource/Frida_Kahlo"},
+            acceptHeader="application/json",
+            requestUrl="http://mock-endpoint/sparql",
+            formData={},
+        )
+        self.validateTestResponse(resp)
+        self.assertTrue(
+            mock_get.called, "Should communicate with SPARQL endpoint via GET"
+        )
 
     @patch("grlc.utils.getLoader")
-    @patch("requests.get")
-    def test_dispatch_query(self, mock_get, mock_loader):
-        mock_get.return_value = self.setMockGetResponse()
+    @patch("requests.post")
+    def test_dispatch_query(self, mock_post, mock_loader):
+        mock_post.return_value = self.setMockGetResponse()
         mock_loader.return_value = self.loader
 
         resp, status, headers = utils.dispatch_query(
