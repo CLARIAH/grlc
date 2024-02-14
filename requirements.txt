@@ -2,7 +2,7 @@ docopt==0.6.2
 Flask==3.0.0
 Flask-Cors==4.0.0
 pyaml==23.9.5
-python-gitlab==3.15.0
+python-gitlab==4.3.0
 rdflib==7.0.0
 requests==2.31.0
 SPARQLTransformer==2.3.0
