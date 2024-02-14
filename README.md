@@ -64,7 +64,7 @@ grlc can also use a subdirectory inside your Github repo. This can be done by in
 
 grlc can build an API from any GitLab repository, specified by the GitLab user name of the owner (`<user>`) and repository name (`<repo>`).
 
-For example, assuming your queries are stored on a GitLAb repo: `https://gitlab.com/c-martinez/grlc-queries`, point your browser to the following location
+For example, assuming your queries are stored on a GitLab repo: `https://gitlab.com/c-martinez/grlc-queries`, point your browser to the following location
 `http://grlc.io/api-gitlab/c-martinez/grlc-queries/`
 
 grlc can make use of git's version control mechanism to generate an API based on a specific version of queries in the repository. This can be done by including the name of a branch in the URL path (`http://grlc-server/api-gitlab/<user>/<repo>/branch/<branch>`), for example: `http://grlc.io/api-gitlab/c-martinez/grlc-queries/branch/master`
@@ -263,6 +263,16 @@ Syntax:
 ```
 
 Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/transform.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_transform).
+
+### `endpoint-method`
+Allows the query to be sent from the grlc server to the SPARQL endpoint using either `GET` or `POST` http method. (Default: `POST`)
+
+Syntax:
+```
+#+ endpoint-method: GET
+```
+
+Example [query](https://github.com/CLARIAH/grlc-queries/blob/master/endpoint-method.rq) and the equivalent [API operation](http://grlc.io/api-git/CLARIAH/grlc-queries/#/default/get_endpoint_method).
 
 ### Example APIs
 

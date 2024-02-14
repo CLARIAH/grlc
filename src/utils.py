@@ -248,22 +248,31 @@ def _dispatchQueryInsert(
 
 
 def _dispatchQuerySelect(
-    acceptHeader, content, rewritten_query, endpoint, auth, headers
+    acceptHeader, content, rewritten_query, endpoint, auth, headers, endpoint_method
 ):
-    reqHeaders = {"Accept": acceptHeader}
+    reqHeaders = {"Accept": acceptHeader, "Content-Type": "application/sparql-query"}
     if content:
-        reqHeaders = {"Accept": static.mimetypes[content]}
-    data = {"query": rewritten_query}
+        reqHeaders = {
+            "Accept": static.mimetypes[content],
+            "Content-Type": "application/sparql-query",
+        }
 
-    glogger.debug(
-        "Sending HTTP request to SPARQL endpoint with params: {}".format(data)
-    )
-    glogger.debug(
-        "Sending HTTP request to SPARQL endpoint with headers: {}".format(reqHeaders)
-    )
-    glogger.debug("Sending HTTP request to SPARQL endpoint with auth: {}".format(auth))
+    glogger.debug("Sending HTTP request to SPARQL endpoint")
+    glogger.debug("... w/params: {}".format(rewritten_query))
+    glogger.debug("... w/headers: {}".format(reqHeaders))
+    glogger.debug("... w/auth: {}".format(auth))
+    glogger.debug("... via: {}".format(endpoint_method))
+
     try:
-        response = requests.get(endpoint, params=data, headers=reqHeaders, auth=auth)
+        if endpoint_method == "GET":
+            data = {"query": rewritten_query}
+            response = requests.get(
+                endpoint, params=data, headers=reqHeaders, auth=auth
+            )
+        else:
+            response = requests.post(
+                endpoint, data=rewritten_query, headers=reqHeaders, auth=auth
+            )
         # Response headers
         resp = response.text
         code = 200
@@ -329,6 +338,11 @@ def dispatchSPARQLQuery(
         "application/json" if isinstance(raw_sparql_query, dict) else acceptHeader
     )
     pagination = query_metadata["pagination"] if "pagination" in query_metadata else ""
+    endpoint_method = (
+        query_metadata["endpoint-method"]
+        if "endpoint-method" in query_metadata
+        else "POST"
+    )
     rewritten_query = query_metadata["query"]
 
     # Rewrite query using parameter values
@@ -370,7 +384,13 @@ def dispatchSPARQLQuery(
     # If there's no mime type, the endpoint is an actual SPARQL endpoint
     else:
         resp, code, headers = _dispatchQuerySelect(
-            acceptHeader, content, rewritten_query, endpoint, auth, headers
+            acceptHeader,
+            content,
+            rewritten_query,
+            endpoint,
+            auth,
+            headers,
+            endpoint_method,
         )
 
     # If the query is paginated, set link HTTP headers
