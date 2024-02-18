@@ -56,7 +56,7 @@ class grlcPROV:
                     "PROV-O",
                 ]
             ).decode("utf-8")
-            repo_prov = repo_prov[repo_prov.find("@"):]
+            repo_prov = repo_prov[repo_prov.find("@") :]
             # glogger.debug('Git2PROV output: {}'.format(repo_prov))
             glogger.debug("Ingesting Git2PROV output into RDF graph")
             with open("temp.prov.ttl", "w") as temp_prov:
