@@ -16,7 +16,7 @@ authors:
     given-names: Carlos
     orcid: "https://orcid.org/0000-0001-5565-7577"
 cff-version: "1.0.3"
-date-released: 2023-07-30
+date-released: 2024-02-17
 doi: 10.5281/zenodo.1064391
 license: MIT
 message: "If you use this software, please cite it as below."
@@ -29,4 +29,4 @@ keywords:
   - "linked-data"
   - "semantic-web"
   - "linked-data-api"
-version: "1.3.8"
+version: "1.3.9"
