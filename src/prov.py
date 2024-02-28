@@ -9,7 +9,6 @@
 from rdflib import Graph, URIRef, Namespace, RDF, Literal
 from datetime import datetime
 from subprocess import check_output
-from six import PY3
 
 # grlc modules
 import grlc.static as static
@@ -18,7 +17,7 @@ import grlc.glogging as glogging
 glogger = glogging.getGrlcLogger(__name__)
 
 
-class grlcPROV():
+class grlcPROV:
     """Record provenance of the grlc specification constructed."""
 
     def __init__(self, user, repo):
@@ -33,10 +32,12 @@ class grlcPROV():
         self.prov_g = Graph()
         prov_uri = URIRef("http://www.w3.org/ns/prov#")
         self.prov = Namespace(prov_uri)
-        self.prov_g.bind('prov', self.prov)
+        self.prov_g.bind("prov", self.prov)
 
         self.agent = URIRef("http://{}".format(static.SERVER_NAME))
-        self.entity_d = URIRef("http://{}/api/{}/{}/spec".format(static.SERVER_NAME, self.user, self.repo))
+        self.entity_d = URIRef(
+            "http://{}/api/{}/{}/spec".format(static.SERVER_NAME, self.user, self.repo)
+        )
         self.activity = URIRef(self.entity_d + "-activity")
 
         self.init_prov_graph()
@@ -49,15 +50,19 @@ class grlcPROV():
         try:
             # Use git2prov to get prov on the repo
             repo_prov = check_output(
-                ['node_modules/git2prov/bin/git2prov', 'https://github.com/{}/{}/'.format(self.user, self.repo),
-                 'PROV-O']).decode("utf-8")
-            repo_prov = repo_prov[repo_prov.find('@'):]
+                [
+                    "node_modules/git2prov/bin/git2prov",
+                    "https://github.com/{}/{}/".format(self.user, self.repo),
+                    "PROV-O",
+                ]
+            ).decode("utf-8")
+            repo_prov = repo_prov[repo_prov.find("@") :]
             # glogger.debug('Git2PROV output: {}'.format(repo_prov))
-            glogger.debug('Ingesting Git2PROV output into RDF graph')
-            with open('temp.prov.ttl', 'w') as temp_prov:
+            glogger.debug("Ingesting Git2PROV output into RDF graph")
+            with open("temp.prov.ttl", "w") as temp_prov:
                 temp_prov.write(repo_prov)
 
-            self.prov_g.parse('temp.prov.ttl', format='turtle')
+            self.prov_g.parse("temp.prov.ttl", format="turtle")
         except Exception as e:
             glogger.error(e)
             glogger.error("Couldn't parse Git2PROV graph, continuing without repo PROV")
@@ -74,7 +79,9 @@ class grlcPROV():
 
         # activity
         self.prov_g.add((self.activity, self.prov.wasAssociatedWith, self.agent))
-        self.prov_g.add((self.activity, self.prov.startedAtTime, Literal(datetime.now())))
+        self.prov_g.add(
+            (self.activity, self.prov.startedAtTime, Literal(datetime.now()))
+        )
         # later: activity used entity_o_1 ... entity_o_n
         # later: activity endedAtTime (when we know the end time)
 
@@ -99,13 +106,10 @@ class grlcPROV():
         Log provenance graph so far
         """
         glogger.debug("Spec generation provenance graph:")
-        glogger.debug(self.prov_g.serialize(format='turtle'))
+        glogger.debug(self.prov_g.serialize(format="turtle"))
 
     def serialize(self, format):
         """
         Serialize provenance graph in the specified format
         """
-        if PY3:
-            return self.prov_g.serialize(format=format).decode('utf-8')
-        else:
-            return self.prov_g.serialize(format=format)
+        return self.prov_g.serialize(format=format)

@@ -1,0 +1,5 @@
+[flake8]
+per-file-ignores = 
+    src/__init__.py:F401
+    src/prov.py:E203
+    tests/test_grlc.py:F401

@@ -22,9 +22,10 @@ case ${1} in
     case ${1} in
       app:start)
         cd ${GRLC_INSTALL_DIR}
-        # put github's access_token in place
+        # put github and gitlab access_tokens in place
         cp config.default.ini config.ini
         sed -i "s/xxx/${GRLC_GITHUB_ACCESS_TOKEN}/" config.ini
+        sed -i "s/yyy/${GRLC_GITLAB_ACCESS_TOKEN}/" config.ini
         # configure grlc server name
         sed -i "s/grlc.io/${GRLC_SERVER_NAME}/" config.ini
         # configure default sparql endpoint
