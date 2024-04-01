@@ -6,6 +6,6 @@ python-gitlab==4.3.0
 rdflib==7.0.0
 requests==2.31.0
 SPARQLTransformer==2.3.0
-PyGithub==2.1.1
+PyGithub==2.3.0
 gunicorn==21.2.0; sys_platform!="win32"
 waitress>=1.4.2; sys_platform=="win32"
