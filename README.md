@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 [![DOI](https://zenodo.org/badge/46131212.svg)](https://zenodo.org/badge/latestdoi/46131212)
 ![Build Status](https://github.com/CLARIAH/grlc/actions/workflows/testing.yml/badge.svg?branch=master)
 [![status](https://joss.theoj.org/papers/437074e2d77df8c6cbf3bc4e407b3b17/status.svg)](https://joss.theoj.org/papers/437074e2d77df8c6cbf3bc4e407b3b17)
+[![FAIR checklist badge](https://ardc-fair-checklist.github.io/badge.svg)](https://ardc-fair-checklist.github.io/v0.2?f=31&a=32113&i=32121&r=123)
 
 
 grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor, automatically builds Web APIs using shared SPARQL queries. http://grlc.io/
