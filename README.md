@@ -300,6 +300,9 @@ More details for each of these options are given below.
 ### grlc.io
 The easiest way to use grlc is by visiting [grlc.io](http://grlc.io/) and using this service to convert SPARQL queries into a RESTful API. Your queries can be [stored on a github repo](#from-a-github-repository) or can be [listed on a specification file](#from-a-specification-file).
 
+#### Google Analytics
+grlc.io uses Google Analytics to keep track of the number of users of the service. We need this to show the impact of grlc when applying for funding. If this causes you to be conserned about privacy, we recommend you use some user-side anti-tracking, and we would appreciate if you could reach out to us to let us know you are using grlc.
+
 ### Docker
 To run grlc via [docker](https://www.docker.com/), you'll need a working installation of docker. To deploy grlc, just pull the [latest image from Docker hub](https://hub.docker.com/r/clariah/grlc/). :
 ```bash
