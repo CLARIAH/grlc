@@ -6,6 +6,10 @@ updates:
     schedule:
       interval: "monthly"
     target-branch: "dev"
+    # Apply only major or minor updates, ignore patches
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
     # Add reviewers
     reviewers:
       - "albertmeronyo"
