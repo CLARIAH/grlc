@@ -1,0 +1,229 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Duchenne Parent Project Shallot",
+    "description": "The FAIR Data Point Shallot server for the Duchenne Parent Project",
+    "contact": {
+      "name": "Mark Wilkinson",
+      "url": "https://fairdata.systems"
+    },
+    "version": "local"
+  },
+  "servers": [
+    {
+      "url": "//fairdata.services/api-local/"
+    }
+  ],
+  "paths": {
+    "/count": {
+      "get": {
+        "tags": [
+          "Patient Count"
+        ],
+        "summary": "Returns the number of patients in the registry with the corresponding disease code",
+        "description": "\n\n```\n#+ summary: Returns the number of patients in the registry with the corresponding disease code\n#+ tags:\n#+   - Patient Count\n#+ defaults:\n#+   - type: http://www.orpha.net/ORDO/Orphanet_98896\n#+ endpoint_in_url: False\n\nPREFIX sio: <http://semanticscience.org/resource/>\nselect (count(?p) as ?count) where { \n    ?p sio:SIO_000228 ?role .  # person has role role\n    ?role sio:SIO_000356 ?process . # is realized in process\n    ?process sio:SIO_000229 ?output . #has output output\n    ?output sio:SIO_000628 ?attribute . # output refers to attribute\n\t?attribute a ?_type_iri .  # attribute is a orphacode\n}\n\n```",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "description": "A value of type string (iri) that will substitute ?_type_iri in the original query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "iri",
+              "default": "http://www.orpha.net/ORDO/Orphanet_98896"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Query response",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/kpi-ttd": {
+      "get": {
+        "tags": [
+          "KPI diagnosis-delay"
+        ],
+        "summary": "Returns the Key Performance Indicator of the delay between symptom onset and diagnosis.  This data is aggregated by disease, and by year of diagnosis, and is measured in days.",
+        "description": "\n\n```\n#+ summary: Returns the Key Performance Indicator of the delay between symptom onset and diagnosis.  This data is aggregated by disease, and by year of diagnosis, and is measured in days.\n#+ tags:\n#+ - KPI diagnosis-delay\n#+ defaults:\n#+ \n#+ endpoint_in_url: False\n\n################################################################\n# list diagnosis and time from onset to diagnosis\n################################################################\n\nPREFIX sio: <http://semanticscience.org/resource/> \nPREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\nPREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\nPREFIX ofn: <http://www.ontotext.com/sparql/functions/>\n\nSELECT DISTINCT ?ORDO ?yearOfDiagnosis (xsd:integer(ROUND(AVG(?timeOnsetToDiagnosis))) as ?avgoffset)\nWHERE {\n    BIND(xsd:integer(ofn:asDays(?onsetdate - ?diagnosisdate)) AS ?timeOnsetToDiagnosis)\n#    BIND(xsd:integer(ofn:asDays(?diagnosisdate - ?onsetdate)) AS ?timeOnsetToDiagnosis)\n    BIND(SUBSTR(str(?diagnosisdate), 1,4) AS ?yearOfDiagnosis)\n    {\n        SELECT  ?ORDO ?diagnosisdate WHERE {\n            GRAPH ?g {\n                ?person sio:SIO_000228 ?role1 .  # person has role role\n                ?role1 sio:SIO_000356 ?process1 . # is realized in process\n                ?process1 a <http://purl.obolibrary.org/obo/NCIT_C18020> .  # diagnostic process\n                ?process1 sio:SIO_000229 ?output1 . #has output output \n                ?output1 a <http://purl.obolibrary.org/obo/NCIT_C154625> .  # diagnosis code\n                ?output1 sio:SIO_000628 ?diagnosis1 . # output refers to attribute\n                ?diagnosis1 a ?ORDO .\n                FILTER(!(?ORDO = sio:SIO_000614)) .  # not an \"attribute\" diagnosis\n\t    \t}\n    \t\t?g sio:SIO_000680 ?startdate .\n    \t\t?startdate sio:SIO_000300 ?diagnosisdate .\n        }\n    }\n    {\n        SELECT  ?onsetdate WHERE {\n            ?person sio:SIO_000228 ?role2 .  # person has role role\n            ?role2 sio:SIO_000356 ?process2 . # is realized in process\n            ?process2 sio:SIO_000229 ?output2 . #has output output\n            ?output2 sio:SIO_000300 ?onsetdate .\n            ?output2 sio:SIO_000628 ?attribute2 . # output refers to attribute\n            ?attribute2 a <http://purl.obolibrary.org/obo/NCIT_C124353> .   \n        }\n    }\n} group by ?ORDO ?yearOfDiagnosis order by ?yearOfDiagnosis ?ORDO\n\n\n```",
+        "responses": {
+          "200": {
+            "description": "Query response",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/phenotype-frequencies": {
+      "get": {
+        "tags": [
+          "Phenotype frequency"
+        ],
+        "summary": "Returns the number of patients in the registry that have had a phenotype code at any time",
+        "description": "\n\n```\n#+ summary: Returns the number of patients in the registry that have had a phenotype code at any time\n#+ tags:\n#+ - Phenotype frequency\n#+ defaults:\n#+ \n#+ endpoint_in_url: False\n\nPREFIX sio: <http://semanticscience.org/resource/>\nselect ?type (count(?type) as ?frequency) where {\n  select distinct ?p ?type where {\n    ?p sio:SIO_000228 ?role .  # person has role role\n    ?role sio:SIO_000356 ?process . # is realized in process\n    ?process sio:SIO_000229 ?output . #has output output\n    ?output sio:SIO_000628 ?attribute . # output refers to attribute\n    ?attribute a ?type .\n    FILTER(!(?type = sio:SIO_000614)) .  # not an \"attribute\" type\n  }\n} group by ?type\n\n```",
+        "responses": {
+          "200": {
+            "description": "Query response",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {}
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              },
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Message": {
+        "type": "string"
+      }
+    }
+  },
+  "x-original-swagger-version": "2.0"
+}

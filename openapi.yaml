@@ -1,0 +1,106 @@
+openapi: "3.0.1"
+info:
+  title: SPARQL OpenAPI
+  version: "10"
+  description: |
+    This is a heavily trimmed copy of the RDF4J REST API that includes only the SPARQL endpoint GET and POST definitions
+
+    From this endpoint we serve the BGV Administrative Collection information (collecting group, date, etc.)
+
+externalDocs:
+  url: https://rdf4j.org/documentation/reference/rest-api/
+
+servers:
+  - url: https://bgv.cbgp.upm.es
+    description: SPARQL server for the BANCO DE GERMOPLASMA VEGETAL-UPM
+
+tags:
+  - name: SPARQL
+    description: SPARQL Query execution
+
+components:
+  requestBodies:
+    RdfData:
+      description: RDF data payload
+      content:
+        application/rdf+xml:
+          schema:
+            type: object
+            xml:
+              name: RDF
+              namespace: http://www.w3.org/1999/02/22-rdf-syntax-ns#
+        text/plain:
+          schema:
+            type: string
+        text/turtle:
+          schema:
+            type: string
+        text/rdf+n3:
+          schema:
+            type: string
+        text/x-nquads:
+          schema:
+            type: string
+        application/ld+json:
+          schema:
+            type: object
+            format: json
+        application/rdf+json:
+          schema:
+            type: object
+            format: json
+        application/trix:
+          schema:
+            type: object
+            xml:
+              name: TriX
+        application/x-trig:
+          schema:
+            type: string
+        application/x-binary-rdf:
+          schema:
+            type: string
+            format: binary
+  responses:
+    200SparqlResult:
+      description: SPARQL query result
+      content:
+        application/sparql-results+json:
+          examples:
+            SelectQueryResult:
+              $ref: "#/components/examples/SparqlJsonBindings"
+  examples:
+    SparqlJsonBindings:
+      value:
+        head:
+          vars: [ "s", "p", "o" ]
+          results:
+            bindings:
+              - s:
+                  type: "uri"
+                  value: "http://example.org/s1"
+              - p:
+                  type: "uri"
+                  value: "http://example.org/p1"
+              - o:
+                  type: "literal"
+                  value: "foo"
+paths:
+  /repositories/administrative:
+    get:
+      tags:
+        - SPARQL
+      summary: Execute SPARQL query
+      description: |
+        Execute a SPARQL query on the repository. The result format is based on the type of result (boolean, variable bindings, or RDF data) and the negotiated acceptable content-type. Note that RDF4J supports executing SPARQL queries with either a GET or a POST request. POST is supported for queries that are too large to be encoded as a query parameter.
+      parameters:
+        - name: query
+          in: query
+          description: The query to evaluate
+          required: true
+          schema:
+            type: string
+            example: SELECT DISTINCT ?type WHERE {?s a ?type}
+      responses:
+        '200':
+          $ref: "#/components/responses/200SparqlResult"
