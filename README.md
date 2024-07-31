@@ -1,3 +1,6 @@
+# Shallot
+## Kinda like grlc, but not as powerful ;-)
+
 <p algin="center"><img src="https://raw.githubusercontent.com/CLARIAH/grlc/master/src/static/grlc_logo_01.png" width="250px"></p>
 
 # NOTE:  This is a highly crippled version of the original grlc server
