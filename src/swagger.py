@@ -17,9 +17,9 @@ def get_blank_spec():
     """Creates the base (blank) structure of swagger specification."""
     swag = {}
     swag["swagger"] = "2.0"
-    swag[
-        "schemes"
-    ] = []  # 'http' or 'https' -- leave blank to make it dependent on how UI is loaded
+    swag["schemes"] = (
+        []
+    )  # 'http' or 'https' -- leave blank to make it dependent on how UI is loaded
     swag["paths"] = {}
     swag["definitions"] = {"Message": {"type": "string"}}
     return swag
@@ -109,9 +109,11 @@ def get_path_for_item(item):
                         "type": "array",
                         "items": {
                             "type": "object",
-                            "properties": item["item_properties"]
-                            if "item_properties" in item
-                            else None,
+                            "properties": (
+                                item["item_properties"]
+                                if "item_properties" in item
+                                else None
+                            ),
                         },
                     },
                 },
@@ -162,48 +164,14 @@ def build_spec(
         if (
             extension in allowed_ext or query_url
         ):  # parameter provided queries may not have extension
-            call_name = c["name"].split(".")[0]
 
-            # Retrieve extra metadata from the query decorators
-            query_text = loader.getTextFor(c)
-
-            item = None
-            if extension == "json":
-                query_text = json.loads(query_text)
-
-            if extension in ["rq", "sparql", "json"] or query_url:
-                glogger.debug(
-                    "==================================================================="
-                )
-                glogger.debug("Processing SPARQL query: {}".format(c["name"]))
-                glogger.debug(
-                    "==================================================================="
-                )
-                try:
-                    item = process_sparql_query_text(
-                        query_text, loader, call_name, extraMetadata
-                    )
-                except Exception as e:
-                    warnings.append(str(e))
-            elif "tpf" == extension:
-                glogger.debug(
-                    "==================================================================="
-                )
-                glogger.debug("Processing TPF query: {}".format(c["name"]))
-                glogger.debug(
-                    "==================================================================="
-                )
-                item = process_tpf_query_text(
-                    query_text, raw_repo_uri, call_name, extraMetadata
-                )
-                # TODO: raise exceptions in process_tpf_query_text
-            else:
-                glogger.info(
-                    "Ignoring unsupported source call name: {}".format(c["name"])
-                )
-
+            item, warning = _buildItem(
+                c, extension, query_url, raw_repo_uri, loader, extraMetadata
+            )
             if item:
                 items.append(item)
+            if warning:
+                warnings.append(warning)
 
     # Add a warning if no license is found
     if loader.getLicenceURL() is None:
@@ -212,6 +180,62 @@ def build_spec(
         )
 
     return items, warnings
+
+
+def _buildItem(c, extension, query_url, raw_repo_uri, loader, extraMetadata):
+    """Collect all the information required to build an item from a file in a repository."""
+    item = None
+    warning = None
+
+    call_name = c["name"].split(".")[0]
+
+    # Retrieve extra metadata from the query decorators
+    query_text = loader.getTextFor(c)
+
+    if extension == "json":
+        query_text = json.loads(query_text)
+        # Validate loaded json is an actual query.
+        # If it isn't, do not process it further and item is not built
+        if not grlc.utils.SPARQLTransformer_validJSON(query_text):
+            glogger.debug(
+                "==================================================================="
+            )
+            glogger.debug("JSON file not a SPARQL query: {}".format(c["name"]))
+            glogger.debug(
+                "==================================================================="
+            )
+            return item, warning
+
+    if extension in ["rq", "sparql", "json"] or query_url:
+        glogger.debug(
+            "==================================================================="
+        )
+        glogger.debug("Processing SPARQL query: {}".format(c["name"]))
+        glogger.debug(
+            "==================================================================="
+        )
+        try:
+            item = process_sparql_query_text(
+                query_text, loader, call_name, extraMetadata
+            )
+        except Exception as e:
+            warning = str(e)
+    elif "tpf" == extension:
+        glogger.debug(
+            "==================================================================="
+        )
+        glogger.debug("Processing TPF query: {}".format(c["name"]))
+        glogger.debug(
+            "==================================================================="
+        )
+        item = process_tpf_query_text(
+            query_text, raw_repo_uri, call_name, extraMetadata
+        )
+        # TODO: raise exceptions in process_tpf_query_text
+    else:
+        glogger.info("Ignoring unsupported source call name: {}".format(c["name"]))
+
+    return item, warning
 
 
 def process_tpf_query_text(query_text, raw_repo_uri, call_name, extraMetadata):
@@ -356,23 +380,23 @@ def build_parameter(p):
     param["required"] = p["required"]
     param["in"] = "query"
     # TODO: can we simplify the description
-    param[
-        "description"
-    ] = "A value of type {} that will substitute {} in the original query".format(
-        p["type"], p["original"]
+    param["description"] = (
+        "A value of type {} that will substitute {} in the original query".format(
+            p["type"], p["original"]
+        )
     )
     if "lang" in p:
-        param[
-            "description"
-        ] = "A value of type {}@{} that will substitute {} in the original query".format(
-            p["type"], p["lang"], p["original"]
+        param["description"] = (
+            "A value of type {}@{} that will substitute {} in the original query".format(
+                p["type"], p["lang"], p["original"]
+            )
         )
     if "format" in p:
         param["format"] = p["format"]
-        param[
-            "description"
-        ] = "A value of type {} ({}) that will substitute {} in the original query".format(
-            p["type"], p["format"], p["original"]
+        param["description"] = (
+            "A value of type {} ({}) that will substitute {} in the original query".format(
+                p["type"], p["format"], p["original"]
+            )
         )
     if "enum" in p:
         param["enum"] = p["enum"]
