@@ -43,6 +43,8 @@ Your queries can add API parameters to each operation by using the [parameter ma
 
 Your queries can include special [decorators](#decorator-syntax) to add extra functionality to your API.
 
+grlc also supports SPARQL queries expressed as json, using the [SPARQL Transformer](https://github.com/D2KLab/py-sparql-transformer) [Query in JSON](https://github.com/D2KLab/sparql-transformer/blob/master/README.md#query-in-json) syntax. (**Tip**: the [SPARQL Transformer Playground](https://d2klab.github.io/sparql-transformer/) is very useful when building queries with this syntax).
+
 ### Query location
 grlc can load your query collection from different locations: from a GitHub repository (`api-git`), from a GitLab repository (`api-gitlab`), from local storage (`api-local`), and from a specification file (`api-url`). Each type of location has specific features and is accessible via different paths. However all location types produce the same beautiful APIs.
 
