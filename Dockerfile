@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 FROM python:3.11-slim
-MAINTAINER albert.merono@vu.nl
+LABEL org.opencontainers.image.authors="albert.merono@vu.nl"
 
 # Default values for env variables
 ARG GRLC_GITHUB_ACCESS_TOKEN=
