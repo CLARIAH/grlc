@@ -58,9 +58,9 @@ def swagger_spec(
     resp_spec = make_response(jsonify(swag))
     resp_spec.headers["Content-Type"] = "application/json"
 
-    resp_spec.headers[
-        "Cache-Control"
-    ] = static.CACHE_CONTROL_POLICY  # Caching JSON specs for 15 minutes
+    resp_spec.headers["Cache-Control"] = (
+        static.CACHE_CONTROL_POLICY
+    )  # Caching JSON specs for 15 minutes
 
     glogger.info(
         "-----> API spec generation for /{}/{}, subdir {}, params {}, on commit {} complete".format(
