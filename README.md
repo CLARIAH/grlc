@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 [![DOI](https://zenodo.org/badge/46131212.svg)](https://zenodo.org/badge/latestdoi/46131212)
 ![Build Status](https://github.com/CLARIAH/grlc/actions/workflows/testing.yml/badge.svg?branch=master)
 [![status](https://joss.theoj.org/papers/437074e2d77df8c6cbf3bc4e407b3b17/status.svg)](https://joss.theoj.org/papers/437074e2d77df8c6cbf3bc4e407b3b17)
+[![FAIR checklist badge](https://ardc-fair-checklist.github.io/badge.svg)](https://ardc-fair-checklist.github.io/v0.2?f=31&a=32113&i=32121&r=123)
 
 
 grlc, the <b>g</b>it <b>r</b>epository <b>l</b>inked data API <b>c</b>onstructor, automatically builds Web APIs using shared SPARQL queries. http://grlc.io/
@@ -41,6 +42,8 @@ grlc assumes that you have a collection of SPARQL queries as .rq files (like [th
 Your queries can add API parameters to each operation by using the [parameter mapping](https://github.com/CLARIAH/grlc/wiki/Parameter-Mapping) syntax. This allows your query to define query variables which will be mapped to API parameters for your API operation ([see here](https://github.com/CLARIAH/grlc-queries/blob/master/enumerate.rq) for an example).
 
 Your queries can include special [decorators](#decorator-syntax) to add extra functionality to your API.
+
+grlc also supports SPARQL queries expressed as json, using the [SPARQL Transformer](https://github.com/D2KLab/py-sparql-transformer) [Query in JSON](https://github.com/D2KLab/sparql-transformer/blob/master/README.md#query-in-json) syntax. (**Tip**: the [SPARQL Transformer Playground](https://d2klab.github.io/sparql-transformer/) is very useful when building queries with this syntax).
 
 ### Query location
 grlc can load your query collection from different locations: from a GitHub repository (`api-git`), from a GitLab repository (`api-gitlab`), from local storage (`api-local`), and from a specification file (`api-url`). Each type of location has specific features and is accessible via different paths. However all location types produce the same beautiful APIs.
@@ -299,6 +302,9 @@ More details for each of these options are given below.
 
 ### grlc.io
 The easiest way to use grlc is by visiting [grlc.io](http://grlc.io/) and using this service to convert SPARQL queries into a RESTful API. Your queries can be [stored on a github repo](#from-a-github-repository) or can be [listed on a specification file](#from-a-specification-file).
+
+#### Google Analytics
+grlc.io uses Google Analytics to keep track of the number of users of the service. We need this to show the impact of grlc when applying for funding. If this causes you to be conserned about privacy, we recommend you use some user-side anti-tracking, and we would appreciate if you could reach out to us to let us know you are using grlc.
 
 ### Docker
 To run grlc via [docker](https://www.docker.com/), you'll need a working installation of docker. To deploy grlc, just pull the [latest image from Docker hub](https://hub.docker.com/r/clariah/grlc/). :

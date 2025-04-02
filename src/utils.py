@@ -446,3 +446,10 @@ def dispatchTPFQuery(raw_tpf_query, loader, acceptHeader, content):
     headers["Content-Type"] = response.headers["Content-Type"]
     headers["Server"] = "grlc/" + grlc_version
     return resp, 200, headers
+
+
+def SPARQLTransformer_validJSON(json_file):
+    """Validate json file (loaded into Python as a dict) is a valid query for
+    SPARQLTransformer (see https://github.com/D2KLab/py-sparql-transformer/issues/13).
+    """
+    return ("@graph" in json_file) or ("proto" in json_file)

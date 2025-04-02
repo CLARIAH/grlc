@@ -128,7 +128,12 @@ filesInRepo = [
         "name": "fakeFile1.rq",
         "download_url": "https://example.org/path/to/fakeFile.rq",
         "decoded_content": "CONTENT ?".encode(),  # Because Github ContentFile object contains bytes.
-    }
+    },
+    {
+        "name": "fakeJSONFile1.json",
+        "download_url": "https://example.org/path/to/fakeJSONFile1.json",
+        "decoded_content": '{ "x": "y" }'.encode(),  # Because Github ContentFile object contains bytes.
+    },
 ]
 
 mockLoader = LocalLoader(base_url)

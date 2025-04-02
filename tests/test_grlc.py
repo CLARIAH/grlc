@@ -37,7 +37,8 @@ class TestGrlcLib(unittest.TestCase):
         repo = "testrepo"
         spec, warning = swagger.build_spec(user=user, repo=repo, git_type="github")
 
-        self.assertEqual(len(spec), len(filesInRepo))
+        # Repo contains one JSON file which is not a query, and should be ignored
+        self.assertEqual(len(spec), len(filesInRepo) - 1)
 
 
 if __name__ == "__main__":

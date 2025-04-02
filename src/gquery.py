@@ -265,6 +265,7 @@ def get_yaml_decorators(rq):
 
     yaml_string = ""
     query_string = ""
+    query_metadata = None
     if isinstance(rq, dict):  # json query (sparql transformer)
         if "grlc" in rq:
             yaml_string = rq["grlc"]
