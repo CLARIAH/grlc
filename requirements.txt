@@ -1,6 +1,6 @@
 docopt-ng==0.9.0
 Flask==3.1.0
-Flask-Cors==5.0.1
+Flask-Cors==6.0.1
 pyaml==25.5.0
 python-gitlab==6.2.0
 rdflib==7.1.3
