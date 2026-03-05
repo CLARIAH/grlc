@@ -18,6 +18,8 @@ SUPPORTED_MIME_FORMATS = defaultdict(
 
 MIME_FORMAT = {format: mime for mime, format in SUPPORTED_MIME_FORMATS.items()}
 
+DEFAULT_USER_AGENT = "grlc/sparql"
+
 
 def getResponseText(endpoint, query, requestedMimeType):
     """Returns the result and mimetype of executing the given query against
@@ -34,6 +36,10 @@ def getResponseText(endpoint, query, requestedMimeType):
     retFormat = _mimeTypeToSparqlFormat(requestedMimeType)
 
     client = SPARQLWrapper(endpoint)
+    if hasattr(client, "setAgent"):
+        client.setAgent(DEFAULT_USER_AGENT)
+    elif hasattr(client, "addCustomHttpHeader"):
+        client.addCustomHttpHeader("User-Agent", DEFAULT_USER_AGENT)
     client.setQuery(query)
     client.setReturnFormat(retFormat)
     client.setCredentials(

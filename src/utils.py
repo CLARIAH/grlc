@@ -233,6 +233,7 @@ def _dispatchQueryInsert(
     reqHeaders = {
         "Accept": acceptHeader,
         "Content-Type": "application/sparql-update",
+        "User-Agent": static.USER_AGENT,
     }
     response = requests.post(
         endpoint, data=rewritten_query, headers=reqHeaders, auth=auth
@@ -250,12 +251,13 @@ def _dispatchQueryInsert(
 def _dispatchQuerySelect(
     acceptHeader, content, rewritten_query, endpoint, auth, headers, endpoint_method
 ):
-    reqHeaders = {"Accept": acceptHeader, "Content-Type": "application/sparql-query"}
+    reqHeaders = {
+        "Accept": acceptHeader,
+        "Content-Type": "application/sparql-query",
+        "User-Agent": static.USER_AGENT,
+    }
     if content:
-        reqHeaders = {
-            "Accept": static.mimetypes[content],
-            "Content-Type": "application/sparql-query",
-        }
+        reqHeaders["Accept"] = static.mimetypes[content]
 
     glogger.debug("Sending HTTP request to SPARQL endpoint")
     glogger.debug("... w/params: {}".format(rewritten_query))
@@ -425,11 +427,13 @@ def dispatchTPFQuery(raw_tpf_query, loader, acceptHeader, content):
     reqHeaders = {
         "Accept": acceptHeader,
         "Authorization": "token {}".format(static.SPARQL_ACCESS_TOKEN),
+        "User-Agent": static.USER_AGENT,
     }
     if content:
         reqHeaders = {
             "Accept": static.mimetypes[content],
             "Authorization": "token {}".format(static.SPARQL_ACCESS_TOKEN),
+            "User-Agent": static.USER_AGENT,
         }
     tpf_list = re.split("\n|=", raw_tpf_query)
     subject = tpf_list[tpf_list.index("subject") + 1]

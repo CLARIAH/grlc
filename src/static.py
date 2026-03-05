@@ -11,6 +11,9 @@ from configparser import ConfigParser
 DEFAULT_HOST = None
 DEFAULT_PORT = 8088
 
+# User-Agent header for HTTP requests
+USER_AGENT = "grlc/1.3.11 (https://github.com/CLARIAH/grlc)"
+
 # XSD datatypes for parsing queries with parameters
 XSD_DATATYPES = [
     "decimal",
