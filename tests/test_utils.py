@@ -77,6 +77,11 @@ class TestUtils(unittest.TestCase):
         self.assertIsInstance(resp, list)
         self.assertIn("http", resp[0]["id"])
 
+        _, kwargs = mock_post.call_args
+        sent_headers = kwargs.get("headers", {})
+        self.assertIn("User-Agent", sent_headers)
+
+
     def validateTestResponse(self, resp):
         self.assertIsInstance(resp, list, "Response should be a list")
         self.assertEqual(len(resp), 5, "Response should have 5 entries")
@@ -120,6 +125,11 @@ class TestUtils(unittest.TestCase):
             mock_post.called, "Should communicate with SPARQL endpoint via POST"
         )
 
+        _, kwargs = mock_post.call_args
+        sent_headers = kwargs.get("headers", {})
+        self.assertIn("User-Agent", sent_headers)
+
+
     @patch("requests.get")
     def test_dispatch_SPARQL_query_get(self, mock_get):
         """Test that communication with SPARQL endpoint goes via GET method
@@ -141,6 +151,11 @@ class TestUtils(unittest.TestCase):
             mock_get.called, "Should communicate with SPARQL endpoint via GET"
         )
 
+        _, kwargs = mock_get.call_args
+        sent_headers = kwargs.get("headers", {})
+        self.assertIn("User-Agent", sent_headers)
+
+
     @patch("grlc.utils.getLoader")
     @patch("requests.post")
     def test_dispatch_query(self, mock_post, mock_loader):
@@ -156,3 +171,7 @@ class TestUtils(unittest.TestCase):
 
         self.validateTestResponse(resp)
         self.assertNotEqual(status, 404)
+
+        _, kwargs = mock_post.call_args
+        sent_headers = kwargs.get("headers", {})
+        self.assertIn("User-Agent", sent_headers)

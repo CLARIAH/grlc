@@ -7,6 +7,7 @@
 # static.py: static values for the grlc Server
 import os
 from configparser import ConfigParser
+from grlc import __version__ as grlc_version
 
 DEFAULT_HOST = None
 DEFAULT_PORT = 8088
@@ -90,12 +91,16 @@ config_fallbacks = {
     "local_sparql_dir": "",
     "debug": "False",
     "gitlab_url": "https://gitlab",
+    "product": "grlc",
+    "version": grlc_version,
+    "comment": "https://github.com/CLARIAH/grlc",
 }
 config = ConfigParser(config_fallbacks)
 config.add_section("auth")
 config.add_section("defaults")
 config.add_section("local")
 config.add_section("api_gitlab")
+config.add_section("user_agent")
 
 config_filename = os.path.join(os.getcwd(), "config.ini")
 print("Reading config file: ", config_filename)
@@ -121,6 +126,13 @@ SERVER_NAME = config.get("defaults", "server_name")
 # Logging format (prettier than the ugly standard in Flask)
 LOG_FORMAT = "%(asctime)-15s [%(levelname)s] (%(module)s.%(funcName)s) %(message)s"
 LOG_DEBUG_MODE = config.getboolean("defaults", "debug")
+
+# User-Agent header for HTTP requests
+USER_AGENT = "{}/{} ({})".format(
+    config.get("user_agent", "product"), 
+    config.get("user_agent", "version"), 
+    config.get("user_agent", "comment"))
+
 
 # Pattern for INSERT query call names
 INSERT_PATTERN = "INSERT DATA { GRAPH ?_g_iri { <s> <p> <o> }}"
