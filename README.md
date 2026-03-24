@@ -373,7 +373,7 @@ If you want to run grlc at system boot as a service, you can find example upstar
 You can use grlc as a library directly from your own python script. See the [usage example](https://github.com/CLARIAH/grlc/blob/master/doc/notebooks/GrlcFromNotebook.ipynb) to find out more.
 
 #### grlc server configuration
-Regardless of how you are running your grlc server, you will need to configure it using the `config.ini` file. Have a look at the [example config file](./config.default.ini) to see how it this file is structured.
+Regardless of how you are running your grlc server, you will need to configure it using the `config.ini` file. Have a look at the [example config file](./config.default.ini) to see how this file is structured.
 
 The configuration file contains the following variables:
  - `github_access_token` [access token](#gitaccess-token) to communicate with Github API.
@@ -384,6 +384,7 @@ The configuration file contains the following variables:
  - `user` and `password` SPARQL endpoint default authentication (if required, specify `'none'` if not required)
  - `debug` enable debug level logging.
  - `gitlab_url` to specify the base url of your GitLab instance.
+ - `product`, `version` and `comment` to specify the user agent information sent from grlc to SPARQL endpoints.s
 
 ##### Git access token
 In order for grlc to communicate with GitHub and/or GitLab, you'll need to tell grlc what your access token is:
