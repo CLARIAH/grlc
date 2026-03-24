@@ -396,7 +396,8 @@ class URLLoader(BaseLoader):
         """Create a new URLLoader.
 
         Keyword arguments:
-        spec_url -- URL where the specification YAML file is located.  User-agent header required by wikidata"""
+        spec_url -- URL where the specification YAML file is located.  User-agent header required by wikidata
+        """
         headers = {"Accept": "text/yaml", "User-Agent": static.USER_AGENT}
         resp = requests.get(spec_url, headers=headers)
         if resp.status_code == 200:
@@ -453,7 +454,8 @@ class URLLoader(BaseLoader):
 
     def _getText(self, itemName):
         """Return the content of the specified item in the specification.
-        Returns None if the file does not exist. User-agent header required by wikidata."""
+        Returns None if the file does not exist. User-agent header required by wikidata.
+        """
         if itemName in self.spec["files"]:
             headers = {"Accept": "text/plain", "User-Agent": static.USER_AGENT}
             itemUrl = self.spec["files"][itemName]["download_url"]

@@ -252,7 +252,7 @@ def _dispatchQuerySelect(
     acceptHeader, content, rewritten_query, endpoint, auth, headers, endpoint_method
 ):
     reqHeaders = {
-        "Accept": acceptHeader, 
+        "Accept": acceptHeader,
         "Content-Type": "application/sparql-query",
         "User-Agent": static.USER_AGENT,
     }

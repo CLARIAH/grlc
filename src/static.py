@@ -129,9 +129,10 @@ LOG_DEBUG_MODE = config.getboolean("defaults", "debug")
 
 # User-Agent header for HTTP requests
 USER_AGENT = "{}/{} ({})".format(
-    config.get("user_agent", "product"), 
-    config.get("user_agent", "version"), 
-    config.get("user_agent", "comment"))
+    config.get("user_agent", "product"),
+    config.get("user_agent", "version"),
+    config.get("user_agent", "comment"),
+)
 
 
 # Pattern for INSERT query call names
