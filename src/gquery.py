@@ -333,7 +333,7 @@ def get_metadata(rq, endpoint):
     try:
         # THE PARSING
         # select, describe, construct, ask
-        parsed_query = translateQuery(Query.parseString(rq, parseAll=True))
+        parsed_query = translateQuery(Query.parse_string(rq, parse_all=True))
         query_metadata["type"] = parsed_query.algebra.name
         if query_metadata["type"] == "SelectQuery":
             # Projection variables
@@ -365,7 +365,7 @@ def get_metadata(rq, endpoint):
         try:
             # update query
             glogger.debug("Trying to parse UPDATE query")
-            parsed_query = UpdateUnit.parseString(rq, parseAll=True)
+            parsed_query = UpdateUnit.parse_string(rq, parse_all=True)
             glogger.debug(parsed_query)
             query_metadata["type"] = parsed_query[0]["request"][0].name
             if query_metadata["type"] == "InsertData":
