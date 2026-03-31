@@ -244,6 +244,7 @@ def get_enumeration_sparql(rq, v, endpoint, auth=None):
             headers={
                 "Accept": static.mimetypes["json"],
                 "Authorization": "token {}".format(static.SPARQL_ACCESS_TOKEN),
+                "User-Agent": static.USER_AGENT,
             },
             auth=auth,
         ).json()
