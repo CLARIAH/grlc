@@ -22,7 +22,7 @@ base_url = path.join("tests", "repo")
 def buildGHEntry(entryName):
     entryName = entryName.replace(base_url, "")
     entryName = entryName.strip(
-        "/"
+        path.sep
     )  # filenames contain extra leading / -- removed here
 
     # Named tuple containing properties of mocked github ContentFile
