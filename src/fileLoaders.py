@@ -23,6 +23,7 @@ from urllib.parse import urljoin
 # util variables
 glogger = glogging.getGrlcLogger(__name__)
 
+
 class BaseLoader:
     """Base class for File Loaders"""
 
@@ -45,7 +46,7 @@ class BaseLoader:
         """Returns the URL of the license file in this repository if one exists.
         Default implementation for loaders that support subdirectories."""
         # Check subdirectory first (if subdir is set)
-        if hasattr(self, 'subdir') and self.subdir:
+        if hasattr(self, "subdir") and self.subdir:
             licence_url = self._getLicenseFileFromPath(self.subdir.strip("/"))
             if licence_url:
                 return licence_url
@@ -250,9 +251,7 @@ class GitlabLoader(BaseLoader):
                 name = gitlab_file["name"]
                 files.append(
                     {
-                        "download_url": path.join(
-                            self.getRawRepoUri(), filepath, name
-                        ),
+                        "download_url": path.join(self.getRawRepoUri(), filepath, name),
                         "name": name,
                         "decoded_content": str.encode(
                             self._getText(gitlab_file["name"])
