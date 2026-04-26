@@ -21,6 +21,9 @@ base_url = path.join("tests", "repo")
 
 def buildGHEntry(entryName):
     entryName = entryName.replace(base_url, "")
+    entryName = entryName.strip(
+        "/"
+    )  # filenames contain extra leading / -- removed here
 
     # Named tuple containing properties of mocked github ContentFile
     MockGithubContentFile = namedtuple(
@@ -46,12 +49,17 @@ mock_gl_files = [buildGLEntry(f) for f in glob(path.join(base_url, "*"))]
 
 
 class MockGithubRepo:
+    def __init__(self, subdir=False) -> None:
+        self.is_subdir = subdir
+
     def get_contents(self, filename, ref=None):
+        if self.is_subdir:
+            filename = filename.strip("subdir")
         if filename == "":
             return mock_gh_files
         else:
             for f in mock_gh_files:
-                if filename in f.name:  # filenames contain extra /
+                if filename in f.name:
                     return f
             return None
 

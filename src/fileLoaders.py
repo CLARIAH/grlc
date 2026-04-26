@@ -49,10 +49,10 @@ class BaseLoader:
             licence_url = self._getLicenseFileFromPath(self.subdir.strip("/"))
             if licence_url:
                 return licence_url
-            # If no license found in subdirectory, check root folder
-            return self._getLicenseFileFromPath("")
         else:
             glogger.debug("FileLoader -- No Subdir...")
+            # If no license found in subdirectory, check root folder
+            return self._getLicenseFileFromPath("")
         return None
 
     def getTextForName(self, query_name):
