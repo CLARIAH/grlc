@@ -8,4 +8,4 @@ requests==2.33.1
 SPARQLTransformer==2.4.0
 PyGithub==2.9.1
 gunicorn==25.3.0; sys_platform!="win32"
-waitress>=1.4.2; sys_platform=="win32"
+waitress>=3.0.2; sys_platform=="win32"
