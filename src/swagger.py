@@ -60,7 +60,7 @@ def get_repo_info(loader, sha, prov_g):
         basePath = "/api-git/" + user_repo + "/"
         basePath += ("subdir/" + loader.subdir + "/") if loader.subdir else ""
         basePath += ("commit/" + sha + "/") if sha else ""
-    if type(loader) is GitlabLoader:
+    elif type(loader) is GitlabLoader:
         basePath = "/api-gitlab/" + user_repo + "/query/"
         basePath += ("branch/" + loader.branch + "/") if loader.branch else ""
         basePath += (
@@ -73,7 +73,7 @@ def get_repo_info(loader, sha, prov_g):
         basePath = "/api-url/"
     else:
         # TODO: raise error
-        glogger.error("Cannot set basePath, loader type unkown")
+        glogger.error("Cannot set basePath, loader type unknown")
 
     return prev_commit, next_commit, info, basePath
 
