@@ -29,8 +29,8 @@ class TestGithubLoader(unittest.TestCase):
         # Should return a list of file items
         self.assertIsInstance(files, list, "Should return a list of file items")
 
-        # Should have N files (where N=10)
-        self.assertEqual(len(files), 10, "Should return correct number of files")
+        # Should have N files (where N=11)
+        self.assertEqual(len(files), 11, "Should return correct number of files")
 
         # File items should have a download_url
         for fItem in files:
@@ -87,6 +87,25 @@ class TestGithubLoader(unittest.TestCase):
         # Should be some text
         self.assertIsInstance(endpoint, six.string_types, "Should be some text")
 
+    def test_getLicenceURL(self):
+        licenceURL = self.loader.getLicenceURL()
+        self.assertIsNot(licenceURL, None, "License should not be None")
+
+
+class TestGithubLoaderSubdir(unittest.TestCase):
+    @classmethod
+    @patch("grlc.fileLoaders.Github.get_repo", return_value=MockGithubRepo(subdir=True))
+    def setUpClass(self, mocked_repo):
+        self.user = "fakeuser"
+        self.repo = "fakerepo"
+        self.loader = GithubLoader(
+            self.user, self.repo, subdir="subdir", sha=None, prov=None
+        )
+
+    def test_getLicenceURL(self):
+        licenceURL = self.loader.getLicenceURL()
+        self.assertIsNot(licenceURL, None, "License should not None")
+
 
 class TestGitlabLoader(unittest.TestCase):
     @classmethod
@@ -104,8 +123,8 @@ class TestGitlabLoader(unittest.TestCase):
         # Should return a list of file items
         self.assertIsInstance(files, list, "Should return a list of file items")
 
-        # Should have N files (where N=10)
-        self.assertEqual(len(files), 10, "Should return correct number of files")
+        # Should have N files (where N=11)
+        self.assertEqual(len(files), 11, "Should return correct number of files")
 
         # File items should have a download_url
         for fItem in files:
@@ -174,8 +193,8 @@ class TestLocalLoader(unittest.TestCase):
         # Should return a list of file items
         self.assertIsInstance(files, list, "Should return a list of file items")
 
-        # Should have N files (where N=10)
-        self.assertEqual(len(files), 10, "Should return correct number of files")
+        # Should have N files (where N=11)
+        self.assertEqual(len(files), 11, "Should return correct number of files")
 
         # File items should have a download_url
         for fItem in files:

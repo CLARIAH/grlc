@@ -24,3 +24,5 @@ This is a list of all people who have contributed to grlc. Big thanks to everyon
 [nichtich](https://github.com/nichtich)
 [jblom](https://github.com/jblom)
 [abelsiqueira](https://github.com/abelsiqueira)
+[ecow](https://github.com/ecow)
+[marioscrock](https://github.com/marioscrock)

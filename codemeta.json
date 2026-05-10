@@ -159,181 +159,181 @@
     },
     "programmingLanguage": "Python",
     "readme": "https://github.com/CLARIAH/grlc/blob//README.md",
-    "runtimePlatform": "Python 3",
+    "runtimePlatform": "Python 3.10 or higher",
     "softwareRequirements": [
         {
             "@type": "SoftwareApplication",
             "identifier": "Flask",
             "name": "Flask",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "1.0.2"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "Flask-Cors",
             "name": "Flask-Cors",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "3.0.6"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "MarkupSafe",
             "name": "MarkupSafe",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "0.23"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "PyGithub",
             "name": "PyGithub",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "1.43.5"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "PyYAML",
             "name": "PyYAML",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "5.4"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "SPARQLTransformer",
             "name": "SPARQLTransformer",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "2.1.1"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "SPARQLWrapper",
             "name": "SPARQLWrapper",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "1.8.2"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "docopt",
             "name": "docopt",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "0.6.2"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "docutils",
             "name": "docutils",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "0.17.1"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "gevent",
             "name": "gevent",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "1.4.0"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "greenlet",
             "name": "greenlet",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "0.4.15"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "gunicorn",
             "name": "gunicorn",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "19.6.0"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "html5lib",
             "name": "html5lib",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "1.0.1"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "isodate",
             "name": "isodate",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "0.5.4"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "keepalive",
             "name": "keepalive",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "0.5"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "pyaml",
             "name": "pyaml",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "18.11.0"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "pyparsing",
             "name": "pyparsing",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "2.0.7"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "rdflib",
             "name": "rdflib",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "5.0.0"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "rdflib-jsonld",
             "name": "rdflib-jsonld",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "0.4.0"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "requests",
             "name": "requests",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "2.20.0"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "setuptools",
             "name": "setuptools",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": ">= 38.6.0"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "simplejson",
             "name": "simplejson",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "3.16.0"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "six",
             "name": "six",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": "1.12.0"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "waitress",
             "name": "waitress",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": ">= 1.4.2"
         },
         {
             "@type": "SoftwareApplication",
             "identifier": "werkzeug",
             "name": "werkzeug",
-            "runtimePlatform": "Python 3",
+            "runtimePlatform": "Python 3.10 or higher",
             "version": ">= 0.16.0"
         }
     ],
