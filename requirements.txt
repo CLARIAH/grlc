@@ -4,7 +4,7 @@ Flask-Cors==6.0.1
 pyaml==26.2.1
 python-gitlab==8.2.0
 rdflib==7.6.0
-requests==2.33.1
+requests==2.34.2
 SPARQLTransformer==2.4.0
 PyGithub==2.9.1
 gunicorn==25.3.0; sys_platform!="win32"
