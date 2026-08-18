@@ -397,12 +397,8 @@ def dispatchSPARQLQuery(
 
     # If the query is paginated, set link HTTP headers
     if pagination:
-        # Get number of total results
-        count = gquery.count_query_results(rewritten_query, endpoint)
         pageArg = requestArgs.get("page", None)
-        headerLink = pageUtils.buildPaginationHeader(
-            count, pagination, pageArg, requestUrl
-        )
+        headerLink = pageUtils.buildPaginationHeader(pagination, pageArg, requestUrl)
         headers["Link"] = headerLink
 
     if "proto" in query_metadata or (
