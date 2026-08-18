@@ -17,33 +17,29 @@ def getSwaggerPaginationDef(resultsPerPage):
     }
 
 
-def buildPaginationHeader(resultCount, resultsPerPage, pageArg, url):
-    """Build link header for result pagination"""
-    lastPage = resultCount / resultsPerPage
-
+def buildPaginationHeader(resultsPerPage, pageArg, url):
+    """Build link header for result pagination. Link headers are built for first,
+    previous and next pages, wherever possible. These links provide no guarantee of
+    results being produced."""
     url_parts = urlparse(url)
     query = dict(
         parse_qsl(url_parts.query)
     )  # Use dict parse_qsl instead of parse_qs to ensure 'page' is unique
 
     first_url = _buildNewUrlWithPage(url_parts, query, page=1)
-    last_url = _buildNewUrlWithPage(url_parts, query, page=lastPage)
 
     if not pageArg:
         next_url = _buildNewUrlWithPage(url_parts, query, page=1)
         prev_url = ""
-        headerLink = "<{}>; rel=next, <{}>; rel=last".format(next_url, last_url)
+        headerLink = "<{}>; rel=next".format(next_url)
     else:
         page = int(pageArg)
         next_url = _buildNewUrlWithPage(url_parts, query, page + 1)
-        prev_url = _buildNewUrlWithPage(url_parts, query, page - 1)
+        prev_url = _buildNewUrlWithPage(url_parts, query, (page - 1) if page > 1 else 1)
 
-        if page == lastPage:
-            headerLink = "<{}>; rel=prev, <{}>; rel=first".format(prev_url, first_url)
-        else:
-            headerLink = "<{}>; rel=next, <{}>; rel=prev, <{}>; rel=first, <{}>; rel=last".format(
-                next_url, prev_url, first_url, last_url
-            )
+        headerLink = "<{}>; rel=next, <{}>; rel=prev, <{}>; rel=first".format(
+            next_url, prev_url, first_url
+        )
     return headerLink
 
 
